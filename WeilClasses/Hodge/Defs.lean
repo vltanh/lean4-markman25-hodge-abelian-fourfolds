@@ -15,8 +15,10 @@ convention), and hence the decomposition of `⋀^k V_ℂ` into the pieces
 The same applies to a complex structure `J` on `H¹(X, ℝ)` and to `S = ⋀• H¹(X)`, whose rational
 `(p, p)`-classes form the *Hodge ring* `⊕_p H^{p,p}(X, ℚ)` of `X` (§2.2).
 
-The complex structure of `X × X̂` on `V_ℝ = H¹(X̂, ℝ) ⊕ H¹(X, ℝ)` is `(θ, w) ↦ (-θ ∘ J, J w)`
-(footnote in §2.4: `I_{X̂}` composes with `-I_X`); it is an isometry of the pairing (1.2.2).
+The complex structure of `X × X̂` on `V_ℝ = H¹(X̂, ℝ) ⊕ H¹(X, ℝ)` is, in the paper's convention
+(footnote in §2.4: the dual of `(I_X, I_{X̂})`, duals composing with `-I`), `(θ, w) ↦ (θ ∘ J, -J w)`,
+the negative of the standard Hodge structure of `H¹(X × X̂)`; it is an isometry of the pairing
+(1.2.2).
 
 The complexification of a real endomorphism is computed in the standard bases.
 -/
@@ -64,20 +66,34 @@ noncomputable def H10 (J : Module.End ℝ (H1 ℝ n)) : Submodule ℂ (H1 ℂ n)
 noncomputable def H01 (J : Module.End ℝ (H1 ℝ n)) : Submodule ℂ (H1 ℂ n) :=
   Module.End.eigenspace (complexifyH1 n J) (-Complex.I)
 
-/-- The complex structure `I_{X × X̂} = (I_{X̂}, I_X)` on `V_ℝ = H¹(X̂, ℝ) ⊕ H¹(X, ℝ)` induced by a
-complex structure `J = I_X` on `H¹(X, ℝ)`: `(θ, w) ↦ (-θ ∘ J, J w)`. -/
+/-- **The complex structure `I = I_{V_ℝ}` of `X × X̂`** on `V_ℝ = H¹(X̂, ℝ) ⊕ H¹(X, ℝ)`, in the
+convention of the paper (footnote in §2.4): `I_{V_ℝ}` is the complex structure of the Hodge structure
+dual to `H₁(X, ℝ) ⊕ H₁(X̂, ℝ)` with the tangent complex structures `(I_X, I_{X̂})`, where the dual of
+`(W, j)` is `(W*, -jᵀ)` ("composing with `-I`"). In our coordinates, with `J` the complex structure of
+`H¹(X, ℝ)` whose `i`-eigenspace is `H^{1,0}(X)` (so that `I_X = Jᵀ` on `H₁(X, ℝ) = H¹(X, ℝ)*`), this is
+`(θ, w) ↦ (θ ∘ J, -J w)`. It is an isometry of the pairing (1.2.2).
+
+Its `i`-eigenspace, which the paper calls `V^{1,0}`, is the space of antiholomorphic forms of
+`X × X̂`; the standard Hodge structure of `H¹(X × X̂)` is `-I`. Hodge classes, the Weil condition and
+all statements of type `(p, p)` are the same for `I` and `-I`; the sign matters for positivity
+(Proposition 2.4.4, Corollary 3.2.3, Lemma 4.0.1), where the paper's convention is the one used. -/
 noncomputable def productStructure (J : Module.End ℝ (H1 ℝ n)) : Module.End ℝ (V ℝ n) :=
-  ((-(LinearMap.dualMap J)) : Module.End ℝ (Module.Dual ℝ (H1 ℝ n))).prodMap J
+  (LinearMap.dualMap J : Module.End ℝ (Module.Dual ℝ (H1 ℝ n))).prodMap (-J)
 
 /-! ## `(p, q)`-pieces of exterior algebras and Hodge classes -/
 
 /-- The piece `⋀^p A ∧ ⋀^q B ⊆ ⋀^{p+q} M` spanned by the products of `p` vectors of `A` and `q`
 vectors of `B`; for `A = V^{1,0}` and `B = V^{0,1}` this is `⋀^{p,q}`. -/
-noncomputable def pqPiece {M : Type*} [AddCommGroup M] [Module ℂ M] (A B : Submodule ℂ M)
-    (p q : ℕ) : Submodule ℂ (ExteriorAlgebra ℂ M) :=
-  Submodule.span ℂ
+noncomputable def pqPiece {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+    (A B : Submodule R M) (p q : ℕ) : Submodule R (ExteriorAlgebra R M) :=
+  Submodule.span R
     {x | ∃ (a : Fin p → M) (b : Fin q → M), (∀ i, a i ∈ A) ∧ (∀ j, b j ∈ B) ∧
-      x = ExteriorAlgebra.ιMulti ℂ p a * ExteriorAlgebra.ιMulti ℂ q b}
+      x = ExteriorAlgebra.ιMulti R p a * ExteriorAlgebra.ιMulti R q b}
+
+/-- The subspace `⋀^k W ⊆ ⋀^k M` spanned by the products of `k` vectors of `W`. -/
+noncomputable def topWedge {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+    (W : Submodule R M) (k : ℕ) : Submodule R (ExteriorAlgebra R M) :=
+  Submodule.span R {x | ∃ v : Fin k → M, (∀ i, v i ∈ W) ∧ x = ExteriorAlgebra.ιMulti R k v}
 
 /-- The rational classes of type `(p, p)` in `H^{2p}(X × X̂, ℚ) = ⋀^{2p} V_ℚ` for the complex
 structure `I` of `V_ℝ`: the Hodge classes of degree `2p`. -/

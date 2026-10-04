@@ -1,6 +1,7 @@
 module
 
 public import WeilClasses.Spinor.BaseChange
+public import WeilClasses.Spinor.Integral
 public import WeilClasses.Basic.Field
 
 /-!
@@ -134,6 +135,23 @@ noncomputable def χ₁ (g : P.spinL₁L₂) : Kd d := Classical.choose ((Subgro
 
 /-- The character `χ₂` by which `Spin(V_K)_{ℓ₁,ℓ₂}` acts on the line `ℓ̃₂ = K u₂`. -/
 noncomputable def χ₂ (g : P.spinL₁L₂) : Kd d := Classical.choose ((Subgroup.mem_inf.mp g.2).2)
+
+/-- `W_{1,ℂ} ⊆ V_ℂ`: the complex span of `W₁ ⊆ V_K`. -/
+noncomputable def W₁ℂ : Submodule ℂ (V ℂ n) := Submodule.span ℂ (bcV (Kd d) ℂ n '' P.W₁)
+
+/-- `W_{2,ℂ} ⊆ V_ℂ`: the complex span of `W₂ ⊆ V_K`. -/
+noncomputable def W₂ℂ : Submodule ℂ (V ℂ n) := Submodule.span ℂ (bcV (Kd d) ℂ n '' P.W₂)
+
+/-- The real span `P_ℝ ⊆ S⁺_ℝ` of the rational plane `P`. -/
+noncomputable def PR : Submodule ℝ (S ℝ n) := Submodule.span ℝ (bcS ℚ ℝ n '' P.Pℚ)
+
+/-- **`Spin(V_ℝ)_P`**: the subgroup of `Spin(V_ℝ)` leaving every vector of `P` (equivalently of
+`P_ℝ`) invariant (§3.2, §4). -/
+noncomputable def spinPR : Subgroup (Spin ℝ n) := fixingSpin ℝ n P.PR
+
+/-- The integral group `Spin(V)_P` of (2.2.2): the elements of the integral spin group `Spin(V)`
+(`SpinZ n`) leaving every vector of `P` invariant. -/
+noncomputable def spinPZ : Subgroup (Spin ℚ n) := SpinZ n ⊓ P.spinPℚ
 
 end KSecant
 
