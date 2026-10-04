@@ -1,7 +1,12 @@
 module
 
 public import WeilClasses.Orlov.Defs
+public import WeilClasses.Orlov.Basis
+public import WeilClasses.Chevalley.Sec2_3
+public import WeilClasses.External.Huybrechts.Sec6_3
 import all Mathlib.LinearAlgebra.ExteriorPower.BilinForm
+import TauCeti.LinearAlgebra.CliffordAlgebra.Spin.SpecialOrthogonal
+import TauCeti.LinearAlgebra.ExteriorPower.Basic
 
 /-!
 # §6.3: Orlov's equivalence induces Chevalley's isomorphism `S ⊗ S ≅ ⋀•V`
@@ -20,10 +25,20 @@ from `1`), `σ_K = (-1)^{k(k+3)/2}` for `k = |K|`, `I' = K \ I`, `I^c` the compl
 `(-1)^{d(d+1)/2}`, is false in odd degrees `d` for the sign of `c₁(𝒫)` under which Lemma 6.3.1 and
 Proposition 6.1.2 hold; `lemma6_3_2` states it with the correct sign `(-1)^{d(d-1)/2}`.
 
-The proofs follow the paper's basis computations. `import all` of
+The proofs follow the paper's basis computations. As in the paper, the footnote formulas for
+`ψ_{𝒫⁻¹[n]}` (`psiPinvShift_eq_phiPX`, `psiPinvShift_basis`) and the computation of
+`φ_𝒫 ⊗ ψ_{𝒫⁻¹}` in the proof of Lemma 6.3.2 (`sd_PiMap0_beta`) use [Huybrechts, Lemma 9.23,
+Cor. 9.24] (`WeilClasses.External.Huybrechts.Sec6_3`). `import all` of
 `Mathlib.LinearAlgebra.ExteriorPower.BilinForm` gives access to the determinant formula
-`LinearMap.BilinForm.bilinForm_ιMulti_ιMulti` (private in Mathlib), needed to compute `extPairing`
-(`s61_extPairing_ιMulti`).
+`LinearMap.BilinForm.bilinForm_ιMulti_ιMulti` (non-exported in Mathlib), needed to compute
+`extPairing` (`s61_extPairing_ιMulti`).
+
+The last section holds the algebraic computation of `ρ'_g` from the identity of Lemma 6.1.1
+(`sd_rhoPrime_of_lemma6_1_1`, with the `Spin(V)`-equivariance of `Π = ±PD`, `s61_PiMap_rhoExt`),
+which proves Proposition 6.1.2 in `WeilClasses.Orlov.Sec6_1` and, upstream of §6.1, the cited
+[Orlov, Th. 2.10] (`WeilClasses.External.Orlov.Sec6_1`); this is why this file imports
+`WeilClasses.Chevalley.Sec2_3`. Part of the helpers written for this file (prefix `s61_`) are in
+`WeilClasses.Orlov.Basis`, where `WeilClasses.Chevalley.Sec2_3` can use them.
 -/
 
 @[expose] public section
@@ -78,50 +93,6 @@ theorem s61_inv_compl_add (K : Finset (Fin (2 * n))) :
 
 end S61Sec63
 
-section S61Graded
-
-variable {R M ι : Type*} [CommRing R] [AddCommGroup M] [Module R M] [LinearOrder ι]
-  (b : Module.Basis ι R M)
-
-/-- The exterior basis is homogeneous: a `k`-vector has no coordinates on index sets of other
-cardinalities. -/
-theorem s61_repr_eq_zero_of_mem {k : ℕ} {x : ExteriorAlgebra R M} (hx : x ∈ ⋀[R]^k M)
-    {s : Finset ι} (hs : s.card ≠ k) : b.ExteriorAlgebra.repr x s = 0 := by
-  rw [Module.Basis.ExteriorAlgebra, Module.Basis.repr_reindex_apply,
-    Set.powersetCard.prodEquiv_symm_apply]
-  exact DirectSum.IsInternal.collectedBasis_repr_of_mem_ne _ _ (Ne.symm hs) hx
-
-theorem s61_zsmul_neg_one_pow {A : Type*} [Ring A] [Algebra R A] (k : ℕ) (y : A) :
-    ((-1 : ℤˣ) ^ k) • y = (-1 : R) ^ k • y := by
-  rw [Units.smul_def, Units.val_pow_eq_pow_val, Units.val_neg, Units.val_one,
-    ← Int.cast_smul_eq_zsmul R]
-  simp
-
-/-- Graded commutativity: `x ∧ y = (-1)^{jk} y ∧ x` for `x ∈ ⋀^j`, `y ∈ ⋀^k`. -/
-theorem s61_mul_comm_of_mem {j k : ℕ} {x y : ExteriorAlgebra R M} (hx : x ∈ ⋀[R]^j M)
-    (hy : y ∈ ⋀[R]^k M) : x * y = (-1 : R) ^ (j * k) • (y * x) := by
-  rw [← ExteriorAlgebra.ιMulti_span_fixedDegree] at hx hy
-  induction hx using Submodule.span_induction with
-  | mem x hx =>
-    obtain ⟨u, rfl⟩ := hx
-    induction hy using Submodule.span_induction with
-    | mem y hy =>
-      obtain ⟨v, rfl⟩ := hy
-      rw [ExteriorAlgebra.ιMulti_mul_ιMulti_anticomm, s61_zsmul_neg_one_pow (R := R), mul_comm k j]
-    | zero => simp
-    | add y z _ _ hy hz => rw [mul_add, hy, hz, add_mul, smul_add]
-    | smul r y _ hy => rw [mul_smul_comm, hy, smul_mul_assoc, smul_comm]
-  | zero => simp
-  | add x z _ _ hx hz => rw [add_mul, hx, hz, mul_add, smul_add]
-  | smul r x _ hx => rw [smul_mul_assoc, hx, mul_smul_comm, smul_comm]
-
-theorem s61_ι_mul_comm_of_mem (v : M) {k : ℕ} {x : ExteriorAlgebra R M} (hx : x ∈ ⋀[R]^k M) :
-    ExteriorAlgebra.ι R v * x = (-1 : R) ^ k • (x * ExteriorAlgebra.ι R v) := by
-  have hv : ExteriorAlgebra.ι R v ∈ ⋀[R]^1 M := by simp
-  rw [s61_mul_comm_of_mem hv hx, one_mul]
-
-end S61Graded
-
 section S61Sec63b
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
@@ -133,24 +104,6 @@ theorem s61_kk3 (k : ℕ) : k * (k + 3) / 2 = k * (k - 1) / 2 + 2 * k := by
   omega
 
 end S61Sec63b
-
-section S61Graded2
-
-variable {R M N : Type*} [CommRing R] [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
-
-theorem s61_map_mem (g : M →ₗ[R] N) {k : ℕ} {x : ExteriorAlgebra R M} (hx : x ∈ ⋀[R]^k M) :
-    ExteriorAlgebra.map g x ∈ ⋀[R]^k N := by
-  rw [← ExteriorAlgebra.ιMulti_span_fixedDegree] at hx
-  induction hx using Submodule.span_induction with
-  | mem x hx =>
-    obtain ⟨v, rfl⟩ := hx
-    rw [ExteriorAlgebra.map_apply_ιMulti]
-    exact ExteriorAlgebra.ιMulti_range R k ⟨_, rfl⟩
-  | zero => simp
-  | add x y _ _ hx hy => rw [map_add]; exact add_mem hx hy
-  | smul r x _ hx => rw [map_smul]; exact Submodule.smul_mem _ r hx
-
-end S61Graded2
 
 section S61Mu
 
@@ -277,99 +230,6 @@ theorem s61_sum_powerset_sdiff {β : Type*} [AddCommMonoid β] (K : Finset (Fin 
 
 end S61Nu
 
-section S61Contract
-
-variable {R M ι : Type*} [CommRing R] [AddCommGroup M] [Module R M] [LinearOrder ι]
-  (b : Module.Basis ι R M)
-
-/-- Contraction by a coordinate erases it from an exterior basis vector, with the sign counting
-the smaller indices. -/
-theorem s61_contractLeft_coord_basis (i : ι) (s : Finset ι) :
-    contractLeft (Q := (0 : QuadraticForm R M)) (b.coord i) (b.ExteriorAlgebra s) =
-      if i ∈ s then (-1 : R) ^ (s.filter (· < i)).card • b.ExteriorAlgebra (s.erase i) else 0 := by
-  classical
-  induction s using Finset.induction_on_min with
-  | empty =>
-    rw [s61_basis_empty, ite_eq_right (Finset.notMem_empty i)]
-    exact contractLeft_one (Q := (0 : QuadraticForm R M)) (b.coord i)
-  | insert a s ha ih =>
-    have has : a ∉ s := fun h => lt_irrefl a (ha a h)
-    rw [s61_basis_insert_min b a s ha, contractLeft_ι_mul, ih, Module.Basis.coord_apply,
-      Module.Basis.repr_self, Finsupp.single_apply]
-    by_cases hia : a = i
-    · subst hia
-      have hf : (insert a s).filter (· < a) = ∅ := by
-        ext x
-        simp only [Finset.mem_filter, Finset.mem_insert, Finset.notMem_empty, iff_false, not_and]
-        rintro (rfl | hx) hxa
-        · exact lt_irrefl _ hxa
-        · exact lt_asymm hxa (ha x hx)
-      rw [ite_eq_left rfl, ite_eq_right has, mul_zero, sub_zero, one_smul,
-        ite_eq_left (Finset.mem_insert_self _ _), hf, Finset.card_empty, pow_zero, one_smul,
-        Finset.erase_insert has]
-    · rw [ite_eq_right hia, zero_smul, zero_sub]
-      by_cases his : i ∈ s
-      · have hai : a < i := ha i his
-        have hf : (insert a s).filter (· < i) = insert a (s.filter (· < i)) := by
-          rw [Finset.filter_insert, ite_eq_left hai]
-        have ha' : a ∉ s.filter (· < i) := fun h => has (Finset.mem_filter.mp h).1
-        rw [ite_eq_left his, ite_eq_left (Finset.mem_insert_of_mem his), hf,
-          Finset.card_insert_of_notMem ha', mul_smul_comm,
-          ← s61_basis_insert_min b a (s.erase i) (fun x hx => ha x (Finset.mem_of_mem_erase hx)),
-          Finset.erase_insert_of_ne hia, pow_succ, mul_neg_one, neg_smul]
-      · have : i ∉ insert a s := by
-          simp only [Finset.mem_insert, not_or]; exact ⟨Ne.symm hia, his⟩
-        rw [ite_eq_right his, ite_eq_right this, mul_zero, neg_zero]
-
-end S61Contract
-
-section S61Delta
-
-variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
-
-omit [CharZero F] in
-/-- `B₀(e_i, ·) : (θ, w) ↦ θ(e_i)` is the coordinate of `basisV` at `f_i`. -/
-theorem s61_B0_e_eq_coord (i : Fin (2 * n)) :
-    B0 F n ((0, e F n i) : V F n) = (basisV F n).coord (Fin.castAdd (2 * n) i) := by
-  refine (basisV F n).ext fun j => ?_
-  rw [Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_apply, B0_apply]
-  refine Fin.addCases (fun l => ?_) (fun l => ?_) j
-  · rw [s61_basisV_castAdd]
-    simp only [f, e, LinearMap.proj_apply, Pi.single_apply]
-    by_cases h : l = i
-    · subst h; simp
-    · rw [ite_eq_right h, ite_eq_right]
-      exact fun h' => h (Fin.castAdd_injective _ _ h')
-  · rw [s61_basisV_natAdd]
-    simp only [LinearMap.zero_apply]
-    rw [ite_eq_right]
-    exact fun h => absurd h (by
-      intro h'
-      have := congrArg Fin.val h'
-      simp at this
-      omega)
-
-omit [CharZero F] in
-theorem s61_card_le_sumIdx (K : Finset (Fin (2 * n))) : K.card ≤ sumIdx n K := by
-  rw [Finset.card_eq_sum_ones, sumIdx]
-  exact Finset.sum_le_sum fun i _ => by omega
-
-omit [CharZero F] in
-theorem s61_sumIdx_insert {a : Fin (2 * n)} {K : Finset (Fin (2 * n))} (ha : a ∉ K) :
-    sumIdx n (insert a K) = ((a : ℕ) + 1) + sumIdx n K := by
-  rw [sumIdx, Finset.sum_insert ha, ← sumIdx]
-
-omit [CharZero F] in
-theorem s61_delta_e_basisExt (a : Fin (2 * n)) (M : Finset (Fin (2 * n + 2 * n))) :
-    delta F n ((0, e F n a) : V F n) (basisExt F n M) =
-      if Fin.castAdd (2 * n) a ∈ M then
-        (-1 : F) ^ (M.filter (· < Fin.castAdd (2 * n) a)).card •
-          basisExt F n (M.erase (Fin.castAdd (2 * n) a))
-      else 0 := by
-  rw [delta, LinearMap.comp_apply, s61_B0_e_eq_coord, basisExt, s61_contractLeft_coord_basis]
-
-end S61Delta
-
 section S61Phi
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
@@ -391,46 +251,6 @@ theorem s61_tau_basisS (L : Finset (Fin (2 * n))) :
         ExteriorAlgebra.ι F (e F n m) from rfl,
       s61_ι_mul_comm_of_mem _ hmem, smul_smul, ← pow_add,
       Finset.card_insert_of_notMem hmL, Nat.add_sub_cancel, s61_tri_succ]
-
-omit [CharZero F] in
-/-- `π_X̂^*f_A ∪ π_X^*e_B` is the exterior basis vector indexed by `A ⊔ B`. -/
-theorem s61_beta_eq (A B : Finset (Fin (2 * n))) :
-    pullXHat F n (basisSHat F n A) * pullX F n (basisS F n B) =
-      basisExt F n (A.map (Fin.castAddOrderEmb (2 * n)).toEmbedding ∪
-        B.map (Fin.natAddOrderEmb (2 * n)).toEmbedding) := by
-  classical
-  rw [s61_pullXHat_basisSHat, s61_pullX_basisS, basisExt, s61_basis_mul_basis, ite_eq_left]
-  · have h0 : s61_inv (A.map (Fin.castAddOrderEmb (2 * n)).toEmbedding)
-        (B.map (Fin.natAddOrderEmb (2 * n)).toEmbedding) = 0 := by
-      refine Finset.sum_eq_zero fun x hx => ?_
-      simp only [Finset.card_eq_zero, Finset.filter_eq_empty_iff, not_lt]
-      intro y hy
-      obtain ⟨i, _, rfl⟩ := Finset.mem_map.mp hx
-      obtain ⟨j, _, rfl⟩ := Finset.mem_map.mp hy
-      simp only [RelEmbedding.coe_toEmbedding, Fin.castAddOrderEmb_apply, Fin.natAddOrderEmb_apply,
-        Fin.le_def, Fin.val_castAdd, Fin.val_natAdd]
-      omega
-    rw [h0, pow_zero, one_smul]
-  · rw [Finset.disjoint_left]
-    intro x hx hy
-    obtain ⟨i, _, rfl⟩ := Finset.mem_map.mp hx
-    obtain ⟨j, _, hj⟩ := Finset.mem_map.mp hy
-    have := congrArg Fin.val hj
-    simp only [RelEmbedding.coe_toEmbedding, Fin.castAddOrderEmb_apply, Fin.natAddOrderEmb_apply,
-      Fin.val_castAdd, Fin.val_natAdd] at this
-    omega
-
-omit [CharZero F] in
-theorem s61_castAdd_lt_natAdd (i j : Fin (2 * n)) :
-    (Fin.castAdd (2 * n) i : Fin (2 * n + 2 * n)) < Fin.natAdd (2 * n) j := by
-  rw [Fin.lt_def, Fin.val_castAdd, Fin.val_natAdd]; omega
-
-omit [CharZero F] in
-theorem s61_natAdd_lt_natAdd (x a : Fin (2 * n)) :
-    (Fin.natAddOrderEmb (2 * n)).toEmbedding x < (Fin.natAdd (2 * n) a : Fin (2 * n + 2 * n)) ↔
-      x < a := by
-  simp only [RelEmbedding.coe_toEmbedding, Fin.natAddOrderEmb_apply, Fin.lt_def, Fin.val_natAdd]
-  omega
 
 omit [CharZero F] in
 /-- `e_a ∧ (f_A ∧ e_B) = ± f_A ∧ e_{B ∪ {a}}`. -/
@@ -472,52 +292,6 @@ theorem s61_ι_e_mul_beta (a : Fin (2 * n)) (A B : Finset (Fin (2 * n))) :
         exact (s61_castAdd_lt_natAdd n i j).ne' hj
     rw [hfilt, Finset.map_insert, Finset.union_insert]
     rfl
-
-omit [CharZero F] in
-/-- `δ_a (f_A ∧ e_B) = ± f_{A ∖ {a}} ∧ e_B`. -/
-theorem s61_delta_e_beta (a : Fin (2 * n)) (A B : Finset (Fin (2 * n))) :
-    delta F n ((0, e F n a) : V F n) (pullXHat F n (basisSHat F n A) * pullX F n (basisS F n B)) =
-      if a ∈ A then (-1 : F) ^ (A.filter (· < a)).card •
-        (pullXHat F n (basisSHat F n (A.erase a)) * pullX F n (basisS F n B)) else 0 := by
-  classical
-  rw [s61_beta_eq, s61_beta_eq, s61_delta_e_basisExt]
-  have hmem : Fin.castAdd (2 * n) a ∈ A.map (Fin.castAddOrderEmb (2 * n)).toEmbedding ∪
-      B.map (Fin.natAddOrderEmb (2 * n)).toEmbedding ↔ a ∈ A := by
-    simp only [Finset.mem_union, Finset.mem_map, RelEmbedding.coe_toEmbedding,
-      Fin.castAddOrderEmb_apply, Fin.natAddOrderEmb_apply]
-    constructor
-    · rintro (⟨i, hi, hi'⟩ | ⟨j, _, hj⟩)
-      · rw [Fin.castAdd_inj] at hi'; exact hi' ▸ hi
-      · exact absurd hj (s61_castAdd_lt_natAdd n a j).ne'
-    · intro h; exact Or.inl ⟨a, h, rfl⟩
-  by_cases haA : a ∈ A
-  · rw [ite_eq_left (hmem.mpr haA), ite_eq_left haA]
-    have hB : (B.map (Fin.natAddOrderEmb (2 * n)).toEmbedding).filter
-        (· < Fin.castAdd (2 * n) a) = ∅ := by
-      refine Finset.filter_false_of_mem fun x hx => ?_
-      obtain ⟨j, _, rfl⟩ := Finset.mem_map.mp hx
-      exact not_lt.mpr (s61_castAdd_lt_natAdd n a j).le
-    have hfilt : ((A.map (Fin.castAddOrderEmb (2 * n)).toEmbedding ∪
-        B.map (Fin.natAddOrderEmb (2 * n)).toEmbedding).filter (· < Fin.castAdd (2 * n) a)).card =
-        (A.filter (· < a)).card := by
-      rw [Finset.filter_union, hB, Finset.union_empty, Finset.filter_map, Finset.card_map]
-      congr 1
-    have hB' : (B.map (Fin.natAddOrderEmb (2 * n)).toEmbedding).erase (Fin.castAdd (2 * n) a) =
-        B.map (Fin.natAddOrderEmb (2 * n)).toEmbedding := by
-      refine Finset.erase_eq_of_notMem fun h => ?_
-      obtain ⟨j, _, hj⟩ := Finset.mem_map.mp h
-      simp only [RelEmbedding.coe_toEmbedding, Fin.natAddOrderEmb_apply] at hj
-      exact (s61_castAdd_lt_natAdd n a j).ne' hj
-    have hA' : (A.map (Fin.castAddOrderEmb (2 * n)).toEmbedding).erase (Fin.castAdd (2 * n) a) =
-        (A.erase a).map (Fin.castAddOrderEmb (2 * n)).toEmbedding := by
-      rw [Finset.map_erase]; rfl
-    have herase : (A.map (Fin.castAddOrderEmb (2 * n)).toEmbedding ∪
-        B.map (Fin.natAddOrderEmb (2 * n)).toEmbedding).erase (Fin.castAdd (2 * n) a) =
-        (A.erase a).map (Fin.castAddOrderEmb (2 * n)).toEmbedding ∪
-          B.map (Fin.natAddOrderEmb (2 * n)).toEmbedding := by
-      rw [Finset.erase_union_distrib, hA', hB']
-    rw [hfilt, herase]
-  · rw [ite_eq_right (fun h => haA (hmem.mp h)), ite_eq_right haA]
 
 omit [CharZero F] in
 /-- `ψ(v x) = L'_v ψ(x) = v ∧ ψ(x) + δ_v ψ(x)`. -/
@@ -869,42 +643,6 @@ theorem s61_univ_eq_cast_nat :
   · exact Or.inr ⟨i, rfl⟩
 
 omit [CharZero F] in
-/-- Every basis vector of `⋀•V` is `f_L ∧ e_K` for some `L, K`. -/
-theorem s61_basisExt_eq_beta (M : Finset (Fin (2 * n + 2 * n))) :
-    ∃ L K : Finset (Fin (2 * n)), L.card + K.card = M.card ∧
-      basisExt F n M = pullXHat F n (basisSHat F n L) * pullX F n (basisS F n K) := by
-  classical
-  set L := M.preimage (Fin.castAdd (2 * n)) (Fin.castAdd_injective _ _).injOn
-  set K := M.preimage (Fin.natAdd (2 * n)) (Fin.natAdd_injective _ _).injOn
-  have hM : M = L.map (Fin.castAddOrderEmb (2 * n)).toEmbedding ∪
-      K.map (Fin.natAddOrderEmb (2 * n)).toEmbedding := by
-    ext x
-    refine Fin.addCases (fun i => ?_) (fun i => ?_) x
-    · simp only [Finset.mem_union, Finset.mem_map, RelEmbedding.coe_toEmbedding,
-        Fin.castAddOrderEmb_apply, Fin.natAddOrderEmb_apply, Finset.mem_preimage, L, K]
-      constructor
-      · intro h; exact Or.inl ⟨i, h, rfl⟩
-      · rintro (⟨j, hj, hji⟩ | ⟨j, _, hj⟩)
-        · rw [Fin.castAdd_inj] at hji; rwa [hji] at hj
-        · exact absurd hj (s61_castAdd_lt_natAdd n i j).ne'
-    · simp only [Finset.mem_union, Finset.mem_map, RelEmbedding.coe_toEmbedding,
-        Fin.castAddOrderEmb_apply, Fin.natAddOrderEmb_apply, Finset.mem_preimage, L, K]
-      constructor
-      · intro h; exact Or.inr ⟨i, h, rfl⟩
-      · rintro (⟨j, _, hj⟩ | ⟨j, hj, hji⟩)
-        · exact absurd hj (s61_castAdd_lt_natAdd n j i).ne
-        · rw [Fin.natAdd_inj] at hji; rwa [hji] at hj
-  refine ⟨L, K, ?_, ?_⟩
-  · conv_rhs => rw [hM]
-    rw [Finset.card_union_of_disjoint, Finset.card_map, Finset.card_map]
-    rw [Finset.disjoint_left]
-    intro x hx hy
-    obtain ⟨i, _, rfl⟩ := Finset.mem_map.mp hx
-    obtain ⟨j, _, hj⟩ := Finset.mem_map.mp hy
-    exact (s61_castAdd_lt_natAdd n i j).ne' hj
-  · rw [s61_beta_eq, ← hM]
-
-omit [CharZero F] in
 theorem s61_integralExt_beta (A B : Finset (Fin (2 * n))) :
     integralExt F n (pullXHat F n (basisSHat F n A) * pullX F n (basisS F n B)) =
       if A = Finset.univ ∧ B = Finset.univ then 1 else 0 := by
@@ -969,49 +707,6 @@ theorem s61_integralExt_beta_mul (L K L' K' : Finset (Fin (2 * n))) :
   · rw [ite_eq_right hL, map_zero, zero_mul, smul_zero, map_zero, ite_eq_right]
     exact fun h => hL ((s61_eq_compl_iff n L L').mp h.1).1
 
-theorem s61_PiMap0_beta (L K : Finset (Fin (2 * n))) :
-    PiMap0 F n (pullXHat F n (basisSHat F n L) * pullX F n (basisS F n K)) =
-      ((((-1 : F) ^ (Lᶜ.card * (Lᶜ.card - 1) / 2) * (-1 : F) ^ (Lᶜ.card * Lᶜ.card)) *
-          (-1 : F) ^ s61_inv L Lᶜ) *
-        (((-1 : F) ^ Kᶜ.card * (-1 : F) ^ (Kᶜ.card * (Kᶜ.card - 1) / 2)) *
-          (-1 : F) ^ s61_inv K Kᶜ)) •
-        (pullX F n (basisS F n Lᶜ) * pullXHat F n (basisSHat F n Kᶜ)) := by
-  rw [PiMap0, LinearMap.comp_apply, LinearMap.comp_apply, LinearEquiv.coe_coe, LinearEquiv.coe_coe,
-    ← kunnethHatX_tmul, LinearEquiv.symm_apply_apply, TensorProduct.map_tmul, s61_phiP_basisSHat,
-    s61_psiPinv_basisS, TensorProduct.smul_tmul_smul, map_smul, kunnethXHat_tmul]
-
-/-- Lemma 6.3.2 on the basis vectors `f_L ∧ e_K`, `f_{L'} ∧ e_{K'}` (the paper's computation). -/
-theorem s61_lemma6_3_2_basis (L K L' K' : Finset (Fin (2 * n))) :
-    extPairing F n (PiMap0 F n (pullXHat F n (basisSHat F n L) * pullX F n (basisS F n K)))
-        (pullXHat F n (basisSHat F n L') * pullX F n (basisS F n K')) =
-      (-1 : F) ^ ((L.card + K.card) * (L.card + K.card - 1) / 2) *
-        integralExt F n ((pullXHat F n (basisSHat F n L) * pullX F n (basisS F n K)) *
-          (pullXHat F n (basisSHat F n L') * pullX F n (basisS F n K'))) := by
-  rw [s61_PiMap0_beta, map_smul, LinearMap.smul_apply, s61_extPairing_beta,
-    s61_integralExt_beta_mul, smul_eq_mul]
-  by_cases h : L' = Lᶜ ∧ K' = Kᶜ
-  · rw [ite_eq_left h, ite_eq_left h, mul_one]
-    have h1 := s61_card_add_card_compl n L
-    have h2 := s61_card_add_card_compl n K
-    have h3 := s61_tri_add L.card Lᶜ.card
-    have h4 := s61_tri_add K.card Kᶜ.card
-    have h5 := s61_tri_two_mul n
-    have h6 := s61_tri_add L.card K.card
-    have h7 := s61_mul_self_mod_two Lᶜ.card
-    have h8 := s61_mul_self_mod_two Kᶜ.card
-    have hm1 : L.card * Lᶜ.card + Lᶜ.card * Lᶜ.card = 2 * (n * Lᶜ.card) := by
-      rw [← add_mul, h1, mul_assoc]
-    have hk1 : K.card * Kᶜ.card + Kᶜ.card * Kᶜ.card = 2 * (n * Kᶜ.card) := by
-      rw [← add_mul, h2, mul_assoc]
-    have hkm : K.card * Lᶜ.card + K.card * L.card = 2 * (n * K.card) := by
-      rw [← mul_add, add_comm, h1]; ring
-    have hc : L.card * K.card = K.card * L.card := mul_comm _ _
-    rw [h1] at h3
-    rw [h2] at h4
-    simp only [← pow_add]
-    exact s61_neg_one_pow_congr (by omega)
-  · rw [ite_eq_right h, ite_eq_right h, mul_zero, mul_zero]
-
 end S61Pairing
 
 section Field
@@ -1070,51 +765,72 @@ theorem muStar_basis (K L : Finset (Fin (2 * n))) :
   simp only [one_pow, one_mul] at h
   exact h
 
-/-- (§6.3, TeX lines 2705–2716 and footnote) The cohomological action of `Ψ_{𝒫⁻¹[n]}` is
-`Ψ_{𝒫⁻¹[n]}(e_K) = σ_K PD(e_K) = σ_K ε_{K,K^c} f_{K^c}`, `σ_K = (-1)^{k(k+3)/2}`. (This, (6.3.1) and
-(6.3.2) depend on the sign convention `c₁(𝒫) = +Σ eᵢ ∪ fᵢ`, `WeilClasses.Correspondence.FourierMukai`.)
-Proof: computed from the kernel `ch(𝒫⁻¹[n]) = (-1)ⁿ exp(-c₁(𝒫))` of `ψ_{𝒫⁻¹[n]}`
-(`s61_psiPinvShift_basisS`); the footnote's appeal to [Huybrechts, Lemma 9.23, Cor. 9.24] (cited
-results, `WeilClasses.External.Huybrechts.Sec6_3`) is not needed in the model. -/
-theorem psiPinvShift_basis (K : Finset (Fin (2 * n))) :
-    psiPinvShift F n (basisS F n K) =
-      ((-1 : F) ^ (K.card * (K.card + 3) / 2) * epsSign F n K Kᶜ) • basisSHat F n Kᶜ := by
-  rw [s61_psiPinvShift_basisS, s61_epsSign_eq, ite_eq_left disjoint_compl_right]
-  congr 1
-  have h2 := s61_card_add_card_compl n K
-  have h3 := s61_tri_add K.card Kᶜ.card
-  have h4 := s61_tri_two_mul n
-  have h5 := s61_mul_self_mod_two K.card
-  have h6 := s61_kk3 K.card
-  have h7 : Kᶜ.card * K.card + K.card * K.card = 2 * (n * K.card) := by
-    rw [← add_mul, add_comm, h2, mul_assoc]
-  rw [h2] at h3
-  simp only [← pow_add]
-  exact s61_neg_one_pow_congr (by rw [mul_comm K.card Kᶜ.card] at h3; omega)
+/-- `ψ_{𝒫⁻¹[n]}(e_K)` lies in `H^{2n-k}(X̂)`, `k = |K|` (footnote in §6.3): by
+[Huybrechts, Lemma 9.23] for `X̂ → X` (`huybrechts_lemma9_23_Xhat`),
+`φ_𝒫(f_{K^c}) = ± ε_{K,K^c} e_K`, and `ψ_{𝒫⁻¹[n]}` is the inverse of `φ_𝒫`
+(`psiPinvShift_comp_phiP`), so
+`ψ_{𝒫⁻¹[n]}(e_K) = ± f_{K^c}`. -/
+theorem sd_psiPinvShift_basisS_mem (K : Finset (Fin (2 * n))) :
+    psiPinvShift F n (basisS F n K) ∈ ⋀[F]^Kᶜ.card (Module.Dual F (H1 F n)) := by
+  have hmem : basisSHat F n Kᶜ ∈ ⋀[F]^Kᶜ.card (Module.Dual F (H1 F n)) := s61_basis_mem _ Kᶜ
+  have h := huybrechts_lemma9_23_Xhat F n Kᶜ.card hmem
+  rw [sd_PDXinv_basisSHat, compl_compl, smul_smul, s61_epsSign_eq,
+    ite_eq_left disjoint_compl_right, ← pow_add] at h
+  have hsq : ((-1 : F) ^ (Kᶜ.card * (Kᶜ.card + 1) / 2 + n + s61_inv K Kᶜ)) *
+      (-1 : F) ^ (Kᶜ.card * (Kᶜ.card + 1) / 2 + n + s61_inv K Kᶜ) = 1 := by
+    rw [← pow_add, ← two_mul, pow_mul]; simp
+  have he : basisS F n K = (-1 : F) ^ (Kᶜ.card * (Kᶜ.card + 1) / 2 + n + s61_inv K Kᶜ) •
+      phiP F n (basisSHat F n Kᶜ) := by
+    rw [h, smul_smul, hsq, one_smul]
+  rw [he, map_smul, ← LinearMap.comp_apply (psiPinvShift F n) (phiP F n), psiPinvShift_comp_phiP,
+    LinearMap.id_apply]
+  exact Submodule.smul_mem _ _ hmem
 
 /-- (footnote in §6.3) The cohomological action of `Ψ_{𝒫⁻¹}[n]` restricts to `H^k(X)` as
 `(-1)^{k+n} φ_𝒫`, where `φ_𝒫 : H*(X) → H*(X̂)`.
-Proof: comparison of the two kernels on basis vectors (`s61_psiPinvShift_basisS`,
-`s61_phiPX_basisS`) instead of [Huybrechts, Cor. 9.24]. -/
+Proof (the footnote's): `Ψ_{𝒫⁻¹}[n]` is the inverse of `Φ_𝒫` (`phiP_comp_psiPinvShift`), and
+`ψ_{𝒫⁻¹[n]}(e_K)` has degree `2n - k` (`sd_psiPinvShift_basisS_mem`, by [Huybrechts, Lemma 9.23]);
+by [Huybrechts, Cor. 9.24] (`huybrechts_cor9_24`) the composition
+`H^{2n-k}(X̂) → H^k(X) → H^{2n-k}(X̂)` of the two `φ_𝒫` is `(-1)^{2n-k+n} = (-1)^{k+n}`, so
+`φ_𝒫(e_K) = φ_𝒫(φ_𝒫(ψ_{𝒫⁻¹[n]}(e_K))) = (-1)^{k+n} ψ_{𝒫⁻¹[n]}(e_K)`. -/
 theorem psiPinvShift_eq_phiPX (k : ℕ) {s : S F n} (hs : s ∈ ⋀[F]^k (H1 F n)) :
     psiPinvShift F n s = (-1 : F) ^ (k + n) • phiPX F n s := by
   rw [← (basisS F n).sum_repr s]
   simp only [map_sum, map_smul, Finset.smul_sum]
   refine Finset.sum_congr rfl fun K _ => ?_
   by_cases hK : K.card = k
-  · rw [s61_psiPinvShift_basisS, s61_phiPX_basisS]
-    simp only [smul_smul]
-    congr 1
+  · subst hK
+    have h := huybrechts_cor9_24 F n Kᶜ.card (sd_psiPinvShift_basisS_mem F n K)
+    rw [← LinearMap.comp_apply (phiP F n) (psiPinvShift F n), phiP_comp_psiPinvShift,
+      LinearMap.id_apply] at h
     have h2 := s61_card_add_card_compl n K
-    have hm : (-1 : F) ^ Kᶜ.card = (-1 : F) ^ (k + n) * (-1 : F) ^ n := by
-      rw [← pow_add]; exact s61_neg_one_pow_congr (by omega)
-    rw [hm]
-    have hn : (-1 : F) ^ n * (-1 : F) ^ n = 1 := by
-      rw [← pow_add, ← two_mul, pow_mul]; simp
-    linear_combination ((-1 : F) ^ (k + n) * (-1 : F) ^ (Kᶜ.card * (Kᶜ.card - 1) / 2) *
-      (-1 : F) ^ s61_inv K Kᶜ * (basisS F n).repr s K) * hn
+    have hsgn : (-1 : F) ^ (K.card + n) * (-1 : F) ^ (Kᶜ.card + n) = 1 := by
+      rw [← pow_add, s61_neg_one_pow_congr (b := 0) (by omega), pow_zero]
+    rw [h, smul_smul, smul_smul]
+    congr 1
+    linear_combination (-(basisS F n).repr s K) * hsgn
   · have h0 : (basisS F n).repr s K = 0 := s61_repr_eq_zero_of_mem _ hs hK
-    rw [h0]; simp
+    rw [h0, zero_smul, zero_smul, smul_zero]
+
+/-- (§6.3, TeX lines 2705–2716 and footnote) The cohomological action of `Ψ_{𝒫⁻¹[n]}` is
+`Ψ_{𝒫⁻¹[n]}(e_K) = σ_K PD(e_K) = σ_K ε_{K,K^c} f_{K^c}`, `σ_K = (-1)^{k(k+3)/2}`. (This, (6.3.1) and
+(6.3.2) depend on the sign convention `c₁(𝒫) = +Σ eᵢ ∪ fᵢ`,
+`WeilClasses.Correspondence.FourierMukai`.)
+Proof (the footnote's): on `H^k(X)`, `ψ_{𝒫⁻¹[n]} = (-1)^{k+n} φ_𝒫` (`psiPinvShift_eq_phiPX`) and
+`φ_𝒫 = (-1)^{k(k+1)/2+n} PD_k` by [Huybrechts, Lemma 9.23] (`huybrechts_lemma9_23_X`), so
+`ψ_{𝒫⁻¹[n]} = (-1)^{k(k+3)/2} PD_k`, with `PD_X(e_K) = ε_{K,K^c} f_{K^c}`. -/
+theorem psiPinvShift_basis (K : Finset (Fin (2 * n))) :
+    psiPinvShift F n (basisS F n K) =
+      ((-1 : F) ^ (K.card * (K.card + 3) / 2) * epsSign F n K Kᶜ) • basisSHat F n Kᶜ := by
+  have hK : basisS F n K ∈ ⋀[F]^K.card (H1 F n) := s61_basis_mem _ K
+  have h1 := s61_kk3 K.card
+  have h2 := s61_tri_succ K.card
+  rw [mul_comm (K.card + 1) K.card] at h2
+  have hsgn : (-1 : F) ^ (K.card + n) * (-1 : F) ^ (K.card * (K.card + 1) / 2 + n) =
+      (-1 : F) ^ (K.card * (K.card + 3) / 2) := by
+    rw [← pow_add]; exact s61_neg_one_pow_congr (by omega)
+  rw [psiPinvShift_eq_phiPX F n K.card hK, huybrechts_lemma9_23_X F n K.card hK, sd_PDX_basisS,
+    smul_smul, smul_smul, hsgn]
 
 /-- `σ_J ε_{J,J^c} = (-1)^{Σ(J) - |J|}`. -/
 theorem s61_sigma_eps (J : Finset (Fin (2 * n))) :
@@ -1301,6 +1017,58 @@ theorem phiOrlov_eq_PiMap_comp_nuOrlov : phiOrlov F n = PiMap F n ∘ₗ nuOrlov
     LinearEquiv.symm_apply_apply]
   rw [← LinearMap.comp_apply (TensorProduct.map (phiP F n) (psiPinvShift F n)), h]
 
+/-- `ψ_{𝒫⁻¹} = (-1)ⁿ ψ_{𝒫⁻¹[n]}` (the shift `[n]` multiplies the Chern character by `(-1)ⁿ`). -/
+theorem sd_psiPinv_eq_smul : psiPinv F n = (-1 : F) ^ n • psiPinvShift F n := by
+  rw [s61_psiPinvShift_eq_smul, smul_smul, ← pow_add, ← two_mul, pow_mul, neg_one_sq, one_pow,
+    one_smul]
+
+/-- `φ_𝒫 ⊗ ψ_{𝒫⁻¹}` on the basis vector `f_L ∧ e_K`, by the route of the proof of Lemma 6.3.2:
+`φ_𝒫(f_L) = (-1)^{ℓ(ℓ+1)/2+n} PD_ℓ(f_L) = (-1)^{ℓ(ℓ+1)/2+n} ε_{L^c,L} e_{L^c}`
+([Huybrechts, Lemma 9.23], `huybrechts_lemma9_23_Xhat`, with `PD_ℓ` the inverse of `PD_X`) and
+`ψ_{𝒫⁻¹}(e_K) = (-1)ⁿ ψ_{𝒫⁻¹[n]}(e_K) = (-1)ⁿ σ_K ε_{K,K^c} f_{K^c}` (the footnote formula,
+`psiPinvShift_basis`). -/
+theorem sd_PiMap0_beta (L K : Finset (Fin (2 * n))) :
+    PiMap0 F n (pullXHat F n (basisSHat F n L) * pullX F n (basisS F n K)) =
+      (((-1 : F) ^ (L.card * (L.card + 1) / 2 + n) * epsSign F n Lᶜ L) *
+        ((-1 : F) ^ n * ((-1 : F) ^ (K.card * (K.card + 3) / 2) * epsSign F n K Kᶜ))) •
+        (pullX F n (basisS F n Lᶜ) * pullXHat F n (basisSHat F n Kᶜ)) := by
+  have hL : basisSHat F n L ∈ ⋀[F]^L.card (Module.Dual F (H1 F n)) := s61_basis_mem _ L
+  rw [PiMap0, LinearMap.comp_apply, LinearMap.comp_apply, LinearEquiv.coe_coe, LinearEquiv.coe_coe,
+    ← kunnethHatX_tmul, LinearEquiv.symm_apply_apply, TensorProduct.map_tmul,
+    huybrechts_lemma9_23_Xhat F n L.card hL, sd_PDXinv_basisSHat, sd_psiPinv_eq_smul,
+    LinearMap.smul_apply, psiPinvShift_basis, smul_smul, smul_smul, TensorProduct.smul_tmul_smul,
+    map_smul, kunnethXHat_tmul]
+
+/-- Lemma 6.3.2 on the basis vectors `f_L ∧ e_K`, `f_{L'} ∧ e_{K'}` (the paper's computation, with
+`φ_𝒫(f_L)` from [Huybrechts, Lemma 9.23] and `ψ_{𝒫⁻¹}(e_K)` from the footnote formula,
+`sd_PiMap0_beta`; with `PD_ℓ = PD_X⁻¹` the signs give `(-1)^{d(d-1)/2}`, `d = ℓ + k`). -/
+theorem s61_lemma6_3_2_basis (L K L' K' : Finset (Fin (2 * n))) :
+    extPairing F n (PiMap0 F n (pullXHat F n (basisSHat F n L) * pullX F n (basisS F n K)))
+        (pullXHat F n (basisSHat F n L') * pullX F n (basisS F n K')) =
+      (-1 : F) ^ ((L.card + K.card) * (L.card + K.card - 1) / 2) *
+        integralExt F n ((pullXHat F n (basisSHat F n L) * pullX F n (basisS F n K)) *
+          (pullXHat F n (basisSHat F n L') * pullX F n (basisS F n K'))) := by
+  rw [sd_PiMap0_beta, map_smul, LinearMap.smul_apply, s61_extPairing_beta,
+    s61_integralExt_beta_mul, smul_eq_mul, s61_epsSign_eq, ite_eq_left disjoint_compl_left,
+    s61_epsSign_eq, ite_eq_left disjoint_compl_right]
+  by_cases h : L' = Lᶜ ∧ K' = Kᶜ
+  · rw [ite_eq_left h, ite_eq_left h, mul_one]
+    have h1 := s61_card_add_card_compl n L
+    have hinv := s61_inv_add_inv (disjoint_compl_right : Disjoint L Lᶜ)
+    have h6 := s61_tri_add L.card K.card
+    have h7 := s61_tri_succ L.card
+    rw [mul_comm (L.card + 1) L.card] at h7
+    have h8 := s61_kk3 K.card
+    have h9 := s61_mul_self_mod_two L.card
+    have hkm : K.card * Lᶜ.card + K.card * L.card = 2 * (n * K.card) := by
+      rw [← mul_add, add_comm, h1]; ring
+    have hlm : L.card * Lᶜ.card + L.card * L.card = 2 * (n * L.card) := by
+      rw [← mul_add, add_comm, h1]; ring
+    have hc : L.card * K.card = K.card * L.card := mul_comm _ _
+    simp only [← pow_add]
+    exact s61_neg_one_pow_congr (by omega)
+  · rw [ite_eq_right h, ite_eq_right h, mul_zero, mul_zero]
+
 /-! ## Lemma 6.3.2 and Remark 6.3.3 -/
 
 /-- **Lemma 6.3.2** (`lemma-phi-P-psi-P-inverse-is-PD-up-to-sign`):
@@ -1317,7 +1085,13 @@ printed sign: `n = 1`, `α = f₁`, `β = f₂ ∧ e₁ ∧ e₂`: the left side
 
 Reading: `ψ_{𝒫⁻¹}` without shift, as printed. (The paper's proof says `φ_𝒫⁻¹ = ψ_{𝒫⁻¹}`, while
 `φ_𝒫⁻¹ = ψ_{𝒫⁻¹[n]} = (-1)ⁿ ψ_{𝒫⁻¹}`; a factor `(-1)ⁿ` is lost between its first and second
-displays. The statement for `ψ_{𝒫⁻¹}` is as printed.) -/
+displays. The statement for `ψ_{𝒫⁻¹}` is as printed.)
+
+Proof: the paper's computation on the basis vectors `f_L ∧ e_K` (`s61_lemma6_3_2_basis`), with
+`φ_𝒫(f_L) = (-1)^{ℓ(ℓ+1)/2+n} PD_ℓ(f_L)` by [Huybrechts, Lemma 9.23] (`huybrechts_lemma9_23_Xhat`,
+`PD_ℓ` read as the inverse of `PD_X`, `PD_ℓ(f_L) = ε_{L^c,L} e_{L^c}`) and
+`ψ_{𝒫⁻¹} = (-1)ⁿ ψ_{𝒫⁻¹[n]}` given by the footnote formula (`psiPinvShift_basis`)
+(`sd_PiMap0_beta`); these two readings correct the two slips above. -/
 theorem lemma6_3_2 (d : ℕ) {α : ExtV F n} (hα : α ∈ ⋀[F]^d (V F n)) (β : ExtV F n) :
     extPairing F n (PiMap0 F n α) β = (-1 : F) ^ (d * (d - 1) / 2) * integralExt F n (α * β) := by
   have hB : ∀ M : Finset (Fin (2 * n + 2 * n)), M.card = d → ∀ β : ExtV F n,
@@ -1356,5 +1130,226 @@ theorem remark6_3_3 (d : ℕ) :
   ⟨(-1 : F) ^ (d * (d - 1) / 2), neg_one_pow_eq_or F _, fun _ hα β => lemma6_3_2 F n d hα β⟩
 
 end Field
+
+/-! ## The algebraic computation of `ρ'_g` (Proposition 6.1.2 and [Orlov, Th. 2.10])
+
+Helpers (prover P10, moved here from `WeilClasses.Orlov.Sec6_1` by prover SD): `⋀ρ_g` preserves the
+pairing `( , )` and `∫_{X̂ × X}` (`ρ_g ∈ SO(V)`), so `Π = ±PD` (Lemma 6.3.2) commutes with `⋀ρ_g`
+(`s61_PiMap_rhoExt`); and the computation `ρ'_g = exp(½[c₁(𝒫) - ρ_g(c₁(𝒫))]) ∪ ρ_g` from the
+identity of Lemma 6.1.1 (`sd_rhoPrime_of_lemma6_1_1`). -/
+
+section S61Equivariance
+
+variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
+
+theorem s61_pairing_rho (g : Spin F n) (u v : V F n) :
+    pairing F n (rho F n g u) (rho F n g v) = pairing F n u v := by
+  simp only [pairing, QuadraticMap.polarBilin_apply_apply, QuadraticMap.polar, rho, ← map_add,
+    spinVectorAction_map_app]
+
+theorem s61_det_rho (g : Spin F n) : LinearMap.det (rho F n g : V F n →ₗ[F] V F n) = 1 := by
+  have h := (CliffordAlgebra.spinToSpecialOrthogonal (Q F n) g).2
+  rw [TauCeti.QuadraticMap.mem_specialOrthogonalGroup_iff] at h
+  have heq : ((CliffordAlgebra.spinToSpecialOrthogonal (Q F n) g :
+      TauCeti.QuadraticMap.specialOrthogonalGroup (Q F n)) : V F n ≃ₗ[F] V F n) = rho F n g :=
+    LinearEquiv.ext fun m => CliffordAlgebra.coe_spinToSpecialOrthogonal_apply (Q F n) g m
+  rw [heq] at h
+  rw [← LinearEquiv.coe_det, h.2, Units.val_one]
+
+omit [CharZero F] in
+theorem s61_basisExt_eq_ιMulti' (N : Finset (Fin (2 * n + 2 * n))) {d : ℕ} (h : N.card = d) :
+    basisExt F n N = ExteriorAlgebra.ιMulti F d (fun i => basisV F n (N.orderEmbOfFin h i)) := by
+  rw [basisExt, ExteriorAlgebra.basis_apply_ofCard _ h, ExteriorAlgebra.ιMulti_family,
+    Set.powersetCard.ofFinEmbEquiv_symm_apply]
+  rfl
+
+/-- `⋀ρ_g` is an isometry of the pairing `( , )` on `⋀•V` induced by `(·,·)_V`. -/
+theorem s61_extPairing_rhoExt (g : Spin F n) (x y : ExtV F n) :
+    extPairing F n (rhoExt F n g x) (rhoExt F n g y) = extPairing F n x y := by
+  have h : (extPairing F n).compl₁₂ (rhoExt F n g).toLinearMap (rhoExt F n g).toLinearMap =
+      extPairing F n := by
+    refine LinearMap.ext_basis (basisExt F n) (basisExt F n) fun M N => ?_
+    rw [LinearMap.compl₁₂_apply, AlgHom.toLinearMap_apply, AlgHom.toLinearMap_apply]
+    by_cases hc : M.card = N.card
+    · have hd : M.card ≤ 4 * n := by
+        have := M.card_le_univ; rw [Fintype.card_fin] at this; omega
+      rw [s61_basisExt_eq_ιMulti' F n M rfl, s61_basisExt_eq_ιMulti' F n N hc.symm, rhoExt,
+        ExteriorAlgebra.map_apply_ιMulti, ExteriorAlgebra.map_apply_ιMulti,
+        s61_extPairing_ιMulti F n hd, s61_extPairing_ιMulti F n hd]
+      congr 1
+      ext i j
+      simp only [Matrix.of_apply, Function.comp_apply, LinearEquiv.coe_coe, s61_pairing_rho]
+    · have hmM : basisExt F n M ∈ ⋀[F]^M.card (V F n) := s61_basis_mem _ M
+      have hmN : basisExt F n N ∈ ⋀[F]^N.card (V F n) := s61_basis_mem _ N
+      rw [s61_extPairing_of_mem_ne F n hc (s61_rhoExt_mem F n g hmM) (s61_rhoExt_mem F n g hmN),
+        s61_extPairing_of_mem_ne F n hc hmM hmN]
+  exact congrArg (fun B : ExtV F n →ₗ[F] ExtV F n →ₗ[F] F => B x y) h
+
+/-- `ρ_g ∈ SO(V)` acts trivially on the top degree: `∫_{X̂ × X} ρ_g(x) = ∫_{X̂ × X} x`. -/
+theorem s61_integralExt_rhoExt (g : Spin F n) (x : ExtV F n) :
+    integralExt F n (rhoExt F n g x) = integralExt F n x := by
+  classical
+  have hN : (Finset.univ : Finset (Fin (2 * n + 2 * n))).card = 2 * n + 2 * n := by simp
+  have htop : rhoExt F n g (basisExt F n Finset.univ) = basisExt F n Finset.univ := by
+    have hid : (fun i => basisV F n ((Finset.univ : Finset (Fin (2 * n + 2 * n))).orderEmbOfFin hN i)) =
+        basisV F n := by
+      have := Finset.orderEmbOfFin_unique hN (f := id) (fun x => Finset.mem_univ x) strictMono_id
+      funext i
+      rw [← this]; rfl
+    rw [s61_basisExt_eq_ιMulti' F n Finset.univ hN, hid, rhoExt, ExteriorAlgebra.map_apply_ιMulti]
+    have h1 := exteriorPower.ιMulti_eq_basis_det_smul (basisV F n)
+      ((rho F n g : V F n →ₗ[F] V F n) ∘ basisV F n)
+    rw [Module.Basis.det_comp, Module.Basis.det_self, mul_one, s61_det_rho, one_smul] at h1
+    exact congrArg Subtype.val h1
+  have h : (integralExt F n) ∘ₗ (rhoExt F n g).toLinearMap = integralExt F n := by
+    refine (basisExt F n).ext fun M => ?_
+    rw [LinearMap.comp_apply, AlgHom.toLinearMap_apply]
+    by_cases hM : M = Finset.univ
+    · rw [hM, htop]
+    · have hc : M.card ≠ (Finset.univ : Finset (Fin (2 * n + 2 * n))).card :=
+        fun h => hM (Finset.eq_univ_of_card M (by rw [h, Finset.card_univ]))
+      have hmM : basisExt F n M ∈ ⋀[F]^M.card (V F n) := s61_basis_mem _ M
+      have h0 : (basisExt F n).repr (rhoExt F n g (basisExt F n M)) Finset.univ = 0 :=
+        s61_repr_eq_zero_of_mem _ (s61_rhoExt_mem F n g hmM) (Ne.symm hc)
+      rw [integralExt, Module.Basis.coord_apply, Module.Basis.coord_apply, h0,
+        Module.Basis.repr_self, Finsupp.single_apply, ite_eq_right hM]
+  exact congrArg (fun φ : ExtV F n →ₗ[F] F => φ x) h
+
+omit [CharZero F] in
+theorem s61_flip_flip (M : Finset (Fin (2 * n + 2 * n))) :
+    (M.map (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding).map
+      (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding = M := by
+  rw [Finset.map_map]
+  convert Finset.map_refl
+  ext x : 1
+  refine Fin.addCases (fun i => ?_) (fun i => ?_) x
+  · show finAddFlip (finAddFlip (Fin.castAdd (2 * n) i)) = Fin.castAdd (2 * n) i
+    rw [finAddFlip_apply_castAdd, finAddFlip_apply_natAdd]
+  · show finAddFlip (finAddFlip (Fin.natAdd (2 * n) i)) = Fin.natAdd (2 * n) i
+    rw [finAddFlip_apply_natAdd, finAddFlip_apply_castAdd]
+
+omit [CharZero F] in
+theorem s61_extPairing_basisExt_flip_ne_zero (M : Finset (Fin (2 * n + 2 * n))) :
+    extPairing F n (basisExt F n M)
+      (basisExt F n (M.map (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding)) ≠ 0 := by
+  obtain ⟨L, K, -, hM⟩ := s61_basisExt_eq_beta F n M
+  have hMeq : M = L.map (Fin.castAddOrderEmb (2 * n)).toEmbedding ∪
+      K.map (Fin.natAddOrderEmb (2 * n)).toEmbedding :=
+    (basisExt F n).injective (hM.trans (s61_beta_eq F n L K))
+  have hflip : M.map (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding =
+      K.map (Fin.castAddOrderEmb (2 * n)).toEmbedding ∪
+        L.map (Fin.natAddOrderEmb (2 * n)).toEmbedding := by
+    rw [hMeq, Finset.map_union, Finset.map_map, Finset.map_map, Finset.union_comm]
+    congr 1
+    · congr 1
+      exact Function.Embedding.ext fun x => finAddFlip_apply_natAdd x (2 * n)
+    · congr 1
+      exact Function.Embedding.ext fun x => finAddFlip_apply_castAdd x (2 * n)
+  rw [hflip, ← s61_beta_eq, hM]
+  have hcomm : pullXHat F n (basisSHat F n L) * pullX F n (basisS F n K) =
+      (-1 : F) ^ (L.card * K.card) • (pullX F n (basisS F n K) * pullXHat F n (basisSHat F n L)) :=
+    s61_mul_comm_of_mem (s61_map_mem _ (s61_basis_mem _ L)) (s61_map_mem _ (s61_basis_mem _ K))
+  rw [hcomm, map_smul, LinearMap.smul_apply, s61_extPairing_identity, smul_eq_mul, mul_one]
+  exact pow_ne_zero _ (neg_ne_zero.mpr one_ne_zero)
+
+omit [CharZero F] in
+/-- The pairing `( , )` on `⋀•V` is nondegenerate. -/
+theorem s61_extPairing_nondeg {z : ExtV F n} (h : ∀ y, extPairing F n z y = 0) : z = 0 := by
+  classical
+  refine (basisExt F n).ext_elem fun M => ?_
+  have h1 := h (basisExt F n
+    (M.map (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding))
+  rw [← (basisExt F n).sum_repr z, map_sum, LinearMap.sum_apply, Finset.sum_eq_single M] at h1
+  · rw [map_smul, LinearMap.smul_apply, smul_eq_mul] at h1
+    rw [map_zero, Finsupp.zero_apply]
+    exact (mul_eq_zero.mp h1).resolve_right (s61_extPairing_basisExt_flip_ne_zero F n M)
+  · intro N _ hN
+    rw [map_smul, LinearMap.smul_apply, s61_extPairing_basisExt_eq_zero, smul_zero]
+    intro h'
+    apply hN
+    have := congrArg (fun P : Finset (Fin (2 * n + 2 * n)) =>
+      P.map (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding) h'
+    simp only [s61_flip_flip] at this
+    exact this.symm
+  · intro h'; exact absurd (Finset.mem_univ M) h'
+
+theorem s61_rhoExt_rhoExt_inv (g : Spin F n) (y : ExtV F n) :
+    rhoExt F n g (rhoExt F n g⁻¹ y) = y := by
+  have h : (rho F n g : V F n →ₗ[F] V F n) ∘ₗ (rho F n g⁻¹ : V F n →ₗ[F] V F n) = LinearMap.id := by
+    have := spinVectorAction_mul (Q F n) g g⁻¹
+    rw [mul_inv_cancel, spinVectorAction_one] at this
+    refine LinearMap.ext fun v => ?_
+    have h2 := congrArg (fun φ : V F n ≃ₗ[F] V F n => φ v) this
+    simpa [rho] using h2.symm
+  rw [rhoExt, rhoExt, ← AlgHom.comp_apply, ExteriorAlgebra.map_comp_map, h, ExteriorAlgebra.map_id,
+    AlgHom.id_apply]
+
+/-- `φ_𝒫 ⊗ ψ_{𝒫⁻¹[n]} = ±PD` is `Spin(V)`-equivariant (Poincaré duality commutes with `SO(V)`). -/
+theorem s61_PiMap_rhoExt (g : Spin F n) (x : ExtV F n) :
+    PiMap F n (rhoExt F n g x) = rhoExt F n g (PiMap F n x) := by
+  have h : (PiMap F n) ∘ₗ (rhoExt F n g).toLinearMap = (rhoExt F n g).toLinearMap ∘ₗ PiMap F n := by
+    refine (basisExt F n).ext fun M => ?_
+    have hM : basisExt F n M ∈ ⋀[F]^M.card (V F n) := s61_basis_mem _ M
+    rw [LinearMap.comp_apply, LinearMap.comp_apply, AlgHom.toLinearMap_apply,
+      AlgHom.toLinearMap_apply, ← sub_eq_zero]
+    apply s61_extPairing_nondeg
+    intro y
+    rw [map_sub, LinearMap.sub_apply, sub_eq_zero]
+    conv_rhs => rw [← s61_rhoExt_rhoExt_inv F n g y, s61_extPairing_rhoExt]
+    rw [s61_PiMap_eq_smul, LinearMap.smul_apply, LinearMap.smul_apply, map_smul, map_smul,
+      LinearMap.smul_apply, LinearMap.smul_apply, lemma6_3_2 F n _ (s61_rhoExt_mem F n g hM),
+      lemma6_3_2 F n _ hM, ← s61_integralExt_rhoExt F n g (basisExt F n M * rhoExt F n g⁻¹ y),
+      map_mul (rhoExt F n g), s61_rhoExt_rhoExt_inv]
+  exact congrArg (fun φ : ExtV F n →ₗ[F] ExtV F n => φ x) h
+
+/-- **The algebraic computation of `ρ'_g`** (the proof of Proposition 6.1.2, by the authorized
+algebraic argument; see the docstring of `proposition6_1_2`), from the identity of Lemma 6.1.1
+`φ = Π ∘ φ̃ ∘ (id ⊗ τ)`, taken as the hypothesis `h`: `φ' = φ ∘ (id ⊗ τ) = Π ∘ E_{B̄₀} ∘ φ̃_sym`
+(Lemma 6.1.1, Remark 2.3.1); `φ̃_sym` is `Spin(V)`-equivariant (Trautman),
+`Π E_{B̄₀} = exp(½c₁(𝒫)) ∪ Π` (`PiMap_changeB0bar`, the operator form of Remark 2.3.1) and
+`Π = ±PD` commutes with `⋀ρ_g` (Lemma 6.3.2, `ρ_g ∈ SO(V)`; `s61_PiMap_rhoExt`).
+It is stated here, upstream of §6.1, with Lemma 6.1.1 as a hypothesis, so that both
+Proposition 6.1.2 (`WeilClasses.Orlov.Sec6_1`, with `lemma6_1_1`) and the cited
+[Orlov, Th. 2.10] (`WeilClasses.External.Orlov.Sec6_1`, which §6.1 cites for (6.1.8)) can use it. -/
+theorem sd_rhoPrime_of_lemma6_1_1
+    (h : phiOrlov F n = PiMap F n ∘ₗ varphiTilde F n ∘ₗ tauTensor F n) (g : Spin F n)
+    (x : ExtV F n) :
+    rhoPrime F n g x =
+      IsNilpotent.exp ((2 : F)⁻¹ • (c1P F n - rhoExt F n g (c1P F n))) * rhoExt F n g x := by
+  have hφ' : ∀ y, phiPrime F n y = PiMap F n (changeB0bar F n (varphiTildeSym F n y)) := by
+    intro y
+    rw [phiPrime, LinearMap.comp_apply, h, LinearMap.comp_apply, LinearMap.comp_apply,
+      ← LinearMap.comp_apply (tauTensor F n) (tauTensor F n), tauTensor_comp_tauTensor,
+      LinearMap.id_apply, varphiTilde, LinearMap.comp_apply, psi_eq_changeB0bar_comp_psiSym,
+      LinearMap.comp_apply, varphiTildeSym, LinearMap.comp_apply]
+  have hc : ∀ t : F, IsNilpotent (t • c1P F n) := s61_isNilpotent_smul_c1P F n
+  set y := phiPrimeInv F n x with hy
+  have hx : phiPrime F n y = x := by
+    rw [hy, ← LinearMap.comp_apply, phiPrime_comp_phiPrimeInv, LinearMap.id_apply]
+  have hw : PiMap F n (varphiTildeSym F n y) =
+      IsNilpotent.exp (-((2 : F)⁻¹ • c1P F n)) * x := by
+    have hcomm1 : Commute (-((2 : F)⁻¹ • c1P F n)) ((2 : F)⁻¹ • c1P F n) :=
+      ((s61_commute_c1P F n _).smul_left _).neg_left
+    rw [← hx, hφ', PiMap_changeB0bar, ← mul_assoc,
+      ← IsNilpotent.exp_add_of_commute hcomm1 (hc _).neg (hc _), neg_add_cancel,
+      IsNilpotent.exp_zero, one_mul]
+  have hρc : IsNilpotent (rhoExt F n g ((2 : F)⁻¹ • c1P F n)) := (hc _).map _
+  calc rhoPrime F n g x
+      = PiMap F n (changeB0bar F n (varphiTildeSym F n
+          (TensorProduct.map (m F n (g : C F n)) (m F n (g : C F n)) y))) := by
+        rw [rhoPrime, LinearMap.comp_apply, LinearMap.comp_apply, hφ']
+    _ = PiMap F n (changeB0bar F n (rhoExt F n g (varphiTildeSym F n y))) := by
+        rw [remark2_3_1_sym_equivariant]
+    _ = IsNilpotent.exp ((2 : F)⁻¹ • c1P F n) * rhoExt F n g (PiMap F n (varphiTildeSym F n y)) := by
+        rw [PiMap_changeB0bar, s61_PiMap_rhoExt]
+    _ = IsNilpotent.exp ((2 : F)⁻¹ • c1P F n) *
+          (IsNilpotent.exp (-(rhoExt F n g ((2 : F)⁻¹ • c1P F n))) * rhoExt F n g x) := by
+        rw [hw, map_mul, IsNilpotent.map_exp (hc _).neg, map_neg]
+    _ = IsNilpotent.exp ((2 : F)⁻¹ • (c1P F n - rhoExt F n g (c1P F n))) * rhoExt F n g x := by
+        rw [← mul_assoc, ← IsNilpotent.exp_add_of_commute ?_ (hc _) hρc.neg, map_smul, smul_sub,
+          sub_eq_add_neg]
+        exact ((s61_commute_c1P F n _).smul_left _)
+
+end S61Equivariance
 
 end WeilClasses

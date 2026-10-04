@@ -6,6 +6,7 @@ public import WeilClasses.Spinor.Integral
 public import WeilClasses.External.Chevalley.Sec2_2
 public import WeilClasses.External.Chevalley.Sec2_3
 public import WeilClasses.External.Trautman.Sec2_3
+import WeilClasses.Orlov.Basis
 import all Mathlib.LinearAlgebra.ExteriorPower.BilinForm
 public import TauCeti.LinearAlgebra.CliffordAlgebra.Filtration
 public import TauCeti.LinearAlgebra.ExteriorAlgebra.IntegralLattice
@@ -446,11 +447,16 @@ theorem B0_eq_half_pairing_add_B0bar : B0 F n = (2 : F)⁻¹ • pairing F n + B
 form in which the proof of Proposition 6.1.2 uses it: under the isomorphism
 `φ_𝒫 ⊗ ψ_{𝒫⁻¹[n]} : H*(X̂ × X) → H*(X × X̂)` (Poincaré duality up to sign, Lemma 6.3.2), the change of
 form by `B̄₀` on `⋀•V` (the exponential of contraction with `B̄₀`; `changeB0bar`) becomes cup product
-with `exp(½c₁(𝒫))`. (Checked numerically for `n = 1, 2`.) Not a statement of the paper. -/
+with `exp(½c₁(𝒫))`. (Checked numerically for `n = 1, 2`.) Not a statement of the paper.
+Proof (from the explicit transforms; prover P10, moved here by prover SD): in the basis of `V`,
+`E_{B̄₀} = ∏ᵢ (1 + ½ ∂_{f_i} ∂_{e_i})` (`s61_changeB0bar_eq_G`),
+`Π ∘ ∂_{f_i} ∂_{e_i} = (e_i ∧ f_i) ∪ Π` on the basis vectors `f_A ∧ e_B` (`s61_PiMap_D`), and
+`exp(½ Σᵢ e_i ∧ f_i) = ∏ᵢ (1 + ½ e_i ∧ f_i)` (`s61_exp_list`); the helpers are in
+`WeilClasses.Orlov.Basis`. -/
 theorem PiMap_changeB0bar (x : ExtV F n) :
     PiMap F n (changeB0bar F n x) =
       IsNilpotent.exp ((2 : F)⁻¹ • c1P F n) * PiMap F n x := by
-  sorry
+  rw [s61_changeB0bar_eq_G, s61_PiMap_G, s61_c1P_eq, Fin.sum_univ_def, s61_exp_list]
 
 /-- **Remark 2.3.1** (`remark-non-equivariance-of-varphi-tilde`), corrected: `B̄₀ = -½ c₁(𝒫)`. The
 alternating form `B̄₀ ∈ ∧²V*` is identified with a class in `H²(X × X̂) = ∧²V` through the determinant
