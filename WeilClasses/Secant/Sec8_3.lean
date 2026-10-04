@@ -4,6 +4,7 @@ public import WeilClasses.Secant.Sec8_2
 public import WeilClasses.PureSpinor.Lemma2_2_7
 public import WeilClasses.Orlov.Sec6_2
 public import WeilClasses.Orlov.Sec6_4
+import WeilClasses.Orlov.Cor1_3_2
 
 /-!
 # §8.3 up to Lemma 8.3.1: the `κ₃`-class of `Φ(F₁ ⊠ F₁)` is independent of `h³`
@@ -20,7 +21,8 @@ Statements of the paper's §8.3, TeX lines 3963–4041 (`n = 3`, the notation of
   `H²(X × X̂, ℤ)^{Spin(V)_P}`"; the statements below only depend on the line `ℚh`).
 * **Lemma 8.3.1** (`lemma8_3_1_rank`, `lemma8_3_1`), with `ch(Φ(F₁ ⊠ F₁)) = φ(w ⊗ w) = φ'(w ⊗ τ w)`
   (`lemma8_3_1_ch`; `φ(ch F₁ ⊠ ch F₁)` is the Chern character of `Φ(F₁ ⊠ F₁)` by GRR, not
-  formalized), the invariance of the two classes (`lemma8_3_1_invariant`), the value of the rank
+  formalized), the invariance of the two classes (`lemma8_3_1_invariant`; for `κ₃` by
+  Corollary 1.3.2, `corollary1_3_2` in `WeilClasses.Orlov.Cor1_3_2`), the value of the rank
   (`lemma8_3_1_rank_eq`: `8d`), and the claims of the proof (`chF1_eq_lambda`, `tau_lambda`,
   `chF1_tmul_tau_decomp`).
 
@@ -720,12 +722,21 @@ theorem s8_rhoPrime_invariant (g : Spin ℚ 3) (hg : g ∈ (PJac d hΘ hd).spinP
   rw [h2] at h
   exact h
 
-/-- `κ(Φ(F₁ ⊠ F₁))` is `Spin(V)_P`-invariant (Corollary 1.3.2: Lemma 6.2.3 and Lemma 6.2.6(1)). -/
+/-- `κ(Φ(F₁ ⊠ F₁))` is `Spin(V)_P`-invariant, by Corollary 1.3.2 (`corollary1_3_2`):
+`Φ(F₁ ⊠ F₁) = Φ(F₁ ⊠ F₂^∨)` for `F₂ = F₁^∨` is a `P`-secant`^{⊠2}`-object (`ch F₁ = w` and
+`ch F₂ = τ w` lie in `P` by Lemma 8.2.1, and `φ(w ⊗ τ(τ w)) = φ(w ⊗ w)`), of non-zero rank by the
+first sentence of Lemma 8.3.1 (`lemma8_3_1_rank`). -/
 theorem s8_kappa_invariant (g : Spin ℚ 3) (hg : g ∈ (PJac d hΘ hd).spinPZ) :
     rhoExt ℚ 3 g (kappa ℚ 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d))) =
-      kappa ℚ 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d)) :=
-  ((lemma6_2_6_1 ℚ 3 (PJac d hΘ hd).spinPZ _ (lemma8_3_1_rank d hd)).mp
-    (s8_rhoPrime_invariant d hΘ hd)).1 g hg
+      kappa ℚ 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d)) := by
+  have hE : secantSqClass ℚ 3 (chF1 d) (tau ℚ 3 (chF1 d)) =
+      phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d) := by
+    rw [secantSqClass, tau_tau]
+  have hr : rankExt ℚ 3 (secantSqClass ℚ 3 (chF1 d) (tau ℚ 3 (chF1 d))) ≠ 0 := by
+    rw [hE]; exact lemma8_3_1_rank d hd
+  have h := corollary1_3_2 (PJac d hΘ hd) (chF1 d) (tau ℚ 3 (chF1 d)) (lemma8_2_1 d hΘ hd).2.1
+    (lemma8_2_1 d hΘ hd).2.2 hr g hg
+  rwa [hE] at h
 
 /-- (Lemma 8.3.1, "the `Spin(V)_P`-invariant classes `h³` and `κ₃(Φ(F₁ ⊠ F₁))`") Both classes are
 invariant under the integral group `Spin(V)_P` acting by `ρ` (for `κ₃`: Corollary 1.3.2, as
