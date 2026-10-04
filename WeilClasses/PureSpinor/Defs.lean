@@ -43,19 +43,52 @@ def IsEvenPureSpinor (w : S F n) : Prop := w ∈ Splus F n ∧ IsMaxIsotropic F 
 /-- An odd pure spinor: `w ∈ S⁻` with `ker m_w` maximal isotropic (§2.2). -/
 def IsOddPureSpinor (w : S F n) : Prop := w ∈ Sminus F n ∧ IsMaxIsotropic F n (ann F n w)
 
+/-- `m(g⁻¹) ∘ m(g) = id` for `g ∈ Spin(V_F)`. -/
+theorem fnd_m_inv_m (g : Spin F n) (s : S F n) :
+    m F n ((g⁻¹ : Spin F n) : C F n) (m F n (g : C F n) s) = s := by
+  rw [← Module.End.mul_apply, ← map_mul, ← Submonoid.coe_mul, inv_mul_cancel, OneMemClass.coe_one,
+    map_one, Module.End.one_apply]
+
 /-- The stabilizer in `Spin(V_F)` of the line spanned by a spinor `u`. -/
 def lineStabilizer (u : S F n) : Subgroup (Spin F n) where
   carrier := {g | ∃ c : F, m F n (g : C F n) u = c • u}
   one_mem' := ⟨1, by simp⟩
-  mul_mem' := by sorry
-  inv_mem' := by sorry
+  mul_mem' := by
+    rintro g h ⟨a, ha⟩ ⟨b, hb⟩
+    refine ⟨a * b, ?_⟩
+    rw [Submonoid.coe_mul, map_mul, Module.End.mul_apply, hb, map_smul, ha, smul_smul, mul_comm b a]
+  inv_mem' := by
+    rintro g ⟨a, ha⟩
+    refine ⟨a⁻¹, ?_⟩
+    have key := fnd_m_inv_m F n g u
+    by_cases ha0 : a = 0
+    · rw [ha, ha0, zero_smul, map_zero] at key
+      rw [← key, map_zero, smul_zero]
+    · rw [ha, map_smul] at key
+      exact (eq_inv_smul_iff₀ ha0).mpr key
 
 /-- The subgroup of `Spin(V_F)` fixing every vector of a subspace `P ⊆ S_F`. -/
 def fixingSpin (P : Submodule F (S F n)) : Subgroup (Spin F n) where
   carrier := {g | ∀ p ∈ P, m F n (g : C F n) p = p}
   one_mem' := by intro p _; simp
-  mul_mem' := by sorry
-  inv_mem' := by sorry
+  mul_mem' := by
+    rintro g h hg hh p hp
+    rw [Submonoid.coe_mul, map_mul, Module.End.mul_apply, hh p hp, hg p hp]
+  inv_mem' := by
+    rintro g hg p hp
+    conv_lhs => rw [← hg p hp]
+    exact fnd_m_inv_m F n g p
+
+/-- For `g` in the stabilizer of the line `F u`, `ρ(g)` preserves `ker m_u`: if `m_v u = 0` then
+`m_{ρ(g) v} u = m_g m_v m_{g⁻¹} u ∈ m_g m_v (F u) = 0`. -/
+theorem fnd_rho_mem_ann {u : S F n} (g : Spin F n) (hg : g ∈ lineStabilizer F n u)
+    (v : V F n) (hv : v ∈ ann F n u) : rho F n g v ∈ ann F n u := by
+  obtain ⟨c, hc⟩ := (lineStabilizer F n u).inv_mem hg
+  simp only [ann, LinearMap.mem_ker, mOf, LinearMap.coe_comp, Function.comp_apply,
+    AlgHom.toLinearMap_apply, LinearMap.applyₗ_apply_apply] at hv ⊢
+  rw [ι_rho, map_mul, map_mul, Module.End.mul_apply, Module.End.mul_apply]
+  have hs : star (g : C F n) = ((g⁻¹ : Spin F n) : C F n) := rfl
+  rw [hs, hc, map_smul, hv, smul_zero, map_zero]
 
 end General
 
@@ -114,11 +147,11 @@ noncomputable def spinPℚ : Subgroup (Spin ℚ n) := fixingSpin ℚ n P.Pℚ
 
 theorem rho_mem_W₁ (g : P.spinL₁L₂) (v : V (Kd d) n) (hv : v ∈ P.W₁) :
     rho (Kd d) n g v ∈ P.W₁ := by
-  sorry
+  exact fnd_rho_mem_ann (Kd d) n (g : Spin (Kd d) n) (Subgroup.mem_inf.mp g.2).1 v hv
 
 theorem rho_mem_W₂ (g : P.spinL₁L₂) (v : V (Kd d) n) (hv : v ∈ P.W₂) :
     rho (Kd d) n g v ∈ P.W₂ := by
-  sorry
+  exact fnd_rho_mem_ann (Kd d) n (g : Spin (Kd d) n) (Subgroup.mem_inf.mp g.2).2 v hv
 
 /-- The character `det₁ : Spin(V_K)_{ℓ₁,ℓ₂} → K^×`, the determinant of the action on `W₁`. -/
 noncomputable def det₁ (g : P.spinL₁L₂) : Kd d :=

@@ -94,7 +94,20 @@ noncomputable def cliffordOp : V F n →ₗ[F] Module.End F (S F n) :=
 
 theorem cliffordOp_mul_self (v : V F n) :
     cliffordOp F n v * cliffordOp F n v = algebraMap F _ (Q F n v) := by
-  sorry
+  obtain ⟨θ, w⟩ := v
+  refine LinearMap.ext fun s => ?_
+  simp only [cliffordOp, L, D, LinearMap.add_apply, LinearMap.comp_apply, LinearMap.snd_apply,
+    LinearMap.fst_apply, Module.End.mul_apply, LinearMap.mul_apply', Module.algebraMap_end_apply,
+    QuadraticForm.dualProd_apply, map_add]
+  -- `L_w² = 0`, `D_θ² = 0` and `D_θ L_w + L_w D_θ = θ(w)` (Leibniz rule for the contraction).
+  have h1 : ExteriorAlgebra.ι F w * (ExteriorAlgebra.ι F w * s) = 0 := by
+    rw [← mul_assoc, ExteriorAlgebra.ι_sq_zero, zero_mul]
+  have h2 : contractLeft (Q := (0 : QuadraticForm F (H1 F n))) θ (ExteriorAlgebra.ι F w * s) =
+      θ w • s - ExteriorAlgebra.ι F w * contractLeft (Q := (0 : QuadraticForm F (H1 F n))) θ s :=
+    contractLeft_ι_mul (Q := (0 : QuadraticForm F (H1 F n))) θ w s
+  have h3 := contractLeft_contractLeft (Q := (0 : QuadraticForm F (H1 F n))) θ s
+  rw [h1, h2, h3]
+  abel
 
 /-- The spin representation (2.1.3) `m : C(V_F) → End(S_F)`, the algebra homomorphism extending
 `m_{(θ, w)} = L_w + D_θ`. -/

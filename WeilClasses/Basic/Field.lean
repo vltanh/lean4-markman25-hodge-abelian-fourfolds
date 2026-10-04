@@ -21,7 +21,69 @@ namespace WeilClasses
 open Complex
 
 theorem sqrtNeg_sq {d : ℚ} (hd : 0 ≤ d) : sqrtNeg d ^ 2 = -(d : ℂ) := by
-  sorry
+  have h : Real.sqrt (d : ℝ) ^ 2 = (d : ℝ) := Real.sq_sqrt (by exact_mod_cast hd)
+  rw [sqrtNeg, mul_pow, Complex.I_sq, ← Complex.ofReal_pow, h, Complex.ofReal_ratCast]
+  ring
+
+/-- `√-d · √-d = -max(d, 0)` for every rational `d` (for `d ≤ 0`, `√-d = 0`). -/
+theorem fnd_sqrtNeg_mul_self (d : ℚ) :
+    sqrtNeg d * sqrtNeg d = -((max d 0 : ℚ) : ℂ) := by
+  rcases le_or_gt 0 d with hd | hd
+  · rw [max_eq_left hd, ← sq, sqrtNeg_sq hd]
+  · have h : Real.sqrt (d : ℝ) = 0 := Real.sqrt_eq_zero_of_nonpos (by exact_mod_cast hd.le)
+    simp [sqrtNeg, h, max_eq_right hd.le]
+
+/-- `√-d` is purely imaginary: its complex conjugate is `-√-d`. -/
+theorem fnd_conj_sqrtNeg (d : ℚ) : (starRingEnd ℂ) (sqrtNeg d) = -sqrtNeg d := by
+  simp [sqrtNeg]
+
+/-- The real part of `√-d` is `0`. -/
+theorem fnd_re_sqrtNeg (d : ℚ) : (sqrtNeg d).re = 0 := by
+  simp [sqrtNeg]
+
+/-- The subfield `{a + b √-d : a, b ∈ ℚ}` of `ℂ` (closed under inverses:
+`(a + b√-d)⁻¹ = (a - b√-d)/(a² + max(d,0) b²)`). -/
+private def fnd_quadSubfield (d : ℚ) : Subfield ℂ where
+  carrier := {z | ∃ a b : ℚ, z = a + b * sqrtNeg d}
+  mul_mem' := by
+    rintro _ _ ⟨a, b, rfl⟩ ⟨a', b', rfl⟩
+    refine ⟨a * a' - max d 0 * b * b', a * b' + a' * b, ?_⟩
+    have h := fnd_sqrtNeg_mul_self d
+    push_cast
+    linear_combination ((b : ℂ) * b') * h
+  one_mem' := ⟨1, 0, by simp⟩
+  add_mem' := by
+    rintro _ _ ⟨a, b, rfl⟩ ⟨a', b', rfl⟩
+    exact ⟨a + a', b + b', by push_cast; ring⟩
+  zero_mem' := ⟨0, 0, by simp⟩
+  neg_mem' := by
+    rintro _ ⟨a, b, rfl⟩
+    exact ⟨-a, -b, by push_cast; ring⟩
+  inv_mem' := by
+    rintro _ ⟨a, b, rfl⟩
+    have h := fnd_sqrtNeg_mul_self d
+    have hm : 0 ≤ max d 0 := le_max_right _ _
+    by_cases hN : a ^ 2 + max d 0 * b ^ 2 = 0
+    · have ha : a = 0 := by nlinarith [sq_nonneg a, mul_nonneg hm (sq_nonneg b)]
+      have hb : max d 0 * b ^ 2 = 0 := by rw [ha] at hN; simpa using hN
+      have hz : ((a : ℂ) + b * sqrtNeg d) * ((a : ℂ) + b * sqrtNeg d) = 0 := by
+        have hb' : ((max d 0 : ℚ) : ℂ) * (b : ℂ) ^ 2 = 0 := by exact_mod_cast hb
+        rw [ha]
+        push_cast
+        linear_combination ((b : ℂ) ^ 2) * h - hb'
+      rw [mul_self_eq_zero.mp hz, inv_zero]
+      exact ⟨0, 0, by simp⟩
+    · refine ⟨a / (a ^ 2 + max d 0 * b ^ 2), -b / (a ^ 2 + max d 0 * b ^ 2), ?_⟩
+      have hN' : ((a ^ 2 + max d 0 * b ^ 2 : ℚ) : ℂ) ≠ 0 := by exact_mod_cast hN
+      apply inv_eq_of_mul_eq_one_right
+      set D : ℂ := ((a ^ 2 + max d 0 * b ^ 2 : ℚ) : ℂ) with hD
+      have e : ((a : ℂ) + b * sqrtNeg d) * (((a / (a ^ 2 + max d 0 * b ^ 2) : ℚ) : ℂ) +
+          ((-b / (a ^ 2 + max d 0 * b ^ 2) : ℚ) : ℂ) * sqrtNeg d) =
+          ((a : ℂ) ^ 2 - (b : ℂ) ^ 2 * (sqrtNeg d * sqrtNeg d)) / D := by
+        rw [hD]; push_cast; ring
+      rw [e, h, ← div_self hN', hD]
+      push_cast
+      ring
 
 namespace Kd
 
@@ -30,10 +92,22 @@ variable (d : ℚ)
 /-- `K = ℚ(√-d)` consists of the numbers `a + b √-d`, `a, b ∈ ℚ` (for `d ≤ 0`, `√-d = 0` and
 `K = ℚ`). -/
 theorem mem_iff {z : ℂ} : z ∈ Kd d ↔ ∃ a b : ℚ, z = a + b * WeilClasses.sqrtNeg d := by
-  sorry
+  constructor
+  · intro hz
+    have hle : Kd d ≤ fnd_quadSubfield d := Subfield.closure_le.mpr (by
+      rintro _ rfl
+      exact ⟨0, 1, by simp⟩)
+    exact hle hz
+  · rintro ⟨a, b, rfl⟩
+    have hs : WeilClasses.sqrtNeg d ∈ Kd d := Subfield.subset_closure (Set.mem_singleton _)
+    exact add_mem (SubfieldClass.ratCast_mem _ a) (mul_mem (SubfieldClass.ratCast_mem _ b) hs)
 
 theorem conj_mem {z : ℂ} (hz : z ∈ Kd d) : (starRingEnd ℂ) z ∈ Kd d := by
-  sorry
+  obtain ⟨a, b, rfl⟩ := (mem_iff d).mp hz
+  refine (mem_iff d).mpr ⟨a, -b, ?_⟩
+  simp only [map_add, map_mul, map_ratCast, fnd_conj_sqrtNeg]
+  push_cast
+  ring
 
 /-- The Galois involution `σ` of `K/ℚ`: the restriction of complex conjugation (paper, §2.2). -/
 noncomputable def σ : Kd d ≃+* Kd d where
@@ -47,9 +121,73 @@ noncomputable def σ : Kd d ≃+* Kd d where
 @[simp]
 theorem coe_σ (z : Kd d) : ((σ d z : Kd d) : ℂ) = (starRingEnd ℂ) z := rfl
 
+/-- The scalar action of `ℚ` on `K`, in `ℂ`. -/
+theorem fnd_coe_smul (q : ℚ) (x : Kd d) : ((q • x : Kd d) : ℂ) = (q : ℂ) * (x : ℂ) := by
+  simp [Rat.smul_def]
+
+/-- For `d > 0`, `1` and `√-d` are linearly independent over `ℚ`. -/
+theorem fnd_linIndep {d : ℚ} (hd : 0 < d) {a b : ℚ}
+    (h : (a : ℂ) + b * WeilClasses.sqrtNeg d = 0) : a = 0 ∧ b = 0 := by
+  have hre := congrArg Complex.re h
+  have him := congrArg Complex.im h
+  have hs : 0 < Real.sqrt (d : ℝ) := Real.sqrt_pos.mpr (by exact_mod_cast hd)
+  simp [WeilClasses.sqrtNeg] at hre him
+  refine ⟨by exact_mod_cast hre, ?_⟩
+  rcases him with h' | h'
+  · exact_mod_cast h'
+  · exact absurd h' hs.ne'
+
+/-- For `d > 0`, `1, √-d` is a `ℚ`-basis of `K`. -/
+private noncomputable def fnd_basis {d : ℚ} (hd : 0 < d) : Module.Basis (Fin 2) ℚ (Kd d) :=
+  Module.Basis.mk (v := ![1, Kd.sqrtNeg d])
+    (by
+      rw [LinearIndependent.pair_iff]
+      intro s t hst
+      have h := congrArg (fun x : Kd d => (x : ℂ)) hst
+      simp only [Subfield.coe_add, fnd_coe_smul, Subfield.coe_one, mul_one, Subfield.coe_zero] at h
+      exact fnd_linIndep hd h)
+    (by
+      rintro z -
+      obtain ⟨a, b, hz⟩ := (mem_iff d).mp z.2
+      have hz' : z = a • (1 : Kd d) + b • Kd.sqrtNeg d := by
+        apply Subtype.ext
+        simp only [Subfield.coe_add, fnd_coe_smul, Subfield.coe_one, mul_one, hz]
+        rfl
+      rw [hz']
+      exact add_mem (Submodule.smul_mem _ _ (Submodule.subset_span ⟨0, rfl⟩))
+        (Submodule.smul_mem _ _ (Submodule.subset_span ⟨1, rfl⟩)))
+
 /-- `Nm(λ) = λ σ(λ)` (paper, §2.2), for `d > 0` (`[K : ℚ] = 2`). -/
 theorem coe_Nm {d : ℚ} (hd : 0 < d) (z : Kd d) : ((Nm d z : ℚ) : ℂ) = (z : ℂ) * (starRingEnd ℂ) z := by
-  sorry
+  obtain ⟨a, b, hz⟩ := (mem_iff d).mp z.2
+  set B := fnd_basis hd with hBdef
+  have hB0 : B 0 = 1 := by simp [B, fnd_basis]
+  have hB1 : B 1 = Kd.sqrtNeg d := by simp [B, fnd_basis]
+  have hrepr : ∀ x y : ℚ, ∀ i, B.repr (x • B 0 + y • B 1) i = ![x, y] i := by
+    intro x y i
+    rw [map_add, map_smul, map_smul, Module.Basis.repr_self, Module.Basis.repr_self]
+    fin_cases i <;> simp
+  have hs : (WeilClasses.sqrtNeg d) * (WeilClasses.sqrtNeg d) = -(d : ℂ) := by
+    rw [← sq, sqrtNeg_sq hd.le]
+  have h0 : z * B 0 = a • B 0 + b • B 1 := by
+    apply Subtype.ext
+    simp only [hB0, hB1, Subfield.coe_add, fnd_coe_smul, Subfield.coe_one, mul_one, hz]
+    rfl
+  have h1 : z * B 1 = (-d * b) • B 0 + a • B 1 := by
+    apply Subtype.ext
+    simp only [hB0, hB1, Subfield.coe_mul, Subfield.coe_add, fnd_coe_smul, Subfield.coe_one,
+      mul_one, hz]
+    show ((a : ℂ) + b * WeilClasses.sqrtNeg d) * WeilClasses.sqrtNeg d =
+      ((-d * b : ℚ) : ℂ) + a * WeilClasses.sqrtNeg d
+    push_cast
+    linear_combination (b : ℂ) * hs
+  rw [Nm, Algebra.norm_eq_matrix_det B, Matrix.det_fin_two]
+  simp only [Algebra.leftMulMatrix_eq_repr_mul, h0, h1, hrepr]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+  rw [hz]
+  simp only [map_add, map_mul, map_ratCast, fnd_conj_sqrtNeg]
+  push_cast
+  linear_combination ((b : ℂ) ^ 2) * hs
 
 /-- The norm group `Nm(K^×) ⊆ ℚ^×` (paper, §1.1 and (2.2.3)). -/
 def normGroup : Set ℚ := {q | ∃ z : Kd d, z ≠ 0 ∧ Nm d z = q}
