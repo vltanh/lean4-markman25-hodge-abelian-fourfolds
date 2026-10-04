@@ -4,6 +4,7 @@ public import WeilClasses.Main.Jacobian
 public import WeilClasses.WeilType.Theta
 public import WeilClasses.PureSpinor.Lemma2_2_4
 public import WeilClasses.Secant.Defs
+public import WeilClasses.PeriodDomain.Defs
 
 /-!
 # The explicit `X × X̂` and the secant `P_Θ` of §2.4
@@ -19,7 +20,12 @@ principal polarization `Θ = ThetaStd`:
 * `h = d Θ + Θ̂` is the class of `Ξ_P` under `V ≅ V*` (`(x, ·)_V ↔ x`):
   `⟪h, (x, ·)_V ∧ (y, ·)_V⟫ = Ξ_P(x, y)`;
 * the standard complex structure of `X × X̂` is `-I_{V_ℝ}` (`stdStructure_eq_neg`);
-* `P_Θ` of §8 (`PJac`) is `PStd`, and `h` is `Ξ_P^♯` (`hClass_PStd`).
+* `P_Θ` of §8 (`PJac`) is `PStd`, and `h` is `Ξ_P^♯` (`hClass_PStd`);
+* transported to the model by `coordV` (with `I ↦ -I` from the paper's convention to the standard
+  one): the Weil-type period domain of `(X × X̂, η, h)` is the image of the paper's `Ω_P` (§4,
+  `weilDomain_eq_image_OmegaP`); Hodge classes correspond (`map_mem_hodgeClassesX_iff`); the
+  Hodge–Weil classes of `η` are the Hodge–Weil plane of `P_Θ` (Corollary 3.2.2,
+  `HWof_eq_map_hwPlane`).
 -/
 
 @[expose] public section
@@ -92,6 +98,34 @@ theorem PJac_eq_PStd {J : Module.End ℝ (H1 ℝ 3)} (hΘ : IsAmple 3 J (ThetaSt
 paper's `I_{V_ℝ}` (footnote in §2.4). -/
 theorem stdStructure_eq_neg (J : Module.End ℝ (H1 ℝ n)) :
     stdStructure n J = -productStructure n J := by
+  sorry
+
+/-! ## Transport of the Weil-type structure to the model -/
+
+/-- The Weil-type period domain of `(X × X̂, η, h)` in the model (`WeilDomain`) is the image of the
+paper's period domain `Ω_P` of `P_Θ` (§4: "the period domain of deformations of `(X × X̂, Ξ_P, η)`
+as a polarized abelian variety of Weil type"), under `I ↦ -I` (the paper's convention to the
+standard one) and `coordV`. -/
+theorem weilDomain_eq_image_OmegaP (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * n)))
+    (hη : η (Kd.sqrtNeg d) = fX n d) :
+    WeilDomain η (hX n d) =
+      (fun I => transportEnd n (-I)) '' (PStd n d hd hn).OmegaP (PStd_isCompl n d hd hn) := by
+  sorry
+
+/-- Hodge classes for the standard complex structure `-I`, transported to the model, are the Hodge
+classes of `I` (types `(p, q)` and `(q, p)` exchange, and `(p, p)` is symmetric). -/
+theorem map_mem_hodgeClassesX_iff (I : Module.End ℝ (V ℝ n)) (hI : IsComplexStructure I) (p : ℕ)
+    (α : ExtV ℚ n) :
+    ExteriorAlgebra.map (coordV ℚ n).toLinearMap α ∈ hodgeClassesX (2 * n) (transportEnd n (-I)) p ↔
+      α ∈ hodgeClassesV n I p := by
+  sorry
+
+/-- The Hodge–Weil classes of `η` in the model (`HWof`) are the transported Hodge–Weil plane
+`ĤW_P` of `P_Θ` (Corollary 3.2.2, `KSecant.hwPlane`). -/
+theorem HWof_eq_map_hwPlane (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * n)))
+    (hη : η (Kd.sqrtNeg d) = fX n d) :
+    HWof η =
+      (PStd n d hd hn).hwPlane.map (ExteriorAlgebra.map (coordV ℚ n).toLinearMap).toLinearMap := by
   sorry
 
 end WeilClasses

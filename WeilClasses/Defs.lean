@@ -307,9 +307,9 @@ noncomputable def WeilDomainMat {m : ℕ} {d : ℚ} (η : Kd d →+* Module.End 
     (h : S ℚ (2 * m)) : Set (Matrix (Fin (2 * (2 * m))) (Fin (2 * (2 * m))) ℝ) :=
   LinearMap.toMatrix' '' WeilDomain η h
 
-/-- **[Voisin, §4.2]**: over a connected component `C` of a Weil-type period domain, the locus where
-a fixed rational class is algebraic is a countable union of closed analytic subsets; so if it
-contains a nonempty open subset of `C`, it is all of `C`. -/
+/-- **[Voisin, *The Hodge conjecture*, §4.2]**: over a connected component `C` of a Weil-type
+period domain, the locus where a fixed rational class is algebraic is a countable union of closed
+analytic subsets; so if it contains a nonempty open subset of `C`, it is all of `C`. -/
 class VoisinLocus (Z : CycleClasses) : Prop where
   spread : ∀ {m : ℕ} {d : ℚ} (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * m))) (h : S ℚ (2 * m))
     (α : S ℚ (2 * m)) (J₀ : Module.End ℝ (H1 ℝ (2 * m)))

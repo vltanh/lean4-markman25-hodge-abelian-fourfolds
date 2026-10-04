@@ -28,13 +28,19 @@ theorem Kd_Nm (d : ℚ) (hd : 0 < d) (a b : ℚ) :
 theorem fX_mul_self (n : ℕ) (d : ℚ) : fX n d * fX n d = -(d • 1) :=
   WeilClasses.fX_mul_self n d
 
-/-- `X × X̂` with `(η, h)` is a polarized abelian `2n`-fold of Weil type (§2.4, Proposition 2.4.4):
-its complex structure lies in its Weil-type period domain. -/
-theorem JX_mem_weilDomain (n : ℕ) (hn : 0 < n) (d : ℚ) (hd : 0 < d)
+/-- `X × X̂` with `(η, h)` is a polarized abelian `2n`-fold of Weil type (§2.4, Proposition 2.4.4,
+Corollary 3.2.3): its complex structure lies in its Weil-type period domain. -/
+theorem JX_mem_weilDomain (n : ℕ) (d : ℚ) (hd : 0 < d)
     (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hΘ : IsAmple n J (ThetaStd ℚ n))
     (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * n))) (hη : η (Kd.sqrtNeg d) = fX n d) :
     JX n J ∈ WeilDomain η (hX n d) :=
-  WeilClasses.JX_mem_weilDomain n hn d hd J hJ hΘ η hη
+  WeilClasses.JX_mem_weilDomain n d hd J hJ hΘ η hη
+
+/-- The discriminant of `X × X̂` is `(-1)ⁿ` (Lemma 3.1.3): every polarized abelian `2n`-fold of Weil
+type with the action and the polarization of `X × X̂` has discriminant `(-1)ⁿ`. -/
+theorem discIs_XXhat (n : ℕ) (d : ℚ) (hd : 0 < d) (A : AbVar (2 * n)) (X : PolarizedWeilType A d)
+    (hη : X.η (Kd.sqrtNeg d) = fX n d) (hh : X.h = hX n d) : X.DiscIs ((-1) ^ n) :=
+  WeilClasses.discIs_XXhat n d hd A X hη hh
 
 /-- The sheaf `E` of Theorem 1.4.1(2) has rank `8d`. -/
 theorem rank_chE (d : ℚ) : ExteriorAlgebra.algebraMapInv (chE d) = 8 * d :=
@@ -71,9 +77,9 @@ polarized abelian sixfolds of Weil type with complex multiplication by `K` and w
 `-1` are algebraic. -/
 theorem theorem1_5_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
     [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
-    (d : ℕ) (hd : 0 < d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d) (hX : X.DiscIs (-1)) :
+    (d : ℕ) (hd : 0 < d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d) (hdisc : X.DiscIs (-1)) :
     X.HW ≤ Z.alg (2 * 3) A.J :=
-  WeilClasses.theorem1_5_1 Z d hd A X hX
+  WeilClasses.theorem1_5_1 Z d hd A X hdisc
 
 /-- **Corollary 1.6.1.** The Hodge conjecture holds for abelian fourfolds: every Hodge class is
 algebraic. -/

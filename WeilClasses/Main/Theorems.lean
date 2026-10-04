@@ -4,7 +4,7 @@ public import WeilClasses.Main.Compare
 public import WeilClasses.Main.Intro
 
 /-!
-# The main results in the model of abelian varieties (Theorems 1.4.1 (3), (4), 1.5.1, Corollary 1.6.1)
+# The main results in the model (Theorems 1.4.1 (3), (4), 1.5.1, Corollary 1.6.1)
 
 The statements of record (`Challenge.lean`) in the library: Theorem 1.4.1 (3), (4) for the explicit
 polarized abelian sixfold of Weil type `X × X̂` of `WeilClasses.Defs` (`fX`, `hX`, `JX`, `kappaX`),
@@ -14,11 +14,12 @@ Theorem 1.5.1 and Corollary 1.6.1 for a system of algebraic classes `Z` satisfyi
 * Theorem 1.4.1 (3), (4) follow from the paper's versions for the secant `P_Θ`
   (`WeilClasses.Main.Intro`) through the bridges of `WeilClasses.Main.Compare` (`f = η(√-d)`,
   `h = Ξ_P^♯`, the standard complex structure `-I_{V_ℝ}`, `coordV`).
-* Theorem 1.5.1 follows the proof in §9.3: discriminant `-1` of `X × X̂` (Lemma 3.2.? for `n = 3`),
+* Theorem 1.5.1 follows the proof in §9.3: discriminant `-1` of `X × X̂` (Lemma 3.1.3 for `n = 3`),
   `κ₃(E)` algebraic near `X × X̂` (`SecantSheafDeformation`), its `η(K)`-translates algebraic
   (`PullbackClosed`), `h³` algebraic (`LefschetzOneOne`, `SubalgebraClosed`), hence `ĤW` algebraic
   near `X × X̂` (Theorem 1.4.1(4)), on the whole connected component (`VoisinLocus`), and on every
-  polarized abelian sixfold of Weil type with discriminant `-1` (`VanGeemenModuli`, `PullbackClosed`).
+  polarized abelian sixfold of Weil type with discriminant `-1` (`VanGeemenModuli`,
+  `PullbackClosed`).
   For `d ∈ {1, 2}` the proof uses `ℚ(√-4d) = ℚ(√-d)`.
 * Corollary 1.6.1 follows its proof (§1.6), with Lefschetz (1,1) and hard Lefschetz in the degrees
   other than `4`.
@@ -39,12 +40,20 @@ theorem Kd_Nm (d : ℚ) (hd : 0 < d) (a b : ℚ) :
 theorem fX_mul_self (n : ℕ) (d : ℚ) : fX n d * fX n d = -(d • 1) := by
   sorry
 
-/-- `X × X̂` with `(η, h)` is a polarized abelian `2n`-fold of Weil type (§2.4, Proposition 2.4.4,
-Lemma 3.1.3): its complex structure lies in its Weil-type period domain. -/
-theorem JX_mem_weilDomain (n : ℕ) (hn : 0 < n) (d : ℚ) (hd : 0 < d)
+/-- `X × X̂` with `(η, h)` is a polarized abelian `2n`-fold of Weil type (§2.4: Lemma 2.2.6,
+Proposition 2.4.4; Lemma 3.2.1, Corollary 3.2.3): its complex structure lies in its Weil-type period
+domain. -/
+theorem JX_mem_weilDomain (n : ℕ) (d : ℚ) (hd : 0 < d)
     (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hΘ : IsAmple n J (ThetaStd ℚ n))
     (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * n))) (hη : η (Kd.sqrtNeg d) = fX n d) :
     JX n J ∈ WeilDomain η (hX n d) := by
+  sorry
+
+/-- The discriminant of `X × X̂` is `(-1)ⁿ` (Lemma 3.1.3, for van Geemen's Hermitian form): every
+polarized abelian `2n`-fold of Weil type with the action and the polarization of `X × X̂` has
+discriminant `(-1)ⁿ`. -/
+theorem discIs_XXhat (n : ℕ) (d : ℚ) (hd : 0 < d) (A : AbVar (2 * n)) (X : PolarizedWeilType A d)
+    (hη : X.η (Kd.sqrtNeg d) = fX n d) (hh : X.h = hX n d) : X.DiscIs ((-1) ^ n) := by
   sorry
 
 /-- The sheaf `E` of Theorem 1.4.1(2) has rank `8d`. -/
@@ -81,7 +90,7 @@ Hodge–Weil classes of polarized abelian sixfolds of Weil type with complex mul
 and with discriminant `-1` are algebraic. -/
 theorem theorem1_5_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
     [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
-    (d : ℕ) (hd : 0 < d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d) (hX : X.DiscIs (-1)) :
+    (d : ℕ) (hd : 0 < d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d) (hdisc : X.DiscIs (-1)) :
     X.HW ≤ Z.alg (2 * 3) A.J := by
   sorry
 

@@ -3,7 +3,7 @@ module
 public import Mathlib
 
 /-!
-# Statements of record: Markman, *Cycles on abelian 2n-folds of Weil type from secant sheaves on abelian n-folds*
+# Statements of record: Markman, cycles on abelian 2n-folds of Weil type
 
 This file states, in Mathlib's vocabulary, the main results of E. Markman, *Cycles on abelian
 2n-folds of Weil type from secant sheaves on abelian n-folds*, arXiv:2502.03415v2 (2025), as this
@@ -39,7 +39,7 @@ the linear algebra that the paper's arguments act on.
   sixfold of Weil type with `H¹(X × X̂, ℚ) = H¹(X̂) ⊕ H¹(X)` (coordinates `coordV`), `η(√-d) = f`,
   `f(y, w) = (-θ⁻¹w, d θ y)` (`fX`), polarization `h = d Θ + Θ̂` (`hX`), and complex structure
   `(y, w) ↦ (-y ∘ J, J w)` (`JX`). The Weil-type period domain of `(η, h)` is `WeilDomain`.
-* **The class `κ₃(E)`** (Theorem 1.4.1): `ch(F₁) = ch(F₂) = 1 + Θ - (d/2)Θ² - d[pt]` (`chF`,
+* **The class `κ₃(E)`** (Theorem 1.4.1): `ch(F₁) = ch(F₂) = 1 + Θ - (d/2)Θ² - d[pt]` (`chF1`,
   Lemma 8.2.1) for the secant sheaves on the Jacobian of a genus-`3` curve; Orlov's equivalence
   `Φ : Dᵇ(X × X) → Dᵇ(X × X̂)` acts on cohomology by `φ = (id ⊗ ψ_{𝒫⁻¹[3]}) ∘ μ^*` (`phiOrlov`,
   (6.1.3); `c₁(𝒫) = Σ eᵢ ∪ fᵢ`); `ch(E) = τ φ(ch F₂ ⊗ ch F₁)` (`chE`) for `Φ(F₂ ⊠ F₁)^∨ = E[-2]`;
@@ -59,8 +59,8 @@ the linear algebra that the paper's arguments act on.
 
 Items (1), (2), (5) of Theorem 1.4.1 are not here: (2) and (5) are about sheaves, and (1) is
 proved in the library (`WeilClasses.theorem1_4_1_1`). Compared theorems (`Kd.Nm`, `fX`, the
-rank `8d` of `E`, and the fact that `X × X̂` is a point of its own period domain) check the
-definitions against the paper.
+rank `8d` of `E`, the fact that `X × X̂` is a point of its own period domain, and its discriminant
+`(-1)ⁿ`) check the definitions against the paper.
 
 ## The results are conditional
 
@@ -70,8 +70,8 @@ in their signatures, the results that their proofs take from algebraic geometry:
 * `PullbackClosed Z`: pullback of cycles along homomorphisms of abelian varieties;
 * `SubalgebraClosed Z`: `[A]` and intersection products are algebraic;
 * `LefschetzOneOne Z`: the Lefschetz (1,1) theorem;
-* `VoisinLocus Z`: [Voisin, *Hodge theory and complex algebraic geometry II*, §4.2] the locus where
-  a flat class is algebraic is a countable union of closed analytic subsets;
+* `VoisinLocus Z`: [Voisin, *The Hodge conjecture*, in *Open Problems in Mathematics* (2016),
+  §4.2] the locus where a flat class is algebraic is a countable union of closed analytic subsets;
 * `VanGeemenModuli`: [van Geemen, *An introduction to the Hodge conjecture for abelian varieties*,
   Th. 5.2(3)] polarized abelian varieties of Weil type with the same `K` and discriminant form one
   connected family up to isogeny;
@@ -377,9 +377,9 @@ noncomputable def WeilDomainMat {m : ℕ} {d : ℚ} (η : Kd d →+* Module.End 
     (h : S ℚ (2 * m)) : Set (Matrix (Fin (2 * (2 * m))) (Fin (2 * (2 * m))) ℝ) :=
   LinearMap.toMatrix' '' WeilDomain η h
 
-/-- **[Voisin, §4.2]**: over a connected component `C` of a Weil-type period domain, the locus where
-a fixed rational class is algebraic is a countable union of closed analytic subsets; so if it
-contains a nonempty open subset of `C`, it is all of `C`. -/
+/-- **[Voisin, *The Hodge conjecture*, §4.2]**: over a connected component `C` of a Weil-type
+period domain, the locus where a fixed rational class is algebraic is a countable union of closed
+analytic subsets; so if it contains a nonempty open subset of `C`, it is all of `C`. -/
 class VoisinLocus (Z : CycleClasses) : Prop where
   spread : ∀ {m : ℕ} {d : ℚ} (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * m))) (h : S ℚ (2 * m))
     (α : S ℚ (2 * m)) (J₀ : Module.End ℝ (H1 ℝ (2 * m)))
@@ -670,12 +670,18 @@ theorem Kd_Nm (d : ℚ) (hd : 0 < d) (a b : ℚ) :
 theorem fX_mul_self (n : ℕ) (d : ℚ) : fX n d * fX n d = -(d • 1) := by
   sorry
 
-/-- `X × X̂` with `(η, h)` is a polarized abelian `2n`-fold of Weil type (§2.4, Proposition 2.4.4):
-its complex structure lies in its Weil-type period domain. -/
-theorem JX_mem_weilDomain (n : ℕ) (hn : 0 < n) (d : ℚ) (hd : 0 < d)
+/-- `X × X̂` with `(η, h)` is a polarized abelian `2n`-fold of Weil type (§2.4, Proposition 2.4.4,
+Corollary 3.2.3): its complex structure lies in its Weil-type period domain. -/
+theorem JX_mem_weilDomain (n : ℕ) (d : ℚ) (hd : 0 < d)
     (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hΘ : IsAmple n J (ThetaStd ℚ n))
     (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * n))) (hη : η (Kd.sqrtNeg d) = fX n d) :
     JX n J ∈ WeilDomain η (hX n d) := by
+  sorry
+
+/-- The discriminant of `X × X̂` is `(-1)ⁿ` (Lemma 3.1.3): every polarized abelian `2n`-fold of Weil
+type with the action and the polarization of `X × X̂` has discriminant `(-1)ⁿ`. -/
+theorem discIs_XXhat (n : ℕ) (d : ℚ) (hd : 0 < d) (A : AbVar (2 * n)) (X : PolarizedWeilType A d)
+    (hη : X.η (Kd.sqrtNeg d) = fX n d) (hh : X.h = hX n d) : X.DiscIs ((-1) ^ n) := by
   sorry
 
 /-- The sheaf `E` of Theorem 1.4.1(2) has rank `8d`. -/
@@ -713,7 +719,7 @@ polarized abelian sixfolds of Weil type with complex multiplication by `K` and w
 `-1` are algebraic. -/
 theorem theorem1_5_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
     [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
-    (d : ℕ) (hd : 0 < d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d) (hX : X.DiscIs (-1)) :
+    (d : ℕ) (hd : 0 < d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d) (hdisc : X.DiscIs (-1)) :
     X.HW ≤ Z.alg (2 * 3) A.J := by
   sorry
 
