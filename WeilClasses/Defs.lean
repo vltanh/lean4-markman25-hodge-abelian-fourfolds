@@ -3,87 +3,17 @@ module
 public import Mathlib
 
 /-!
-# Statements of record: Markman, *Cycles on abelian 2n-folds of Weil type from secant sheaves on abelian n-folds*
+# The definitions of the statements of record
 
-This file states, in Mathlib's vocabulary, the main results of E. Markman, *Cycles on abelian
-2n-folds of Weil type from secant sheaves on abelian n-folds*, arXiv:2502.03415v2 (2025), as this
-project proves them. It imports only Mathlib. The definitions it uses are written out below,
-between the markers `BEGIN SHARED DEFINITIONS` and `END SHARED DEFINITIONS`, a verbatim copy of the
-block in `WeilClasses/Defs.lean`. Numbering follows the paper.
-
-## The model
-
-No Lean library has algebraic cycles on complex abelian varieties yet, so the statements are about
-the linear algebra that the paper's arguments act on.
-
-* **Abelian varieties up to isogeny** (`AbVar g`): `H¹(A, ℚ) = ℚ^{2g}` with a complex structure `J`
-  of `H¹(A, ℝ)` admitting an ample class; `H*(A, ℚ) = ⋀• H¹(A, ℚ)`. By Riemann's theorem these are
-  exactly the polarizable rational Hodge structures of weight one, i.e. abelian varieties up to
-  isogeny, which is all the Hodge conjecture sees. Conventions: `H^{1,0}(A)` is the `i`-eigenspace
-  of `J` on `H¹(A, ℂ)` (`H10`); a class `Θ ∈ H²` is ample (`IsAmple`) if it has type `(1,1)` and
-  `⟪Θ, a ∧ (a ∘ J)⟫ > 0` for all nonzero `a ∈ H₁(A, ℝ) = H¹(A, ℝ)*` (Kähler positivity, as in
-  [Huybrechts, *Complex geometry*, 1.2.15]). Hodge classes `A.hodge p` are the rational classes in
-  `⋀^{2p}` of type `(p, p)`.
-* **Weil type** (§1.1): `K = ℚ(√-d) ⊆ ℂ` with `√-d = i√d` (`Kd`); an abelian `2m`-fold of Weil type
-  is `η : K → End_ℚ(H¹(A, ℚ))` acting by endomorphisms of Hodge structure with both eigenspaces of
-  `η(√-d)` meeting `H^{1,0}` in dimension `m` (`WeilType`); polarized if moreover `h` is ample and
-  `η(k)^* h = Nm(k) h` (`PolarizedWeilType`). The Hodge–Weil classes `ĤW` are the rational classes
-  of `⋀^{2m} W ⊕ ⋀^{2m} W̄` (`HWof`). The discriminant is that of van Geemen's Hermitian form
-  `H(x, y) = E(x, η(√-d) y) + √-d E(x, y)` on `H₁(A, ℚ)`, in `ℚ^×/Nm(K^×)` (`DiscIs`).
-* **Algebraic classes** (`CycleClasses`): an arbitrary assignment of a subspace
-  `Z.alg g J ⊆ H*(A, ℚ)` to each abelian variety; for actual cycles it is the span of the classes of
-  algebraic cycles. The properties of algebraic classes that the paper's proofs use are hypotheses
-  (below).
-* **The family `X × X̂`** (§§1.2–1.4, 2.4): for a principally polarized abelian threefold `X`
-  (`Θ = e₁ ∧ e₂ + e₃ ∧ e₄ + e₅ ∧ e₆`, `ThetaStd`) and `d > 0`, `X × X̂` is a polarized abelian
-  sixfold of Weil type with `H¹(X × X̂, ℚ) = H¹(X̂) ⊕ H¹(X)` (coordinates `coordV`), `η(√-d) = f`,
-  `f(y, w) = (-θ⁻¹w, d θ y)` (`fX`), polarization `h = d Θ + Θ̂` (`hX`), and complex structure
-  `(y, w) ↦ (-y ∘ J, J w)` (`JX`). The Weil-type period domain of `(η, h)` is `WeilDomain`.
-* **The class `κ₃(E)`** (Theorem 1.4.1): `ch(F₁) = ch(F₂) = 1 + Θ - (d/2)Θ² - d[pt]` (`chF`,
-  Lemma 8.2.1) for the secant sheaves on the Jacobian of a genus-`3` curve; Orlov's equivalence
-  `Φ : Dᵇ(X × X) → Dᵇ(X × X̂)` acts on cohomology by `φ = (id ⊗ ψ_{𝒫⁻¹[3]}) ∘ μ^*` (`phiOrlov`,
-  (6.1.3); `c₁(𝒫) = Σ eᵢ ∪ fᵢ`); `ch(E) = τ φ(ch F₂ ⊗ ch F₁)` (`chE`) for `Φ(F₂ ⊠ F₁)^∨ = E[-2]`;
-  `κ(E) = exp(-c₁(E)/rk E) ch(E)` and `κ₃(E)` its part in `H⁶` (`kappaX 3 d`).
-
-## What is stated
-
-* **Theorem 1.4.1 (3)** (`theorem1_4_1_3`): every graded summand of `κ(E)` is a Hodge class on every
-  deformation of `(X × X̂, η, h)` as a polarized abelian sixfold of Weil type (the connected
-  component of the period domain).
-* **Theorem 1.4.1 (4)** (`theorem1_4_1_4`): the `η(K)`-translates of `κ₃(E)`, together with `h³`,
-  span the `3`-dimensional subspace `ℚ h³ ⊕ ĤW` of `H⁶(X × X̂, ℚ)`.
-* **Theorem 1.5.1** (`theorem1_5_1`): for every positive integer `d`, the Hodge–Weil classes of
-  every polarized abelian sixfold of Weil type for `ℚ(√-d)` with discriminant `-1` are algebraic.
-* **Corollary 1.6.1** (`corollary1_6_1`): the Hodge conjecture holds for abelian fourfolds: every
-  Hodge class is algebraic.
-
-Items (1), (2), (5) of Theorem 1.4.1 are not here: (2) and (5) are about sheaves, and (1) is
-proved in the library (`WeilClasses.theorem1_4_1_1`). Compared theorems (`Kd.Nm`, `fX`, the
-rank `8d` of `E`, and the fact that `X × X̂` is a point of its own period domain) check the
-definitions against the paper.
-
-## The results are conditional
-
-Theorems 1.4.1 (3), (4) are unconditional. Theorem 1.5.1 and Corollary 1.6.1 assume, as classes
-in their signatures, the results that their proofs take from algebraic geometry:
-
-* `PullbackClosed Z`: pullback of cycles along homomorphisms of abelian varieties;
-* `SubalgebraClosed Z`: `[A]` and intersection products are algebraic;
-* `LefschetzOneOne Z`: the Lefschetz (1,1) theorem;
-* `VoisinLocus Z`: [Voisin, *Hodge theory and complex algebraic geometry II*, §4.2] the locus where
-  a flat class is algebraic is a countable union of closed analytic subsets;
-* `VanGeemenModuli`: [van Geemen, *An introduction to the Hodge conjecture for abelian varieties*,
-  Th. 5.2(3)] polarized abelian varieties of Weil type with the same `K` and discriminant form one
-  connected family up to isogeny;
-* `SecantSheafDeformation Z`: the paper's own sheaf-theoretic Sections 7–9 (semiregular twisted
-  sheaves, [Buchweitz–Flenner, Th. 5.1]), in cohomological form: `κ₃(E)` stays algebraic near
-  `X × X̂` in its period domain;
-* for Corollary 1.6.1 also `SchoenDegeneration Z` [Schoen, Prop. 10], `MoonenZarhinSimple`
-  [Moonen–Zarhin 1995, Th. 2.11], `RamonMariProducts Z` [Ramón-Marí, Th. 4.11] and
-  `MoonenZarhinLowDim` [Moonen–Zarhin 1999, Prop. 3.8, Th. 0.1(i)].
-
-For actual algebraic cycles each class is a theorem of the cited source (or of the paper's
-Sections 7–9); nothing here constructs a `CycleClasses` from cycles.
+This module imports only Mathlib (all of it, as `Challenge.lean` does, so that the block below
+elaborates identically in both files) and holds, between the two marker comments, every definition
+that the statements of `Challenge.lean` use: the linear-algebra model of the rational cohomology of
+abelian varieties up to isogeny, Hodge classes, abelian varieties of Weil type and their Hodge–Weil
+classes, systems of algebraic classes with the results assumed about them, and the explicit
+polarized abelian sixfold of Weil type `X × X̂` with the class `κ₃(E)` of Theorem 1.4.1.
+`scripts/sync_challenge_defs.py` copies the block word for word into `Challenge.lean`, so that the
+Challenge and the library have the same constants. The rest of the library imports this module and
+proves the bridges to the paper's own constructions (`WeilClasses.Main.Compare`).
 -/
 
 @[expose] public section
@@ -654,75 +584,3 @@ class SecantSheafDeformation (Z : CycleClasses) : Prop where
 
 end WeilClasses
 -- END SHARED DEFINITIONS
-
-namespace WeilClasses.Challenge
-
-open WeilClasses
-
-/-! ### Compared theorems: the definitions are the intended ones -/
-
-/-- `Nm(a + b√-d) = a² + d b²`. -/
-theorem Kd_Nm (d : ℚ) (hd : 0 < d) (a b : ℚ) :
-    Kd.Nm d ((a : Kd d) + (b : Kd d) * Kd.sqrtNeg d) = a ^ 2 + d * b ^ 2 := by
-  sorry
-
-/-- `f² = -d` on `H¹(X × X̂, ℚ)`, so `√-d ↦ f` defines an action of `K = ℚ(√-d)`. -/
-theorem fX_mul_self (n : ℕ) (d : ℚ) : fX n d * fX n d = -(d • 1) := by
-  sorry
-
-/-- `X × X̂` with `(η, h)` is a polarized abelian `2n`-fold of Weil type (§2.4, Proposition 2.4.4):
-its complex structure lies in its Weil-type period domain. -/
-theorem JX_mem_weilDomain (n : ℕ) (hn : 0 < n) (d : ℚ) (hd : 0 < d)
-    (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hΘ : IsAmple n J (ThetaStd ℚ n))
-    (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * n))) (hη : η (Kd.sqrtNeg d) = fX n d) :
-    JX n J ∈ WeilDomain η (hX n d) := by
-  sorry
-
-/-- The sheaf `E` of Theorem 1.4.1(2) has rank `8d`. -/
-theorem rank_chE (d : ℚ) : ExteriorAlgebra.algebraMapInv (chE d) = 8 * d := by
-  sorry
-
-/-! ### Theorem 1.4.1 -/
-
-/-- **Theorem 1.4.1 (3).** Let `X` be a principally polarized abelian threefold (in the paper the
-Jacobian of a non-hyperelliptic curve of genus `3`) and `d ≥ 3`. Every graded summand `κ_k(E)` of
-`κ(E)` is of Hodge type on every deformation of `(X × X̂, η, h)` as a polarized abelian sixfold of
-Weil type. -/
-theorem theorem1_4_1_3 (d : ℕ) (hd : 3 ≤ d) (J : Module.End ℝ (H1 ℝ 3))
-    (hJ : IsComplexStructure J) (hΘ : IsAmple 3 J (ThetaStd ℚ 3))
-    (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 3))) (hη : η (Kd.sqrtNeg d) = fX 3 d)
-    (M : Matrix (Fin (2 * (2 * 3))) (Fin (2 * (2 * 3))) ℝ)
-    (hM : M ∈ connectedComponentIn (WeilDomainMat η (hX 3 d)) (LinearMap.toMatrix' (JX 3 J)))
-    (k : ℕ) : kappaX k d ∈ hodgeClassesX (2 * 3) (Matrix.toLin' M) k := by
-  sorry
-
-/-- **Theorem 1.4.1 (4).** The `η(K)`-translates of `κ₃(E) ∈ H⁶(X × X̂, ℚ)`, together with `h³`,
-span the `3`-dimensional subspace `ℚ h³ ⊕ ĤW` of `H⁶(X × X̂, ℚ)`. -/
-theorem theorem1_4_1_4 (d : ℕ) (hd : 3 ≤ d) (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 3)))
-    (hη : η (Kd.sqrtNeg d) = fX 3 d) :
-    Submodule.span ℚ
-        (insert (hX 3 d ^ 3) (Set.range fun k : Kd d => ExteriorAlgebra.map (η k) (kappaX 3 d))) =
-      (ℚ ∙ (hX 3 d ^ 3)) ⊔ HWof η ∧
-    Module.finrank ℚ ↥((ℚ ∙ (hX 3 d ^ 3)) ⊔ HWof η) = 3 := by
-  sorry
-
-/-! ### Theorem 1.5.1 and Corollary 1.6.1 -/
-
-/-- **Theorem 1.5.1.** Let `d` be a positive integer and `K = ℚ(√-d)`. The Hodge–Weil classes of
-polarized abelian sixfolds of Weil type with complex multiplication by `K` and with discriminant
-`-1` are algebraic. -/
-theorem theorem1_5_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
-    [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
-    (d : ℕ) (hd : 0 < d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d) (hX : X.DiscIs (-1)) :
-    X.HW ≤ Z.alg (2 * 3) A.J := by
-  sorry
-
-/-- **Corollary 1.6.1.** The Hodge conjecture holds for abelian fourfolds: every Hodge class is
-algebraic. -/
-theorem corollary1_6_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
-    [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
-    [SchoenDegeneration Z] [MoonenZarhinSimple] [RamonMariProducts Z] [MoonenZarhinLowDim]
-    (A : AbVar (2 * 2)) (p : ℕ) : A.hodge p ≤ Z.alg (2 * 2) A.J := by
-  sorry
-
-end WeilClasses.Challenge

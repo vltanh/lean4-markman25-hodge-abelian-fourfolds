@@ -27,9 +27,6 @@ section BaseChange
 
 variable (F F' : Type*) [Field F] [CharZero F] [Field F'] [CharZero F'] [Algebra F F'] (n : ℕ)
 
-/-- Change of coefficients on `H¹(X, ·)`. -/
-noncomputable def bcH1 : H1 F n →ₗ[F] H1 F' n := (Algebra.linearMap F F').compLeft _
-
 /-- Change of coefficients on `H¹(X̂, ·) = H¹(X, ·)*`: the functional with the same coordinates. -/
 noncomputable def bcDual : Module.Dual F (H1 F n) →ₗ[F] Module.Dual F' (H1 F' n) where
   toFun θ := ∑ i, algebraMap F F' (θ (e F n i)) • f F' n i
@@ -44,12 +41,6 @@ noncomputable def bcV : V F n →ₗ[F] V F' n := (bcDual F F' n).prodMap (bcH1 
 
 theorem Q_bcV (v : V F n) : Q F' n (bcV F F' n v) = algebraMap F F' (Q F n v) := by
   sorry
-
-/-- Change of coefficients on `S = ⋀• H¹(X)`, an `F`-algebra homomorphism. -/
-noncomputable def bcS : S F n →ₐ[F] S F' n :=
-  ExteriorAlgebra.lift F
-    ⟨((ExteriorAlgebra.ι F' : H1 F' n →ₗ[F'] S F' n).restrictScalars F) ∘ₗ bcH1 F F' n,
-      fun _ => ExteriorAlgebra.ι_sq_zero _⟩
 
 /-- Change of coefficients on the Clifford algebra, an `F`-algebra homomorphism. -/
 noncomputable def bcC : C F n →ₐ[F] C F' n :=

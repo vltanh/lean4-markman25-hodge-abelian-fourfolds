@@ -38,17 +38,7 @@ noncomputable def complexifyV (A : Module.End ℝ (V ℝ n)) : Module.End ℂ (V
   Matrix.toLin (basisV ℂ n) (basisV ℂ n)
     ((LinearMap.toMatrix (basisV ℝ n) (basisV ℝ n) A).map (algebraMap ℝ ℂ))
 
-/-- The `ℂ`-linear extension to `H¹(X, ℂ)` of an `ℝ`-linear endomorphism of `H¹(X, ℝ)`. -/
-noncomputable def complexifyH1 (A : Module.End ℝ (H1 ℝ n)) : Module.End ℂ (H1 ℂ n) :=
-  Matrix.toLin (Pi.basisFun ℂ (Fin (2 * n))) (Pi.basisFun ℂ (Fin (2 * n)))
-    ((LinearMap.toMatrix (Pi.basisFun ℝ (Fin (2 * n))) (Pi.basisFun ℝ (Fin (2 * n))) A).map
-      (algebraMap ℝ ℂ))
-
 /-! ## Complex structures and their eigenspaces -/
-
-/-- A complex structure: an endomorphism with `I² = -1`. -/
-def IsComplexStructure {M : Type*} [AddCommGroup M] [Module ℝ M] (I : Module.End ℝ M) : Prop :=
-  I * I = -1
 
 /-- `V^{1,0}`: the eigenspace of `I` in `V_ℂ` with eigenvalue `i`. -/
 noncomputable def V10 (I : Module.End ℝ (V ℝ n)) : Submodule ℂ (V ℂ n) :=
@@ -57,14 +47,6 @@ noncomputable def V10 (I : Module.End ℝ (V ℝ n)) : Submodule ℂ (V ℂ n) :
 /-- `V^{0,1}`: the eigenspace of `I` in `V_ℂ` with eigenvalue `-i`. -/
 noncomputable def V01 (I : Module.End ℝ (V ℝ n)) : Submodule ℂ (V ℂ n) :=
   Module.End.eigenspace (complexifyV n I) (-Complex.I)
-
-/-- `H^{1,0}(X)`: the eigenspace of `J` in `H¹(X, ℂ)` with eigenvalue `i`. -/
-noncomputable def H10 (J : Module.End ℝ (H1 ℝ n)) : Submodule ℂ (H1 ℂ n) :=
-  Module.End.eigenspace (complexifyH1 n J) Complex.I
-
-/-- `H^{0,1}(X)`: the eigenspace of `J` in `H¹(X, ℂ)` with eigenvalue `-i`. -/
-noncomputable def H01 (J : Module.End ℝ (H1 ℝ n)) : Submodule ℂ (H1 ℂ n) :=
-  Module.End.eigenspace (complexifyH1 n J) (-Complex.I)
 
 /-- **The complex structure `I = I_{V_ℝ}` of `X × X̂`** on `V_ℝ = H¹(X̂, ℝ) ⊕ H¹(X, ℝ)`, in the
 convention of the paper (footnote in §2.4): `I_{V_ℝ}` is the complex structure of the Hodge structure
@@ -82,37 +64,24 @@ noncomputable def productStructure (J : Module.End ℝ (H1 ℝ n)) : Module.End 
 
 /-! ## `(p, q)`-pieces of exterior algebras and Hodge classes -/
 
-/-- The piece `⋀^p A ∧ ⋀^q B ⊆ ⋀^{p+q} M` spanned by the products of `p` vectors of `A` and `q`
-vectors of `B`; for `A = V^{1,0}` and `B = V^{0,1}` this is `⋀^{p,q}`. -/
-noncomputable def pqPiece {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
-    (A B : Submodule R M) (p q : ℕ) : Submodule R (ExteriorAlgebra R M) :=
-  Submodule.span R
-    {x | ∃ (a : Fin p → M) (b : Fin q → M), (∀ i, a i ∈ A) ∧ (∀ j, b j ∈ B) ∧
-      x = ExteriorAlgebra.ιMulti R p a * ExteriorAlgebra.ιMulti R q b}
-
-/-- The subspace `⋀^k W ⊆ ⋀^k M` spanned by the products of `k` vectors of `W`. -/
-noncomputable def topWedge {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
-    (W : Submodule R M) (k : ℕ) : Submodule R (ExteriorAlgebra R M) :=
-  Submodule.span R {x | ∃ v : Fin k → M, (∀ i, v i ∈ W) ∧ x = ExteriorAlgebra.ιMulti R k v}
-
 /-- The rational classes of type `(p, p)` in `H^{2p}(X × X̂, ℚ) = ⋀^{2p} V_ℚ` for the complex
 structure `I` of `V_ℝ`: the Hodge classes of degree `2p`. -/
 noncomputable def hodgeClassesV (I : Module.End ℝ (V ℝ n)) (p : ℕ) :
-    Submodule ℚ (ExteriorAlgebra ℚ (V ℚ n)) where
-  carrier := {α | α ∈ ⋀[ℚ]^(2 * p) (V ℚ n) ∧
-    bcExt ℚ ℂ n α ∈ pqPiece (V10 n I) (V01 n I) p p}
-  add_mem' := by sorry
-  zero_mem' := by sorry
-  smul_mem' := by sorry
+    Submodule ℚ (ExteriorAlgebra ℚ (V ℚ n)) :=
+  ⋀[ℚ]^(2 * p) (V ℚ n) ⊓
+    ((pqPiece (V10 n I) (V01 n I) p p).restrictScalars ℚ).comap (bcExt ℚ ℂ n).toLinearMap
 
-/-- The rational classes of type `(p, p)` in `H^{2p}(X, ℚ) = ⋀^{2p} H¹(X, ℚ)` for the complex
-structure `J` of `H¹(X, ℝ)`. -/
-noncomputable def hodgeClassesX (J : Module.End ℝ (H1 ℝ n)) (p : ℕ) : Submodule ℚ (S ℚ n) where
-  carrier := {α | α ∈ ⋀[ℚ]^(2 * p) (H1 ℚ n) ∧
-    bcS ℚ ℂ n α ∈ pqPiece (H10 n J) (H01 n J) p p}
-  add_mem' := by sorry
-  zero_mem' := by sorry
-  smul_mem' := by sorry
+theorem mem_hodgeClassesV_iff (I : Module.End ℝ (V ℝ n)) (p : ℕ) (α : ExteriorAlgebra ℚ (V ℚ n)) :
+    α ∈ hodgeClassesV n I p ↔
+      α ∈ ⋀[ℚ]^(2 * p) (V ℚ n) ∧ bcExt ℚ ℂ n α ∈ pqPiece (V10 n I) (V01 n I) p p := by
+  simp [hodgeClassesV, Submodule.mem_inf, Submodule.mem_comap, Submodule.restrictScalars_mem]
+
+/-- The Hodge classes of degree `2p` on `X` (`WeilClasses.hodgeClassesX`, in `WeilClasses.Defs`):
+rational classes of degree `2p` of type `(p, p)`. -/
+theorem mem_hodgeClassesX_iff (J : Module.End ℝ (H1 ℝ n)) (p : ℕ) (α : S ℚ n) :
+    α ∈ hodgeClassesX n J p ↔
+      α ∈ ⋀[ℚ]^(2 * p) (H1 ℚ n) ∧ bcS ℚ ℂ n α ∈ pqPiece (H10 n J) (H01 n J) p p := by
+  simp [hodgeClassesX, Submodule.mem_inf, Submodule.mem_comap, Submodule.restrictScalars_mem]
 
 /-- The Hodge ring `⊕_{p=0}^{n} H^{p,p}(X, ℚ)` of `X` (§2.2). -/
 noncomputable def hodgeRingX (J : Module.End ℝ (H1 ℝ n)) : Submodule ℚ (S ℚ n) :=

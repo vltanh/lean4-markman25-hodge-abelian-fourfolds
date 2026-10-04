@@ -1,5 +1,6 @@
 module
 
+public import WeilClasses.Defs
 public import Mathlib.LinearAlgebra.CliffordAlgebra.Contraction
 public import Mathlib.LinearAlgebra.CliffordAlgebra.SpinGroup
 public import Mathlib.LinearAlgebra.CliffordAlgebra.Conjugation
@@ -52,14 +53,6 @@ section Defs
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
-/-- `H¹(X, F)` of an abelian `n`-fold `X`, in the coordinates of a basis `e₁, …, e_{2n}` of
-`H¹(X, ℤ)` with `∫_X e₁ ∧ ⋯ ∧ e_{2n} = 1`. -/
-abbrev H1 : Type _ := Fin (2 * n) → F
-
-/-- `V_F = H¹(X × X̂, F) = H¹(X̂, F) ⊕ H¹(X, F)`, with `H¹(X̂, F) = H¹(X, F)*` (1.2.1). Mathlib's
-order `(θ, w)`: the dual summand first. -/
-abbrev V : Type _ := Module.Dual F (H1 F n) × H1 F n
-
 /-- The quadratic form `Q (θ, w) = θ(w)` on `V`. Its polar form is the pairing (1.2.2), and
 `CliffordAlgebra (Q F n)` is the paper's Clifford algebra `C(V_F)` with relation (2.1.1). -/
 abbrev Q : QuadraticForm F (V F n) := QuadraticForm.dualProd F (H1 F n)
@@ -70,35 +63,9 @@ noncomputable abbrev pairing : LinearMap.BilinForm F (V F n) := QuadraticMap.pol
 /-- The Clifford algebra `C(V_F)` of §2.1. -/
 abbrev C : Type _ := CliffordAlgebra (Q F n)
 
-/-- The spin representation `S_F = H*(X, F) = ⋀• H¹(X, F)`. -/
-abbrev S : Type _ := ExteriorAlgebra F (H1 F n)
-
-/-- The basis vector `e_i` of `H¹(X, F)`. -/
-noncomputable def e (i : Fin (2 * n)) : H1 F n := Pi.single i 1
-
-/-- The coordinate functional `f_i ∈ H¹(X̂, F) = H¹(X, F)*`, dual to `e_i`. -/
-noncomputable def f (i : Fin (2 * n)) : Module.Dual F (H1 F n) := LinearMap.proj i
-
-/-- The basis `e_K = e_{i₁} ∧ ⋯ ∧ e_{i_k}` (`i₁ < ⋯ < i_k`) of `S_F`, indexed by subsets
-`K ⊆ {1, …, 2n}`. -/
-noncomputable def basisS : Module.Basis (Finset (Fin (2 * n))) F (S F n) :=
-  (Pi.basisFun F (Fin (2 * n))).ExteriorAlgebra
-
-/-- The basis of `V_F` formed by the coordinate functionals `f_i` (first summand) and the vectors
-`e_i` (second summand), indexed by `Fin (2n + 2n)`. -/
-noncomputable def basisV : Module.Basis (Fin (2 * n + 2 * n)) F (V F n) :=
-  ((Pi.basisFun F (Fin (2 * n))).dualBasis.prod (Pi.basisFun F (Fin (2 * n)))).reindex
-    finSumFinEquiv
-
 /-- The basis of `⋀• V_F` induced by `basisV`, indexed by subsets of `Fin (2n + 2n)`. -/
 noncomputable def basisExt : Module.Basis (Finset (Fin (2 * n + 2 * n))) F (ExteriorAlgebra F (V F n)) :=
   (basisV F n).ExteriorAlgebra
-
-/-- The class `[pt_X] = e₁ ∧ ⋯ ∧ e_{2n} ∈ H^{2n}(X, F)`, Poincaré dual to a point. -/
-noncomputable def pt : S F n := basisS F n Finset.univ
-
-/-- Integration `∫_X : H*(X, F) → F`: the coefficient of `[pt_X]`. -/
-noncomputable def integral : S F n →ₗ[F] F := (basisS F n).coord Finset.univ
 
 /-- The main anti-automorphism `τ` of `S` (and of `C(V)`): reversal of products, acting on `H^i`
 by `(-1)^{i(i-1)/2}`. -/
@@ -120,10 +87,6 @@ noncomputable def Sminus : Submodule F (S F n) :=
 /-- `L_w`: exterior multiplication by `w ∈ H¹(X, F)` on `S` (§2.1). -/
 noncomputable def L : H1 F n →ₗ[F] Module.End F (S F n) :=
   (LinearMap.mul F (S F n)) ∘ₗ ExteriorAlgebra.ι F
-
-/-- `D_θ`: contraction with `θ ∈ H¹(X, F)*` on `S` (§2.1). -/
-noncomputable def D : Module.Dual F (H1 F n) →ₗ[F] Module.End F (S F n) :=
-  CliffordAlgebra.contractLeft (Q := (0 : QuadraticForm F (H1 F n)))
 
 /-- The embedding (2.1.2) `V → End(S)`, `m_{(θ, w)} = L_w + D_θ`. -/
 noncomputable def cliffordOp : V F n →ₗ[F] Module.End F (S F n) :=

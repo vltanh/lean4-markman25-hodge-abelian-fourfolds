@@ -34,15 +34,6 @@ section Defs
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
-/-- **(6.1.3)** (`eq-Orlov-cohomological-isomorphism`) The cohomological action `φ : S ⊗ S = H*(X ×
-X) → ⋀•V = H*(X × X̂)` of Orlov's
-equivalence (6.1.2), defined in the model as `φ := (id ⊗ ψ_{𝒫⁻¹[n]}) ∘ μ^*`: the second factor of
-`H*(X × X)` is transformed by `ψ_{𝒫⁻¹[n]}` and the result read in `H*(X × X̂)` by the Künneth
-isomorphism `u ⊗ v ↦ π_X^*u ∪ π_X̂^*v`. -/
-noncomputable def phiOrlov : S F n ⊗[F] S F n →ₗ[F] ExtV F n :=
-  (kunnethXHat F n).toLinearMap ∘ₗ TensorProduct.map LinearMap.id (psiPinvShift F n) ∘ₗ
-    muStar F n
-
 /-- `ν = (ψ_{𝒫⁻¹[n]} ⊗ 1) ∘ μ^* : H*(X × X) → H*(X̂ × X)` (§6.3), the cohomological action of
 `(Ψ_{𝒫⁻¹[n]} ⊗ 1) ∘ μ^*`; `H*(X̂ × X) = ⋀•V` by `a ⊗ b ↦ π_X̂^*a ∪ π_X^*b`. -/
 noncomputable def nuOrlov : S F n ⊗[F] S F n →ₗ[F] ExtV F n :=

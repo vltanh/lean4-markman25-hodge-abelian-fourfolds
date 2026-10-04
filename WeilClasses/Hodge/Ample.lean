@@ -20,19 +20,4 @@ ample: `⟪x₁ ∧ x₂, λ₁ ∧ λ₁ ∘ J⟫ = ⟪x₁ ∧ x₂, λ₁ ∧
 
 @[expose] public section
 
-namespace WeilClasses
-
-variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
-
-/-- `⟪ξ, a ∧ b⟫ = b ⌋ (a ⌋ ξ)` (degree-0 coefficient), for `ξ ∈ S_F` and `a, b ∈ H¹(X, F)*`. On
-`⋀² H¹` this is the pairing with `⋀² H₁`: `⟪x ∧ y, a ∧ b⟫ = a(x) b(y) - a(y) b(x)`. -/
-noncomputable def eval2 (ξ : S F n) (a b : Module.Dual F (H1 F n)) : F :=
-  (basisS F n).coord ∅ (D F n b (D F n a ξ))
-
-/-- `Θ ∈ H²(X, ℚ)` is ample for the complex structure `J` of `H¹(X, ℝ)`: of type `(1,1)` and
-`⟪Θ, a ∧ (a ∘ J)⟫ > 0` for every nonzero `a ∈ H₁(X, ℝ) = H¹(X, ℝ)*`. -/
-def IsAmple (J : Module.End ℝ (H1 ℝ n)) (Θ : S ℚ n) : Prop :=
-  Θ ∈ hodgeClassesX n J 1 ∧
-    ∀ a : Module.Dual ℝ (H1 ℝ n), a ≠ 0 → 0 < eval2 ℝ n (bcS ℚ ℝ n Θ) a (a ∘ₗ J)
-
-end WeilClasses
+-- The definitions `WeilClasses.eval2` and `WeilClasses.IsAmple` are in `WeilClasses.Defs`.

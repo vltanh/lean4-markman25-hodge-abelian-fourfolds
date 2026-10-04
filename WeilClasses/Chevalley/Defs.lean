@@ -148,11 +148,6 @@ noncomputable def extFiltLE (k : ℕ) : Submodule F (ExtV F n) :=
 noncomputable def extFiltGE (k : ℕ) : Submodule F (ExtV F n) :=
   ⨆ (i : ℕ) (_ : k ≤ i), ⋀[F]^i (V F n)
 
-/-- The projection `⋀•V → ⋀^k V ⊆ ⋀•V` to the degree-`k` component. On `F^k(⋀•V)` (resp.
-`F_k(⋀•V)`) it is the quotient map to `F^k / F^{k-1} = ⋀^k V` (resp. `F_k / F_{k+1}`). -/
-noncomputable def projDeg (k : ℕ) : ExtV F n →ₗ[F] ExtV F n :=
-  GradedAlgebra.proj (fun i : ℕ => ⋀[F]^i (V F n)) k
-
 /-! ## Chevalley's `φ : S ⊗ S → C(V)` (2.2.5) -/
 
 /-- **(2.3.2)** (`eq-tilde-varphi`) `φ̃ = ψ ∘ φ : S ⊗ S → ⋀•V`. Via the Künneth theorem this is an

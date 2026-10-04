@@ -73,17 +73,6 @@ end BcEnd
 
 /-! ## The field `K`: the coefficient of `√-d` -/
 
-/-- The coefficient `b` of `z = a + b √-d ∈ K = ℚ(√-d)` (for `d > 0`):
-`b = -(1/d) · Re(z √-d)`. Together with `Kd.ratPart` it gives the coordinates of `K = ℚ ⊕ ℚ √-d`. -/
-noncomputable def Kd.sqrtNegCoeff (d : ℚ) : Kd d →ₗ[ℚ] ℚ :=
-  (-(d⁻¹)) • (Kd.ratPart d ∘ₗ LinearMap.mulRight ℚ (Kd.sqrtNeg d))
-
-/-- `z = a + b √-d` with `a = Kd.ratPart d z` and `b = Kd.sqrtNegCoeff d z` (for `d > 0`). -/
-theorem Kd.eq_ratPart_add_sqrtNegCoeff {d : ℚ} (hd : 0 < d) (z : Kd d) :
-    z = algebraMap ℚ (Kd d) (Kd.ratPart d z) +
-      algebraMap ℚ (Kd d) (Kd.sqrtNegCoeff d z) * Kd.sqrtNeg d := by
-  sorry
-
 /-! ## Assumption 2.4.1 -/
 
 variable {n : ℕ} {d : ℚ}

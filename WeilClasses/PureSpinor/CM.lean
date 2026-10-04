@@ -35,6 +35,17 @@ noncomputable def ratPart : Kd d →ₗ[ℚ] ℚ where
   map_add' := by sorry
   map_smul' := by sorry
 
+/-- The coefficient `b` of `z = a + b √-d ∈ K = ℚ(√-d)` (for `d > 0`):
+`b = -(1/d) · Re(z √-d)`. Together with `Kd.ratPart` it gives the coordinates of `K = ℚ ⊕ ℚ √-d`. -/
+noncomputable def sqrtNegCoeff : Kd d →ₗ[ℚ] ℚ :=
+  (-(d⁻¹)) • (Kd.ratPart d ∘ₗ LinearMap.mulRight ℚ (Kd.sqrtNeg d))
+
+/-- `z = a + b √-d` with `a = Kd.ratPart d z` and `b = Kd.sqrtNegCoeff d z` (for `d > 0`). -/
+theorem eq_ratPart_add_sqrtNegCoeff {d : ℚ} (hd : 0 < d) (z : Kd d) :
+    z = algebraMap ℚ (Kd d) (Kd.ratPart d z) +
+      algebraMap ℚ (Kd d) (Kd.sqrtNegCoeff d z) * Kd.sqrtNeg d := by
+  sorry
+
 end Kd
 
 /-- Rational parts of the coordinates of a vector of `V_K`. -/

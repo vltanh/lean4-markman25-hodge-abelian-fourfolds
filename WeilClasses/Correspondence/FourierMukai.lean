@@ -56,17 +56,8 @@ variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
 /-! ## The Poincaré bundle -/
 
-/-- `c₁(𝒫) = Σᵢ π_X^*eᵢ ∪ π_X̂^*fᵢ ∈ H²(X × X̂, ℤ) = ⋀²V` (sign convention in the module
-docstring). -/
-noncomputable def c1P : ExtV F n :=
-  ∑ i : Fin (2 * n), pullX F n (ExteriorAlgebra.ι F (e F n i)) *
-    pullXHat F n (ExteriorAlgebra.ι F (f F n i))
-
 /-- `ch(𝒫) = exp(c₁(𝒫))` (𝒫 is a line bundle). -/
 noncomputable def chP : ExtV F n := IsNilpotent.exp (c1P F n)
-
-/-- `ch(𝒫⁻¹[n]) = (-1)ⁿ exp(-c₁(𝒫))`. -/
-noncomputable def chPinvShift : ExtV F n := (-1 : F) ^ n • IsNilpotent.exp (-c1P F n)
 
 /-- `φ_𝒫 = ch(𝒫)_* : H*(X̂) → H*(X)`, the cohomological action of `Φ_𝒫 : Dᵇ(X̂) → Dᵇ(X)` (𝒫 on
 `X̂ × X`; §6.1, footnote in §6.3). -/
@@ -76,11 +67,6 @@ noncomputable def phiP : SHat F n →ₗ[F] S F n :=
 /-- `φ_𝒫 = ch(𝒫)_* : H*(X) → H*(X̂)` (𝒫 on `X × X̂`; (1.2.5), footnote in §6.3). -/
 noncomputable def phiPX : S F n →ₗ[F] SHat F n :=
   corr (integral F n) ((kunnethXHat F n).symm (chP F n))
-
-/-- `ψ_{𝒫⁻¹[n]} = ch(𝒫⁻¹[n])_* : H*(X) → H*(X̂)`, the cohomological action of
-`Ψ_{𝒫⁻¹[n]} : Dᵇ(X) → Dᵇ(X̂)`, the inverse of `Φ_𝒫` (§6.1). -/
-noncomputable def psiPinvShift : S F n →ₗ[F] SHat F n :=
-  corr (integral F n) ((kunnethXHat F n).symm (chPinvShift F n))
 
 /-- `ψ_{𝒫⁻¹} = ch(𝒫⁻¹)_* : H*(X) → H*(X̂)` (no shift; Lemma 6.3.2): `(-1)ⁿ ψ_{𝒫⁻¹[n]}`. -/
 noncomputable def psiPinv : S F n →ₗ[F] SHat F n :=

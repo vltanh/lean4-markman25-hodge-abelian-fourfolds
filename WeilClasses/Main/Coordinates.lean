@@ -22,15 +22,6 @@ namespace WeilClasses
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
-/-- The coordinate isomorphism `V_F ≃ F^{4n}` (`basisV` to the standard basis). -/
-noncomputable def coordV : V F n ≃ₗ[F] H1 F (2 * n) :=
-  (basisV F n).equivFun.trans (LinearEquiv.funCongrLeft F F (finCongr (by ring)))
-
-/-- The class `Θ = e₁ ∧ e₂ + e₃ ∧ e₄ + ⋯ + e_{2n-1} ∧ e_{2n}` (a principal polarization in symplectic
-coordinates). -/
-noncomputable def ThetaStd : S F n :=
-  ∑ i : Fin n, ExteriorAlgebra.ι F (e F n ⟨2 * i, by omega⟩) * ExteriorAlgebra.ι F (e F n ⟨2 * i + 1, by omega⟩)
-
 /-- `Θⁿ = n! [pt]` for `ThetaStd`: the orientation `∫_X e₁ ∧ ⋯ ∧ e_{2n} = 1` is the one for which `Θ`
 has degree `Θⁿ/n! = 1`. -/
 theorem ThetaStd_pow : ThetaStd F n ^ n = (n.factorial : F) • pt F n := by

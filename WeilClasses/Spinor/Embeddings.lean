@@ -24,14 +24,6 @@ section Defs
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
-/-- `H*(X̂, F) = ⋀• H¹(X̂, F)`, where `H¹(X̂, F) = H¹(X, F)*` (the dual summand of `V`). -/
-abbrev SHat : Type _ := ExteriorAlgebra F (Module.Dual F (H1 F n))
-
-/-- `⋀• V_F`. Since `V = H¹(X̂) ⊕ H¹(X)` (dual summand first), this is `H*(X̂ × X, F)` in the
-Künneth order, and also `H*(X × X̂, F)` (the same ring); see `WeilClasses.Correspondence.Defs` for
-the Künneth isomorphisms. -/
-abbrev ExtV : Type _ := ExteriorAlgebra F (V F n)
-
 /-- The basis `f_K = f_{i₁} ∧ ⋯ ∧ f_{i_k}` (`i₁ < ⋯ < i_k`) of `H*(X̂, F)`, built from the basis
 `f_i` of `H¹(X̂, F)` dual to `e_i`. -/
 noncomputable def basisSHat : Module.Basis (Finset (Fin (2 * n))) F (SHat F n) :=

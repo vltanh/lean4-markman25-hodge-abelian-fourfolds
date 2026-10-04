@@ -43,17 +43,7 @@ section Generic
 
 variable {F : Type*} [Field F] {A B : Type*} [Ring A] [Algebra F A] [AddCommGroup B] [Module F B]
 
-/-- Poincaré duality `PD(u) = ∫(• ∪ u) ∈ A*` for an integration functional `∫ : A → F`. -/
-noncomputable def pdOf (intA : A →ₗ[F] F) : A →ₗ[F] Module.Dual F A :=
-  (LinearMap.mul F A).flip.compr₂ intA
-
 theorem pdOf_apply (intA : A →ₗ[F] F) (u s : A) : pdOf intA u s = intA (s * u) := rfl
-
-/-- The correspondence `γ_* : H*(X) → H*(Y)` of a class `γ ∈ H*(X × Y) = H*(X) ⊗ H*(Y)`, where
-`H*(X) = A` carries the integration `∫_X = intA`: for `γ = Σ uᵢ ⊗ vᵢ`,
-`γ_*(s) = Σ (∫_X s ∪ uᵢ) vᵢ = π_{Y*}(π_X^*s ∪ γ)` (§5.2, proof of Lemma 5.2.1). -/
-noncomputable def corr (intA : A →ₗ[F] F) : A ⊗[F] B →ₗ[F] A →ₗ[F] B :=
-  TensorProduct.lift ((LinearMap.smulRightₗ (R := F) (M := B) (M₂ := A)) ∘ₗ pdOf intA)
 
 theorem corr_tmul (intA : A →ₗ[F] F) (u : A) (v : B) (s : A) :
     corr intA (u ⊗ₜ v) s = intA (s * u) • v := by
@@ -70,27 +60,10 @@ noncomputable def PD : S F n →ₗ[F] Module.Dual F (S F n) := pdOf (integral F
 
 /-! ## `X̂ × X` and `X × X̂` -/
 
-/-- `π_X^* : H*(X) → H*(X̂ × X) = H*(X × X̂) = ⋀•V`. -/
-noncomputable def pullX : S F n →ₐ[F] ExtV F n :=
-  ExteriorAlgebra.map (LinearMap.inr F (Module.Dual F (H1 F n)) (H1 F n))
-
-/-- `π_X̂^* : H*(X̂) → H*(X̂ × X) = H*(X × X̂) = ⋀•V`. -/
-noncomputable def pullXHat : SHat F n →ₐ[F] ExtV F n :=
-  ExteriorAlgebra.map (LinearMap.inl F (Module.Dual F (H1 F n)) (H1 F n))
-
 /-- Künneth for `X̂ × X`: `H*(X̂) ⊗ H*(X) ≅ ⋀•V`, `a ⊗ b ↦ π_X̂^*a ∪ π_X^*b`. -/
 noncomputable def kunnethHatX : SHat F n ⊗[F] S F n ≃ₗ[F] ExtV F n :=
   (GradedTensorProduct.of F (fun i : ℕ => ⋀[F]^i (Module.Dual F (H1 F n)))
       (fun i : ℕ => ⋀[F]^i (H1 F n))).trans
-    (ExteriorAlgebra.prodEquivTensor F (Module.Dual F (H1 F n)) (H1 F n)).symm.toLinearEquiv
-
-/-- Künneth for `X × X̂`: `H*(X) ⊗ H*(X̂) ≅ ⋀•V`, `u ⊗ v ↦ π_X^*u ∪ π_X̂^*v` (graded commutativity
-moves the `X̂`-factor in front: `kunnethXHat_tmul`). -/
-noncomputable def kunnethXHat : S F n ⊗[F] SHat F n ≃ₗ[F] ExtV F n :=
-  ((GradedTensorProduct.of F (fun i : ℕ => ⋀[F]^i (H1 F n))
-      (fun i : ℕ => ⋀[F]^i (Module.Dual F (H1 F n)))).trans
-    (GradedTensorProduct.comm (fun i : ℕ => ⋀[F]^i (H1 F n))
-      (fun i : ℕ => ⋀[F]^i (Module.Dual F (H1 F n)))).toLinearEquiv).trans
     (ExteriorAlgebra.prodEquivTensor F (Module.Dual F (H1 F n)) (H1 F n)).symm.toLinearEquiv
 
 omit [CharZero F] in
@@ -103,9 +76,6 @@ theorem kunnethXHat_tmul (u : S F n) (v : SHat F n) :
 
 /-! ## `X × X` -/
 
-/-- The ring `H*(X × X, F) = ⋀•(H¹(X) ⊕ H¹(X))` (first summand: `π₁^*H¹(X)`). -/
-abbrev SXX : Type _ := ExteriorAlgebra F (H1 F n × H1 F n)
-
 /-- `π₁^* : H*(X) → H*(X × X)`. -/
 noncomputable def pull1 : S F n →ₐ[F] SXX F n :=
   ExteriorAlgebra.map (LinearMap.inl F (H1 F n) (H1 F n))
@@ -114,18 +84,8 @@ noncomputable def pull1 : S F n →ₐ[F] SXX F n :=
 noncomputable def pull2 : S F n →ₐ[F] SXX F n :=
   ExteriorAlgebra.map (LinearMap.inr F (H1 F n) (H1 F n))
 
-/-- Künneth for `X × X`: `S ⊗ S ≅ H*(X × X)`, `u ⊗ v ↦ π₁^*u ∪ π₂^*v`. -/
-noncomputable def kunnethXX : S F n ⊗[F] S F n ≃ₗ[F] SXX F n :=
-  (GradedTensorProduct.of F (fun i : ℕ => ⋀[F]^i (H1 F n)) (fun i : ℕ => ⋀[F]^i (H1 F n))).trans
-    (ExteriorAlgebra.prodEquivTensor F (H1 F n) (H1 F n)).symm.toLinearEquiv
-
 omit [CharZero F] in
 theorem kunnethXX_tmul (u v : S F n) : kunnethXX F n (u ⊗ₜ v) = pull1 F n u * pull2 F n v := rfl
-
-/-- `μ^*` on `H¹(X × X) = H¹(X) ⊕ H¹(X)` for `μ(x, y) = (x + y, y)`: `(a, b) ↦ (a, a + b)`. -/
-noncomputable def mu1 : (H1 F n × H1 F n) →ₗ[F] (H1 F n × H1 F n) :=
-  (LinearMap.fst F (H1 F n) (H1 F n)).prod
-    (LinearMap.fst F (H1 F n) (H1 F n) + LinearMap.snd F (H1 F n) (H1 F n))
 
 /-- `(μ^{-1})^*` on `H¹(X × X)`: `(a, b) ↦ (a, b - a)`. -/
 noncomputable def mu1Inv : (H1 F n × H1 F n) →ₗ[F] (H1 F n × H1 F n) :=
@@ -134,10 +94,6 @@ noncomputable def mu1Inv : (H1 F n × H1 F n) →ₗ[F] (H1 F n × H1 F n) :=
 
 /-- `μ^* : H*(X × X) → H*(X × X)`, the ring homomorphism induced by `mu1`. -/
 noncomputable def muStarXX : SXX F n →ₐ[F] SXX F n := ExteriorAlgebra.map (mu1 F n)
-
-/-- `μ^*` on `H*(X × X) = S ⊗ S` (through `kunnethXX`). -/
-noncomputable def muStar : S F n ⊗[F] S F n →ₗ[F] S F n ⊗[F] S F n :=
-  (kunnethXX F n).symm.toLinearMap ∘ₗ (muStarXX F n).toLinearMap ∘ₗ (kunnethXX F n).toLinearMap
 
 /-- `(μ^*)^{-1} = (μ^{-1})^*` on `H*(X × X) = S ⊗ S`. -/
 noncomputable def muStarInv : S F n ⊗[F] S F n →ₗ[F] S F n ⊗[F] S F n :=
