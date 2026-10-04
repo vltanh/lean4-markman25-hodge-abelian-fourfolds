@@ -1,0 +1,69 @@
+# label	environment	proved	cited statements (from route_check.py extract)
+cor-kappa-class-is-Spin-V-P-invariant	corollary	1	corollary-Spin-V-P-invariant-classes-are-Hodge,prop-extension-class-of-decreasing-filtration-of-spin-V-representations
+main-theorem-introduction	theorem	0	
+thm-algebraicity	theorem	1	conjecture-semiregular-twisted-sheaves-deform,lemma-semiregularity-of-twisted-sheaf-B,lemma-the-discriminant-is-minus-1-to-the-n,main-theorem-introduction
+lemma-P-is-non-isotropic-iff-W-1-and-W-2-are-transversal	lemma	1	
+lemma-Spin-V-K-is-SL-n-K	lemma	1	
+lemma-centralizer-of-rho-Spin-V-P	lemma	1	
+lemma-decomposition-into-4-direct-summands	lemma	1	
+lemma-Spin-V-P-invariant-classes-are-Hodge	lemma	1	
+lemma-symmetric-or-alternating-product-of-two-pure-spinors-has-weight-2	lemma	1	
+lemma-g-P-in-terms-of-4-summands	lemma	1	
+prop-polarized-abelian-variety-of-Weil-type	proposition	1	lemma-g-P-in-terms-of-4-summands
+lemma-stabilizer-is-isomorphic-to-so-f	lemma	1	
+lemma-su-3-3	lemma	1	
+lemma-the-discriminant-is-minus-1-to-the-n	lemma	1	
+lemma-3-dimensional-eigenvalues	lemma	1	lemma-decomposition-into-4-direct-summands
+cor-plane-of-Hodge-Weil-classes	corollary	1	lemma-3-dimensional-eigenvalues
+cor-abelian-variety-of-weil-type	corollary	1	
+lemma-coadjoint-orbit-embedds-as-open-subset-of-Grassmannian	lemma	1	lemma-decomposition-into-4-direct-summands,prop-polarized-abelian-variety-of-Weil-type
+lemma-period-domain-is-an-adjoint-orbit	lemma	1	lemma-coadjoint-orbit-embedds-as-open-subset-of-Grassmannian,lemma-decomposition-into-4-direct-summands,lemma-su-3-3
+lemma-Hodge-Weil-classes-remain-of-Hodge-type-for-all-I-in-Omega-P	lemma	1	cor-plane-of-Hodge-Weil-classes
+corollary-Spin-V-P-invariant-classes-are-Hodge	corollary	1	lemma-Hodge-Weil-classes-remain-of-Hodge-type-for-all-I-in-Omega-P,lemma-Spin-V-P-invariant-classes-are-Hodge
+lemma-action-of-m-h-tensor-1	lemma	1	
+cor-Spin-V-Y-invariance	corollary	0	
+lemma-orlov-isomorphism-is-chevalley	lemma	1	lemma-nu-equal-tilde-varphi
+prop-extension-class-of-decreasing-filtration-of-spin-V-representations	proposition	1	example-conjecture-holds-for-abelian-surfaces
+eq-object-is-image-of-F-1-dual-times-F-2	lemma	1	
+ch-3-alpha-is-second-partial-of-J	lemma	1	
+example-conjecture-holds-for-abelian-surfaces	lemma	1	ch-3-alpha-is-second-partial-of-J
+lemma-Spin-V-ell-1-ell-2-invariance-conditions	lemma	1	lemma-Spin-V-P-invariant-classes-are-Hodge,prop-extension-class-of-decreasing-filtration-of-spin-V-representations
+lemma-nu-equal-tilde-varphi	lemma	1	
+lemma-phi-P-psi-P-inverse-is-PD-up-to-sign	lemma	1	lemma-nu-equal-tilde-varphi
+prop-the-orlov-image-of-HW-P-projects-into-the-3-dimensional-space-of-HW-classes	proposition	1	lemma-Spin-V-P-invariant-classes-are-Hodge,lemma-decomposition-into-4-direct-summands,lemma-orlov-isomorphism-is-chevalley,lemma-phi-P-psi-P-inverse-is-PD-up-to-sign,lemma-symmetric-or-alternating-product-of-two-pure-spinors-has-weight-2
+eq-atiya-class-of-twisted-B-versus-that-of-E	lemma	1	
+conjecture-semiregular-twisted-sheaves-deform	conjecture	0	
+lemma-deforming-semihomogeneous-vb	lemma	1	eq-atiya-class-of-twisted-B-versus-that-of-E
+lemma-orbit-of-pure-spinors	lemma	1	
+lemma-ch-F-i-is-on-secant-to-spinor-variety	lemma	1	
+lemma-ch-O-W-2	lemma	1	
+lemma-kappa-3-is-linearly-independent-from-h-cube	lemma	1	lemma-Spin-V-P-invariant-classes-are-Hodge,lemma-Spin-V-ell-1-ell-2-invariance-conditions,prop-the-orlov-image-of-HW-P-projects-into-the-3-dimensional-space-of-HW-classes
+lemma-dim-Ext-1-F-F-is-3n+3	lemma	1	
+lemma-rank-of-ob-F-is-at-least-6	lemma	1	
+lemma-criterion-for-semiregularity	lemma	1	
+lemma-Ext-algebra-generated-by-Ext-1-when-n=1	lemma	1	lemma-criterion-for-semiregularity,lemma-dim-Ext-1-F-F-is-3n+3,lemma-rank-of-ob-F-is-at-least-6
+lemma-Yoneda-algebra-is-generated-in-degree-1	lemma	1	lemma-Ext-algebra-generated-by-Ext-1-when-n=1
+prop-obstruction-map-has-rank-6	proposition	1	lemma-Yoneda-algebra-is-generated-in-degree-1,lemma-dim-Ext-1-F-F-is-3n+3,lemma-rank-of-ob-F-is-at-least-6
+lemma-invariance-under-derived-equivalence-of-equality-of-ker-ob-and-ker-ch	lemma	1	
+cor-kernel-of-obstruction-is-annihilator-of-ch	corollary	1	lemma-invariance-under-derived-equivalence-of-equality-of-ker-ob-and-ker-ch,prop-obstruction-map-has-rank-6
+lemma-kernel-of-ob-E-is-annihilator-of-ch_E	lemma	1	cor-kernel-of-obstruction-is-annihilator-of-ch,lemma-invariance-under-derived-equivalence-of-equality-of-ker-ob-and-ker-ch
+lemma-Orlov's-equivalence-maps-diagonal-deformations-to-commutative-gerby-ones	lemma	1	
+cor-Orlov's-equivalence-maps-diagonal-deformations-to-commutative-gerby-ones	corollary	1	lemma-Orlov's-equivalence-maps-diagonal-deformations-to-commutative-gerby-ones,lemma-kernel-of-ob-E-is-annihilator-of-ch_E
+eq-intersection-of-translates-of-theta-is-empty	lemma	1	lemma-global-sections-of-ideal-I-C-2Theta
+lemma-emptiness-condition-holds-when-the-curves-are-an-orbit	lemma	1	eq-intersection-of-translates-of-theta-is-empty
+prop-local-freeness	proposition	1	lemma-LB-s-t,lemma-intersection-of-C-and-Sigma-has-length-at-most-2,lemma-vanishing-of-tor-sheaves
+lemma-intersection-of-C-and-Sigma-has-length-at-most-2	lemma	1	lemma-intersection-is-either-empty-or-of-length-2
+lemma-intersection-is-either-empty-or-of-length-2	lemma	1	
+lemma-LB-s-t	lemma	1	lemma-intersection-is-either-empty-or-of-length-2
+lemma-global-sections-of-ideal-I-C-2Theta	lemma	1	
+lemma-G_1-and-G_2-can-be-chosen-to-satisfy-assumption-intersections-of-surfaces-are-generic	lemma	1	lemma-emptiness-condition-holds-when-the-curves-are-an-orbit
+lemma-image-of-ob-E-is-the-G-invariant-subspace	lemma	1	
+lemma-the-projection-of-G-to-bar-G-is-an-isomorphism	lemma	1	
+lemma-if-d-is-even-E-descends	lemma	1	
+lemma-E-descends-to-a-reflexive-twisted-sheaf-B-over-Y	lemma	1	
+lemma-action-of-tensorization-by-a-lb-on-HT	lemma	1	
+lemma-huge-diagram-is-commutative	lemma	1	lemma-action-of-tensorization-by-a-lb-on-HT,lemma-image-of-ob-E-is-the-G-invariant-subspace
+lemma-semiregularity-of-twisted-sheaf-B	lemma	1	lemma-image-of-ob-E-is-the-G-invariant-subspace,lemma-kernel-of-ob-E-is-annihilator-of-ch_E
+lemma-secant-to-spinor-variety	lemma	1	
+lemma-imaginary-quadratic-field-is-centralizer-sixfold-case	lemma	1	lemma-centralizer-of-rho-Spin-V-P,lemma-secant-to-spinor-variety
+lemma-vanishing-of-tor-sheaves	lemma	1	
