@@ -1,6 +1,7 @@
 module
 
 public import WeilClasses.Orlov.Defs
+public import WeilClasses.Orlov.Sec6_1
 
 /-!
 # §1.3: Orlov's equivalence and the representations `ρ`, `ρ'` (introduction)
@@ -41,8 +42,8 @@ landing in `H*(X × X̂)` with `φ_𝒫 : H*(X) → H*(X̂)` on its `X`-factor a
 gives `(-1)^d` times this map on `H^d(X × X̂)` — checked numerically for `n = 1, 2`; the sign is
 irrelevant for the equivariance claims below, `ρ'_g` preserving parity.) So this is
 `lemma6_1_1`. -/
-theorem proposition1_3_1_eq : phiOrlov F n = PiMap F n ∘ₗ varphiTilde F n ∘ₗ tauTensor F n := by
-  sorry
+theorem proposition1_3_1_eq : phiOrlov F n = PiMap F n ∘ₗ varphiTilde F n ∘ₗ tauTensor F n :=
+  lemma6_1_1 F n
 
 /-- **Proposition 1.3.1** (no label), second claim: `φ ∘ (id ⊗ τ)` is `Spin(V)`-equivariant, where
 the domain is the representation `m ⊗ m` and the codomain is `ρ'`
@@ -55,7 +56,13 @@ Correction of a misprint (REPORT.md): the paper prints the domain representation
 theorem proposition1_3_1_equivariant (g : Spin F n) (y : S F n ⊗[F] S F n) :
     phiPrime F n (TensorProduct.map (m F n (g : C F n)) (m F n (g : C F n)) y) =
       rhoPrimeFormula F n g (phiPrime F n y) := by
-  sorry
+  have h : rhoPrime F n g (phiPrime F n y) =
+      phiPrime F n (TensorProduct.map (m F n (g : C F n)) (m F n (g : C F n)) y) := by
+    rw [rhoPrime, LinearMap.comp_apply, LinearMap.comp_apply,
+      ← LinearMap.comp_apply (phiPrimeInv F n) (phiPrime F n), phiPrimeInv_comp_phiPrime,
+      LinearMap.id_apply]
+  rw [← h, proposition6_1_2, rhoPrimeFormula, LinearMap.comp_apply, AlgHom.toLinearMap_apply,
+    LinearMap.mulLeft_apply]
 
 /-- **Diagram (1.3.1)** (`eq-diagram-of-rho-and-rho-prime`), upper square: cup product with
 `exp(-½c₁(𝒫))` intertwines `ρ'_g` with `ρ_g` on `H*(X × X̂, ℚ)`; hence `ρ` and `ρ'` are isomorphic
@@ -63,7 +70,17 @@ after tensoring with `ℚ`. (The lower square is `proposition1_3_1_equivariant`.
 theorem diagram1_3_1_upper (g : Spin F n) (x : ExtV F n) :
     IsNilpotent.exp (-((2 : F)⁻¹ • c1P F n)) * rhoPrimeFormula F n g x =
       rhoExt F n g (IsNilpotent.exp (-((2 : F)⁻¹ • c1P F n)) * x) := by
-  sorry
+  have hc : IsNilpotent (-((2 : F)⁻¹ • c1P F n)) := (s61_isNilpotent_smul_c1P F n _).neg
+  have hβ : IsNilpotent ((2 : F)⁻¹ • (c1P F n - rhoExt F n g (c1P F n))) :=
+    s61_isNilpotent_of_mem_two F n (s61_beta_mem F n g)
+  have hcomm : Commute (-((2 : F)⁻¹ • c1P F n)) ((2 : F)⁻¹ • (c1P F n - rhoExt F n g (c1P F n))) :=
+    (((s61_commute_c1P F n _).smul_left _).neg_left)
+  rw [rhoPrimeFormula, LinearMap.comp_apply, AlgHom.toLinearMap_apply, LinearMap.mulLeft_apply,
+    ← mul_assoc, ← IsNilpotent.exp_add_of_commute hcomm hc hβ, map_mul,
+    IsNilpotent.map_exp hc (rhoExt F n g), map_neg, map_smul]
+  congr 2
+  rw [smul_sub]
+  abel
 
 /-- **(1.3.2)** (`eq-tilde-phi`): `φ̃ = exp(-c₁(𝒫)/2) ∪ φ ∘ (id ⊗ τ)` is `Spin(V)`-equivariant, where
 the domain is the representation `m ⊗ m` and the codomain is `ρ` (the outer square of Diagram
@@ -71,7 +88,8 @@ the domain is the representation `m ⊗ m` and the codomain is `ρ` (the outer s
 theorem equation1_3_2_equivariant (g : Spin F n) (y : S F n ⊗[F] S F n) :
     phiTildeIntro F n (TensorProduct.map (m F n (g : C F n)) (m F n (g : C F n)) y) =
       rhoExt F n g (phiTildeIntro F n y) := by
-  sorry
+  rw [phiTildeIntro, LinearMap.comp_apply, LinearMap.comp_apply, LinearMap.mulLeft_apply,
+    LinearMap.mulLeft_apply, proposition1_3_1_equivariant, diagram1_3_1_upper]
 
 end Field
 
