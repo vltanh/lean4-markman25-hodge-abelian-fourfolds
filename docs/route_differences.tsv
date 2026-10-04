@@ -1,0 +1,14 @@
+# Recorded differences between the routes of the paper's proofs (docs/paper_routes.tsv, extracted from the
+# TeX) and of the Lean proofs (.lake/route_deps.tsv, written by scripts/Audit.lean), checked by
+#   python3 scripts/route_check.py check docs/paper_routes.tsv --accept docs/route_differences.tsv
+# Format: LABEL<TAB>±OTHER<TAB>reason. `-X`: the paper's proof cites X and the Lean proof does not reach it;
+# `+X`: the Lean proof uses X and the paper's argument does not reach it. LABEL `*`: a result the paper uses
+# throughout without citing it at each use. Departures are also documented in the docstrings and in
+# REPORT.md (Section 7).
+*	+lemma-P-is-non-isotropic-iff-W-1-and-W-2-are-transversal	standing step of the paper (§2.2, TeX l. 846: "The vanishing W₁ ∩ W₂ = (0) holds, by Lemma 2.2.1"): every later use of V_K = W₁ ⊕ W₂ for a non-isotropic plane P (Assumption2_4_1.isCompl, KSecant.isCompl_of_not_isIsotropic) goes through Lemma 2.2.1
+thm-algebraicity	-conjecture-semiregular-twisted-sheaves-deform	assumed: §§7–9 (the deformation of the secant sheaves, Conjecture 7.3.9 for families of abelian varieties via [Buchweitz–Flenner]) are the named hypothesis SecantSheafDeformation, which the Lean proof uses where the paper uses them
+thm-algebraicity	-lemma-semiregularity-of-twisted-sheaf-B	assumed: the semiregularity of the twisted sheaf B (§9) is part of the named hypothesis SecantSheafDeformation
+lemma-3-dimensional-eigenvalues	-lemma-decomposition-into-4-direct-summands	the paper cites Lemma 2.2.6 (with Remark 2.2.5) only for the special case where I comes from a complex structure on X with P in the Hodge ring, then proves the general case without it (TeX l. 1640-1643); the Lean proof is the general argument
+lemma-period-domain-is-an-adjoint-orbit	-lemma-coadjoint-orbit-embedds-as-open-subset-of-Grassmannian	departure authorized by the project owner (reasons 2 and 3; docstring of lemma4_0_2): direct transitivity of SO₊(V_ℝ)_f ≅ SU(n,n) on Ω_P instead of comparing the dimension of an adjoint orbit with that of Ω_P (dimensions of real-analytic orbits and Lie groups are not available)
+lemma-period-domain-is-an-adjoint-orbit	-lemma-decomposition-into-4-direct-summands	same departure: the paper uses Lemma 2.2.6 to compute the dimension 2n² - 1 of the centralizer of I
+lemma-period-domain-is-an-adjoint-orbit	-lemma-su-3-3	same departure: the paper uses Lemma 3.1.2 for dim SO₊(V_ℝ)_f = (2n)² - 1

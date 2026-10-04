@@ -1006,6 +1006,30 @@ theorem theorem1_4_1_3 (hJ : IsComplexStructure J) (hΘ : IsAmple 3 J (ThetaStd 
   rw [chE, main_kappa_reverse, hsec]
   exact main_tau_mem_hodgeRingV hhodge
 
+/-- **Corollary 1.3.2** (`cor-kappa-class-is-Spin-V-P-invariant`) for the sheaf `E` of
+Theorem 1.4.1, as used in the paragraph before Theorem 1.5.1 (TeX 570: "`κ(E)` remains of Hodge type
+over the locus, where `(X × X̂, η, h)` deforms as an abelian variety of Weil-type, by
+Corollary 1.3.2"): `κ(E)` is a Hodge class for every complex structure `I` in the period domain
+`Ω_P` of `P = P_Θ`. -/
+theorem main_kappa_chE_hodge (hJ : IsComplexStructure J) (hΘ : IsAmple 3 J (ThetaStd ℚ 3))
+    (hd3 : 3 ≤ d) (I : Module.End ℝ (V ℝ 3))
+    (hI : I ∈ (PJac d hΘ (pos_of_three_le hd3)).OmegaP (PJac_isCompl d hΘ (pos_of_three_le hd3))) :
+    kappa ℚ 3 (chE d) ∈ hodgeRingV 3 I := by
+  have hd := pos_of_three_le hd3
+  have hP := PJac_assumption2_4_1 d hJ hΘ hd
+  -- `ch(Φ(F₂ ⊠ F₁)) = φ(w₁ ⊗ τ w₂)` with `w₁ = ch F₁`, `w₂ = τ ch F₁` in `P` (Lemma 8.2.1)
+  obtain ⟨-, hw, hτw⟩ := lemma8_2_1 d hΘ hd
+  have hsec : phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d) =
+      secantSqClass ℚ 3 (chF1 d) (tau ℚ 3 (chF1 d)) := by
+    rw [secantSqClass, tau_tau]
+  have hr : rankExt ℚ 3 (secantSqClass ℚ 3 (chF1 d) (tau ℚ 3 (chF1 d))) ≠ 0 := by
+    rw [← hsec]; exact lemma8_3_1_rank d hd
+  -- Corollary 1.3.2: `κ(Φ(F₂ ⊠ F₁))` remains of Hodge type on `Ω_P`
+  have hhodge := corollary1_3_2_hodge _ J hP (chF1 d) (tau ℚ 3 (chF1 d)) hw hτw hr I hI
+  -- `κ(E) = κ(τ ch Φ(F₂ ⊠ F₁)) = τ κ(Φ(F₂ ⊠ F₁))`
+  rw [chE, main_kappa_reverse, hsec]
+  exact main_tau_mem_hodgeRingV hhodge
+
 theorem main_kappa3E_eq_neg (d : ℚ) :
     kappa3E d = -kappaDeg ℚ 3 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d)) := by
   have h6 := main_projDeg_mem ℚ 3 6 (kappa ℚ 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d)))

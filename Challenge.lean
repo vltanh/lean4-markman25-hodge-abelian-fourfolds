@@ -76,8 +76,9 @@ in their signatures, the results that their proofs take from algebraic geometry:
   Th. 5.2(3)] polarized abelian varieties of Weil type with the same `K` and discriminant form one
   connected family up to isogeny;
 * `SecantSheafDeformation Z`: the paper's own sheaf-theoretic Sections 7–9 (semiregular twisted
-  sheaves, [Buchweitz–Flenner, Th. 5.1]), in cohomological form: `κ₃(E)` stays algebraic near
-  `X × X̂` in its period domain;
+  sheaves, [Buchweitz–Flenner, Th. 5.1]), in cohomological form: near `X × X̂` in its period
+  domain, `κ₃(E)` is algebraic wherever every `κ_k(E)` is of Hodge type (that they are of Hodge
+  type there is the paper's Corollary 1.3.2, which is proved, not assumed);
 * for Corollary 1.6.1 also `SchoenDegeneration Z` [Schoen, Prop. 10], `MoonenZarhinSimple`
   [Moonen–Zarhin 1995, Th. 2.11], `RamonMariProducts Z` [Ramón-Marí, Th. 4.11] and
   `MoonenZarhinLowDim` [Moonen–Zarhin 1999, Prop. 3.8, Th. 0.1(i)].
@@ -156,10 +157,13 @@ noncomputable def D : Module.Dual F (H1 F n) →ₗ[F] Module.End F (S F n) :=
   CliffordAlgebra.contractLeft (Q := (0 : QuadraticForm F (H1 F n)))
 
 /-- The principal polarization `Θ = e₁ ∧ e₂ + e₃ ∧ e₄ + ⋯ + e_{2n-1} ∧ e_{2n}` in symplectic
-coordinates. -/
+coordinates. (The index bounds are proved by terms: a tactic proof here would create a private
+auxiliary lemma named after the module, so the copies of this block in `Challenge.lean` and here
+would differ and Comparator would reject them.) -/
 noncomputable def ThetaStd : S F n :=
-  ∑ i : Fin n, ExteriorAlgebra.ι F (e F n ⟨2 * i, by omega⟩) *
-    ExteriorAlgebra.ι F (e F n ⟨2 * i + 1, by omega⟩)
+  ∑ i : Fin n, ExteriorAlgebra.ι F (e F n ⟨2 * i, Nat.mul_lt_mul_of_pos_left i.isLt Nat.two_pos⟩) *
+    ExteriorAlgebra.ι F (e F n ⟨2 * i + 1,
+      Nat.lt_of_lt_of_le (Nat.lt_succ_self _) (Nat.mul_le_mul_left 2 i.isLt)⟩)
 
 end Model
 
@@ -633,26 +637,31 @@ noncomputable def chE (d : ℚ) : ExtV ℚ 3 := tauExt ℚ 3 (phiOrlov ℚ 3 (ch
 noncomputable def kappaX (k : ℕ) (d : ℚ) : S ℚ (2 * 3) :=
   ExteriorAlgebra.map (coordV ℚ 3).toLinearMap (kappaDeg ℚ 3 k (chE d))
 
-/-- **The paper's Sections 7–9, in cohomological form.** For every integer `d ≥ 3` there is a
-principally polarized abelian threefold `X` (a complex structure `J` of `H¹(X, ℝ) = ℝ⁶` for which
-`Θ = ThetaStd` is ample; the paper takes the Jacobian of a generic non-hyperelliptic curve of genus
-`3`) such that, for the action `η` of `K` on `H¹(X × X̂, ℚ)` with `η(√-d) = f`, the class
-`κ₃(E) ∈ H⁶(X × X̂, ℚ)` is algebraic on every polarized abelian sixfold of Weil type near
-`X × X̂` in the connected component of its Weil-type period domain.
+/-- **The paper's Sections 7–9, in cohomological form: the secant sheaf deforms along the Hodge
+locus of `κ`.** For every integer `d ≥ 3` there is a principally polarized abelian threefold `X` (a
+complex structure `J` of `H¹(X, ℝ) = ℝ⁶` for which `Θ = ThetaStd` is ample; the paper takes the
+Jacobian of a generic non-hyperelliptic curve of genus `3`) such that, for the action `η` of `K` on
+`H¹(X × X̂, ℚ)` with `η(√-d) = f`: on every polarized abelian sixfold of Weil type near `X × X̂` in
+the connected component of its Weil-type period domain at which every graded summand `κ_k(E)` is
+of Hodge type, the class `κ₃(E) ∈ H⁶(X × X̂, ℚ)` is algebraic.
 
-In the paper this combines Lemma 8.2.1 (`ch F_i`), the Grothendieck–Riemann–Roch theorem for
-Orlov's kernel (`ch Φ(G) = φ(ch G)`), Theorem 1.4.1(2) (`E` reflexive of rank `8d`), §9.3 (a
-semiregular twisted sheaf `B` on `Y = (X × X̂)/Ḡ` with `q^*κ(B) = κ(E)`), Conjecture 7.3.9 for
-families of abelian varieties (§7.4, from [Buchweitz–Flenner, Th. 5.1]): `B` deforms where
-`κ(B)` stays of Hodge type, which contains the Weil-type deformations by Corollary 1.3.2; and the
-algebraicity of `κ(B_t)` and of its pullback along the isogeny `q`. -/
+In the paper (the paragraph before Theorem 1.5.1 and §9.3) this combines Lemma 8.2.1 (`ch F_i`),
+the Grothendieck–Riemann–Roch theorem for Orlov's kernel (`ch Φ(G) = φ(ch G)`), Theorem 1.4.1(2)
+(`E` reflexive of rank `8d`), §9.3 (a twisted sheaf `B` on `Y = (X × X̂)/Ḡ` with
+`q^*κ(B) = κ(E)`, semiregular by Lemma 9.3.11) and Conjecture 7.3.9 for families of abelian
+varieties (proved in §7.4, from [Buchweitz–Flenner, Th. 5.1]): `(Y, B)`, hence `(X × X̂, q^*B)`,
+deforms locally over the locus where `κ(B)` remains of Hodge type, and `κ` of the deformed sheaves
+is algebraic. That `κ(E)` remains of Hodge type over the Weil-type deformations of
+`(X × X̂, η, h)` is the paper's Corollary 1.3.2 (TeX 570); it is proved in the library
+(`corollary1_3_2_hodge`), and is not part of this hypothesis. -/
 class SecantSheafDeformation (Z : CycleClasses) : Prop where
   deform : ∀ d : ℕ, 3 ≤ d → ∃ J : Module.End ℝ (H1 ℝ 3), IsComplexStructure J ∧
     IsAmple 3 J (ThetaStd ℚ 3) ∧ ∀ η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 3)),
       η (Kd.sqrtNeg d) = fX 3 d →
       ∀ᶠ M in nhdsWithin (LinearMap.toMatrix' (JX 3 J))
           (connectedComponentIn (WeilDomainMat η (hX 3 d)) (LinearMap.toMatrix' (JX 3 J))),
-        kappaX 3 d ∈ Z.alg (2 * 3) (Matrix.toLin' M)
+        (∀ k, kappaX k d ∈ hodgeClassesX (2 * 3) (Matrix.toLin' M) k) →
+          kappaX 3 d ∈ Z.alg (2 * 3) (Matrix.toLin' M)
 
 end WeilClasses
 -- END SHARED DEFINITIONS

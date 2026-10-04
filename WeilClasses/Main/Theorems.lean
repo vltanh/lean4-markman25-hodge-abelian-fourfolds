@@ -527,6 +527,26 @@ theorem theorem1_4_1_3_model (d : ℕ) (hd : 3 ≤ d) (J : Module.End ℝ (H1 �
   rw [kappaX, map_mem_hodgeClassesX_iff 3 I hI.2.1]
   exact main_projDeg_mem_hodgeClassesV (theorem1_4_1_3 hJ hΘ hd3 I hI) k
 
+/-- Corollary 1.3.2 for the sheaf `E`, in the model (the step of the paragraph before
+Theorem 1.5.1, TeX 570): every graded summand of `κ(E)` is a Hodge class on every deformation of
+`(X × X̂, η, h)` as a polarized abelian sixfold of Weil type (the connected component of its
+Weil-type period domain). -/
+theorem main_kappaX_mem_hodge (d : ℕ) (hd : 3 ≤ d) (J : Module.End ℝ (H1 ℝ 3))
+    (hJ : IsComplexStructure J) (hΘ : IsAmple 3 J (ThetaStd ℚ 3))
+    (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 3))) (hη : η (Kd.sqrtNeg d) = fX 3 d)
+    (M : Matrix (Fin (2 * (2 * 3))) (Fin (2 * (2 * 3))) ℝ)
+    (hM : M ∈ connectedComponentIn (WeilDomainMat η (hX 3 d)) (LinearMap.toMatrix' (JX 3 J)))
+    (k : ℕ) : kappaX k d ∈ hodgeClassesX (2 * 3) (Matrix.toLin' M) k := by
+  have hd3 : (3 : ℚ) ≤ d := by exact_mod_cast hd
+  have hd0 : (0 : ℚ) < d := by linarith
+  -- the deformation `M` is `-I` (transported) for some `I ∈ Ω_P`
+  obtain ⟨J', hJ', rfl⟩ := connectedComponentIn_subset _ _ hM
+  rw [Matrix.toLin'_toMatrix']
+  rw [weilDomain_eq_image_OmegaP 3 d hd0 (by norm_num) η hη] at hJ'
+  obtain ⟨I, hI, rfl⟩ := hJ'
+  rw [kappaX, map_mem_hodgeClassesX_iff 3 I hI.2.1]
+  exact main_projDeg_mem_hodgeClassesV (main_kappa_chE_hodge hJ hΘ hd3 I hI) k
+
 /-- **Theorem 1.4.1 (4)** (`main-theorem-introduction`), in the model: the `η(K)`-translates of
 `κ₃(E)`, together with `h³`, span the `3`-dimensional subspace `ℚ h³ ⊕ ĤW` of `H⁶(X × X̂, ℚ)`. -/
 theorem theorem1_4_1_4_model (d : ℕ) (hd : 3 ≤ d) (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 3)))
@@ -604,10 +624,16 @@ theorem main_theorem1_5_1_of_three_le (Z : CycleClasses) [PullbackClosed Z] [Sub
   have hCW : ∀ J', LinearMap.toMatrix' J' ∈ C → J' ∈ WeilDomain η₀ (hX 3 d) := fun J' hJ' => by
     obtain ⟨J'', hJ'', hJ''eq⟩ := connectedComponentIn_subset _ _ hJ'
     rwa [LinearMap.toMatrix'.injective hJ''eq] at hJ''
-  -- (1) `κ₃(E) = q^*κ₃(B)` is algebraic on a nonempty open subset `u ∩ C` of `C`: the
-  -- semiregularity of `B` (`lemma-semiregularity-of-twisted-sheaf-B`) and Conjecture 7.3.9,
-  -- verified for families of abelian varieties (`SecantSheafDeformation`).
-  obtain ⟨u, hu_open, hu_mem, hu_sub⟩ := mem_nhdsWithin.mp (hdef η₀ hη₀)
+  -- (1) `κ₃(E) = q^*κ₃(B)` is algebraic on a nonempty open subset `u ∩ C` of `C`: by the
+  -- semiregularity of `B` (Lemma 9.3.11) and Conjecture 7.3.9, verified for families of abelian
+  -- varieties (`SecantSheafDeformation`), `(X × X̂, q^*B)` deforms locally over the locus where
+  -- `κ(E) = q^*κ(B)` remains of Hodge type, and `κ(E)` remains of Hodge type over the Weil-type
+  -- deformations of `(X × X̂, η, h)` by Corollary 1.3.2 (the paragraph before Theorem 1.5.1).
+  have hdef' : ∀ᶠ M in nhdsWithin (LinearMap.toMatrix' (JX 3 J)) C,
+      kappaX 3 d ∈ Z.alg (2 * 3) (Matrix.toLin' M) := by
+    filter_upwards [hdef η₀ hη₀, self_mem_nhdsWithin] with M hM hMC
+    exact hM fun k => main_kappaX_mem_hodge d hd J hJ hΘ η₀ hη₀ M hMC k
+  obtain ⟨u, hu_open, hu_mem, hu_sub⟩ := mem_nhdsWithin.mp hdef'
   -- (2) Hence the Hodge–Weil classes are algebraic at every point of `u ∩ C`: the `η(K)`-translates
   -- of `κ₃(E)` are algebraic (`η(K)` acts by algebraic correspondences), so is `h³` (Lefschetz
   -- (1,1) and products), and they span `ℚh³ ⊕ ĤW` (Theorem 1.4.1(4)).
