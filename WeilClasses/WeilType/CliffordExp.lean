@@ -36,20 +36,113 @@ extension. -/
 noncomputable def contractOne (ξ : S F n) : Module.Dual F (H1 F n) →ₗ[F] H1 F n :=
   (LinearMap.pi fun i => (basisS F n).coord {i}) ∘ₗ (D F n).flip ξ
 
+omit [CharZero F] in
+/-- The basis vector `e_{{j}}` of `H*(X, F)` is `e_j ∈ H¹(X, F)`. -/
+theorem s24a_basisS_singleton (j : Fin (2 * n)) :
+    basisS F n {j} = ExteriorAlgebra.ι F (Pi.single j 1) := by
+  rw [basisS, ExteriorAlgebra.basis_apply_ofCard _ (Finset.card_singleton j)]
+  simp only [ExteriorAlgebra.ιMulti_family]
+  have h : (Set.powersetCard.ofFinEmbEquiv.symm
+      (Set.powersetCard.ofCard (Finset.card_singleton j))) 0 = j := by
+    have hm := (Set.powersetCard.mem_range_ofFinEmbEquiv_symm_iff_mem
+      (Set.powersetCard.ofCard (Finset.card_singleton j)) ((Set.powersetCard.ofFinEmbEquiv.symm
+      (Set.powersetCard.ofCard (Finset.card_singleton j))) 0)).mp ⟨0, rfl⟩
+    rw [← Set.powersetCard.mem_coe_iff, Set.powersetCard.val_ofCard] at hm
+    simpa using hm
+  simp [h]
+
+omit [CharZero F] in
+/-- The coefficient of `e_{{i}}` in `w ∈ H¹(X, F) ⊆ H*(X, F)` is the coordinate `w_i`. -/
+theorem s24a_coord_singleton_ι (w : H1 F n) (i : Fin (2 * n)) :
+    (basisS F n).repr (ExteriorAlgebra.ι F w) {i} = w i := by
+  have hw : ExteriorAlgebra.ι F w = ∑ j, w j • basisS F n {j} := by
+    conv_lhs => rw [show w = ∑ j, w j • (Pi.single j 1 : H1 F n) by
+      ext k; simp [Pi.single_apply]]
+    simp [map_sum, s24a_basisS_singleton]
+  rw [hw, map_sum, Finsupp.finsetSum_apply]
+  simp only [map_smul, Module.Basis.repr_self, Finsupp.smul_apply, smul_eq_mul]
+  rw [Finset.sum_eq_single i]
+  · simp
+  · intro j _ hj
+    simp [Finset.singleton_inj, hj]
+  · simp
+
+omit [CharZero F] in
+/-- `D_y` maps `H²(X, F)` into `H¹(X, F)`: `D_y (a ∧ b) = y(a) b - y(b) a`. -/
+theorem s24a_D_mem_range_ι (ξ : S F n) (hξ : ξ ∈ ⋀[F]^2 (H1 F n))
+    (y : Module.Dual F (H1 F n)) : D F n y ξ ∈ LinearMap.range (ExteriorAlgebra.ι F) := by
+  rw [← ExteriorAlgebra.ιMulti_span_fixedDegree] at hξ
+  induction hξ using Submodule.span_induction with
+  | mem x hx =>
+      obtain ⟨v, rfl⟩ := hx
+      refine ⟨y (v 0) • v 1 - y (v 1) • v 0, ?_⟩
+      rw [ExteriorAlgebra.ιMulti_apply]
+      simp only [List.ofFn_succ, List.ofFn_zero, List.prod_cons, List.prod_nil, mul_one,
+        Fin.succ_zero_eq_one, D]
+      rw [CliffordAlgebra.contractLeft_ι_mul, CliffordAlgebra.contractLeft_ι, ← Algebra.commutes,
+        ← Algebra.smul_def, map_sub, map_smul, map_smul]
+  | zero => simp
+  | add x z _ _ hx hz => rw [map_add]; exact add_mem hx hz
+  | smul a x _ hx => rw [map_smul]; exact Submodule.smul_mem _ a hx
+
+-- The statement keeps the section's `[CharZero F]` (unused by the proof).
+set_option linter.unusedSectionVars false in
 /-- For `ξ ∈ H²(X, F)`, `D_y ξ` is the vector `contractOne ξ y` of degree one. -/
 theorem ι_contractOne (ξ : S F n) (hξ : ξ ∈ ⋀[F]^2 (H1 F n)) (y : Module.Dual F (H1 F n)) :
     ExteriorAlgebra.ι F (contractOne F n ξ y) = D F n y ξ := by
-  sorry
+  obtain ⟨w, hw⟩ := s24a_D_mem_range_ι F n ξ hξ y
+  rw [← hw]
+  congr 1
+  funext i
+  simp [contractOne, ← hw, s24a_coord_singleton_ι]
+
+omit [CharZero F] in
+/-- `j(w) = ι(0, w)` for `w ∈ H¹(X, F)`. -/
+theorem s24a_iotaX_ι (w : H1 F n) :
+    iotaX F n (ExteriorAlgebra.ι F w) = CliffordAlgebra.ι (Q F n) ((0, w) : V F n) :=
+  ExteriorAlgebra.lift_ι_apply F _ _ w
 
 /-- The spin representation of `j(s)` is cup product with `s`: `m(j(s)) = s ∪ (·)`. -/
 theorem m_jH (s : S F n) : m F n (iotaX F n s) = LinearMap.mulLeft F s := by
-  sorry
+  -- Both sides are algebra homomorphisms `S → End(S)` in `s`; they agree on `H¹(X)`, where
+  -- `m_{(0, w)} = L_w + D_0 = L_w`.
+  have h : (m F n).comp (iotaX F n) = Algebra.lmul F (S F n) := by
+    refine ExteriorAlgebra.hom_ext (LinearMap.ext fun w => LinearMap.ext fun x => ?_)
+    simp only [LinearMap.coe_comp, Function.comp_apply, AlgHom.toLinearMap_apply,
+      AlgHom.comp_apply, s24a_iotaX_ι]
+    rw [m, CliffordAlgebra.lift_ι_apply]
+    simp [cliffordOp, L, D]
+  have hs := congrArg (fun φ : S F n →ₐ[F] Module.End F (S F n) => φ s) h
+  simp only [AlgHom.comp_apply] at hs
+  rw [hs]
+  ext x
+  simp
+
+omit [CharZero F] in
+/-- A class `u ∈ H²(X, F)` is nilpotent: `u^{n+1} ∈ H^{2n+2}(X, F) = 0`. -/
+theorem s24a_isNilpotent_of_mem_two (u : S F n) (hu : u ∈ ⋀[F]^2 (H1 F n)) : IsNilpotent u := by
+  refine ⟨n + 1, ?_⟩
+  have h1 : u ^ (n + 1) ∈ ⋀[F]^(2 * (n + 1)) (H1 F n) := by
+    rw [ExteriorAlgebra.exteriorPower, pow_mul]
+    exact Submodule.pow_mem_pow _ hu _
+  have hsub : Subsingleton (⋀[F]^(2 * (n + 1)) (H1 F n)) :=
+    exteriorPower.subsingleton_of_span_eq_top_of_card_lt (Pi.basisFun F (Fin (2 * n)))
+      (Pi.basisFun F (Fin (2 * n))).span_eq _ (by simp)
+  have := hsub.elim ⟨_, h1⟩ 0
+  simpa using congrArg Subtype.val this
 
 /-- For `u ∈ H²(X, F)`, the spin representation of `exp(j(u))` is cup product with `exp(u)`
 (§2.4, before (2.4.4): "cup product with `exp(u)` … corresponding to the spin representation image of
 an element `exp(u)`"). -/
 theorem m_exp_jH (u : S F n) (hu : u ∈ ⋀[F]^2 (H1 F n)) :
     m F n (IsNilpotent.exp (iotaX F n u)) = LinearMap.mulLeft F (IsNilpotent.exp u) := by
-  sorry
+  have hnil : IsNilpotent u := s24a_isNilpotent_of_mem_two F n u hu
+  have hl : LinearMap.mulLeft F (IsNilpotent.exp u) =
+      Algebra.lmul F (S F n) (IsNilpotent.exp u) := by
+    ext x
+    simp
+  rw [IsNilpotent.map_exp (hnil.map (iotaX F n)) (m F n), m_jH, hl,
+    IsNilpotent.map_exp hnil (Algebra.lmul F (S F n))]
+  congr 1
 
 end WeilClasses
