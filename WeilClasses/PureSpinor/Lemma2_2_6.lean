@@ -6,8 +6,8 @@ public import WeilClasses.Hodge.Defs
 public import WeilClasses.PureSpinor.Lemma2_2_4
 import TauCeti.LinearAlgebra.ExteriorAlgebra.Contraction
 import TauCeti.LinearAlgebra.CliffordAlgebra.VolumeElement
-import WeilClasses.External.Chevalley.Sec3
 import WeilClasses.External.Chevalley.Sec2_1
+import WeilClasses.External.Chevalley.Sec2_2
 
 /-!
 # Remark 2.2.5, Chevalley's isomorphism `φ` (2.2.5), and Lemma 2.2.6 (paper §2.2)
@@ -24,8 +24,10 @@ ring of `X` is `hodgeRingX n J`.
 * `iotaX`, `iotaXHat`: the embeddings of `S_X = ⋀• H¹(X)` and `S_X̂ = ⋀• H¹(X̂)` in `C(V)` as
   subalgebras (`H¹(X)` and `H¹(X̂)` are isotropic); `ptHatC = [pt_X̂] = f₁ ⋯ f_{2n} ∈ C(V)`.
 * `varphi`: Chevalley's `φ : S ⊗ S → C(V)`, `φ(u ⊗ v) = u [pt_X̂] τ(v)` (2.2.5).
-* `cliffordTopPiece F n W`: `⋀^{2n} W` regarded as a subspace of `C(V)` (products of `2n` vectors
-  of `W`).
+
+`⋀^{2n} W` regarded as a subspace of `C(V)` (products of `2n` vectors of `W`) is
+`cliffordTopPiece F n W`, defined in `WeilClasses.PureSpinor.Groups` (the statement of
+[Chevalley, III.3.2] uses it).
 
 ## Statements
 
@@ -43,7 +45,9 @@ ring of `X` is `hodgeRingX n J`.
 The Hodge structure on `C(V)` induced by `m : C(V) ≅ End(S)`, used in the paper's proof, is not
 formalized as such; in the model it is the action of the circle `exp(t I)` on `V` and of its lift
 `exp(-t D_J)` on `S` (`D_J` the derivation of `⋀• H¹(X)` extending `J`; `I = I_{V_ℝ}` acts on the
-summand `H¹(X)` by `-J`).
+summand `H¹(X)` by `-J`). The proof of Lemma 2.2.6 uses one element `g` of the complexified circle
+(`s22b_exists_torus`); "`φ` is a morphism of Hodge structures" is then the equivariance of `φ` under
+`g` ([Chevalley, III.3.1], `chevalley_III_3_1_equivariant`).
 -/
 
 @[expose] public section
@@ -1254,6 +1258,81 @@ theorem s22b_det_of_isCompl {K M : Type*} [Field K] [AddCommGroup M] [Module K M
 
 end S22bDet
 
+section S22bTopPiece
+
+variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
+
+/-- The products `w₁ ⋯ w_k ∈ C(V_F)` of `k` vectors of an isotropic subspace `W ⊆ V_F`, as an
+alternating map `W^k → C(V_F)` (`ι(w)² = Q(w) = 0` for `w ∈ W`). -/
+noncomputable def s22b_topMap {W : Submodule F (V F n)} (hW : ∀ v ∈ W, Q F n v = 0) (k : ℕ) :
+    W [⋀^Fin k]→ₗ[F] C F n :=
+  (ExteriorAlgebra.lift F ⟨ι (Q F n) ∘ₗ W.subtype, fun w => by
+      rw [LinearMap.comp_apply, ι_sq_scalar, Submodule.subtype_apply, hW _ w.2,
+        map_zero]⟩).toLinearMap.compAlternatingMap (ExteriorAlgebra.ιMulti F k)
+
+omit [CharZero F] in
+theorem s22b_topMap_apply {W : Submodule F (V F n)} (hW : ∀ v ∈ W, Q F n v = 0) (k : ℕ)
+    (w : Fin k → W) :
+    s22b_topMap hW k w = (List.ofFn fun i => ι (Q F n) (w i : V F n)).prod := by
+  rw [s22b_topMap, LinearMap.compAlternatingMap_apply, AlgHom.toLinearMap_apply,
+    ExteriorAlgebra.ιMulti_apply, map_list_prod, List.map_ofFn]
+  congr 2
+  funext i
+  simp [ExteriorAlgebra.lift_ι_apply]
+
+omit [CharZero F] in
+/-- Top products transform by the determinant: `T w₁ ⋯ T w_k = det(T) w₁ ⋯ w_k` for `k = dim W`
+(an alternating `k`-form on `W` is a multiple of the basis determinant). -/
+theorem s22b_topMap_comp {W : Submodule F (V F n)} (hW : ∀ v ∈ W, Q F n v = 0) {k : ℕ}
+    (hk : Module.finrank F W = k) (T : W →ₗ[F] W) (x : Fin k → W) :
+    s22b_topMap hW k (T ∘ x) = LinearMap.det T • s22b_topMap hW k x := by
+  set b := Module.finBasisOfFinrankEq F W hk
+  rw [← sub_eq_zero, ← Module.forall_dual_apply_eq_zero_iff F]
+  intro φ
+  have h := AlternatingMap.eq_smul_basis_det b (φ.compAlternatingMap (s22b_topMap hW k))
+  have h1 := congrArg (fun A => A (T ∘ x)) h
+  have h2 := congrArg (fun A => A x) h
+  simp only [LinearMap.compAlternatingMap_apply, AlternatingMap.smul_apply, smul_eq_mul] at h1 h2
+  rw [map_sub, map_smul, h1, h2, Module.Basis.det_comp, smul_eq_mul]
+  ring
+
+/-- Conjugation by `g ∈ Spin(V_F)` maps a product of vectors to the product of their images:
+`g v₁ ⋯ v_k g* = ρ(g)v₁ ⋯ ρ(g)v_k` (as `g* g = 1`). -/
+theorem s22b_conj_prod (g : Spin F n) (l : List (V F n)) :
+    (g : C F n) * (l.map (ι (Q F n))).prod * star (g : C F n) =
+      (l.map fun v => ι (Q F n) (rho F n g v)).prod := by
+  induction l with
+  | nil => simp [spinGroup.mul_star_self_of_mem g.2]
+  | cons a l ih =>
+    rw [List.map_cons, List.prod_cons, List.map_cons, List.prod_cons, ← ih, ι_rho]
+    simp only [mul_assoc]
+    rw [← mul_assoc (star (g : C F n)) (g : C F n), spinGroup.star_mul_self_of_mem g.2, one_mul]
+
+/-- **The `Spin(V_F)`-character of `⋀^{2n} W ⊆ C(V_F)`**: for an isotropic `W ⊆ V_F` of dimension
+`2n` and `g ∈ Spin(V_F)` with `ρ(g)(W) ⊆ W`, conjugation by `g` multiplies `⋀^{2n} W`
+(`cliffordTopPiece`) by `det(ρ(g)|_W)`: `g w₁ ⋯ w_{2n} g* = ρ(g)w₁ ⋯ ρ(g)w_{2n}`, and
+`(w₁, …, w_{2n}) ↦ w₁ ⋯ w_{2n}` is alternating on `W`. -/
+theorem s22b_conj_cliffordTopPiece {W : Submodule F (V F n)} (hW : ∀ v ∈ W, Q F n v = 0)
+    (hdim : Module.finrank F W = 2 * n) (g : Spin F n) (hg : ∀ v ∈ W, rho F n g v ∈ W)
+    {x : C F n} (hx : x ∈ cliffordTopPiece F n W) :
+    (g : C F n) * x * star (g : C F n) =
+      LinearMap.det ((rho F n g : V F n →ₗ[F] V F n).restrict hg) • x := by
+  set T := (rho F n g : V F n →ₗ[F] V F n).restrict hg
+  induction hx using Submodule.span_induction with
+  | mem y hy =>
+    obtain ⟨w, hw, rfl⟩ := hy
+    set z : Fin (2 * n) → W := fun i => ⟨w i, hw i⟩
+    have h1 := s22b_topMap_comp hW hdim T z
+    rw [s22b_topMap_apply, s22b_topMap_apply] at h1
+    have h2 := s22b_conj_prod g (List.ofFn w)
+    rw [List.map_ofFn, List.map_ofFn] at h2
+    exact h2.trans h1
+  | zero => rw [mul_zero, zero_mul, smul_zero]
+  | add x y _ _ hx hy => rw [mul_add, add_mul, hx, hy, smul_add]
+  | smul c x _ hx => rw [mul_smul_comm, smul_mul_assoc, hx, smul_comm]
+
+end S22bTopPiece
+
 section S22bBaseChange
 
 variable {n : ℕ} {F F' : Type*} [Field F] [CharZero F] [Field F'] [CharZero F'] [Algebra F F']
@@ -2107,13 +2186,6 @@ section Varphi
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
-/-- The top exterior power `⋀^{2n} W` of a subspace `W ⊆ V_F`, "considered as a one-dimensional
-subspace of `C(V)`" (proof of Lemma 2.2.6): the span of the products `w₁ ⋯ w_{2n}` in `C(V_F)` of
-`2n` vectors of `W`. For `W` isotropic of dimension `2n` it is a line. -/
-noncomputable def cliffordTopPiece (W : Submodule F (V F n)) : Submodule F (C F n) :=
-  Submodule.span F
-    {x | ∃ w : Fin (2 * n) → V F n, (∀ i, w i ∈ W) ∧ x = (List.ofFn fun i => ι (Q F n) (w i)).prod}
-
 omit [CharZero F] in
 theorem varphi_tmul (u v : S F n) :
     varphi F n (u ⊗ₜ v) = iotaX F n u * ptHatC F n * iotaX F n (tau F n v) := by
@@ -2284,13 +2356,31 @@ theorem s22b_core (hJ : IsComplexStructure J) (hPJ : P.Pℚ ≤ hodgeRingX n J)
       obtain ⟨a, ha, b, hb, rfl⟩ := hdecomp v hv
       exact Submodule.add_mem_sup ha hb) (sup_le inf_le_left inf_le_left)
   refine ⟨hD, ?_⟩
-  -- Chevalley's `c² = det`
-  obtain ⟨c, hc, hc2⟩ := chevalley_III_3_2_III_4_5 ℂ n uC huC g hstab
+  -- `⋀^{2n} W ⊆ C(V_ℂ)` is the trivial character: `φ` is an isomorphism [Chevalley, III.3.1] of
+  -- Hodge structures (equivariant for `g`), mapping the trivial character `ℓ̃ ⊗ ℓ̃` onto
+  -- `⋀^{2n} W` [Chevalley, III.3.2].
   have huC0 : uC ≠ 0 := huC.ne_zero hn
-  have hc1 : c = 1 := by
-    rw [hfix] at hc
-    have : (1 - c) • uC = 0 := by rw [sub_smul, one_smul, ← hc, sub_self]
-    exact (sub_eq_zero.mp ((smul_eq_zero.mp this).resolve_right huC0)).symm
+  have htmul : uC ⊗ₜ[ℂ] uC ≠ 0 := by
+    have : Module.Free ℂ (S ℂ n) := Module.Free.of_basis (basisS ℂ n)
+    obtain ⟨ψ, hψ⟩ := Module.Projective.exists_dual_eq_one ℂ huC0
+    intro h
+    have h' := congrArg ((TensorProduct.lid ℂ ℂ).toLinearMap ∘ₗ TensorProduct.map ψ ψ) h
+    simp [hψ] at h'
+  have hφ0 : varphi ℂ n (uC ⊗ₜ uC) ≠ 0 := fun h =>
+    htmul ((chevalley_III_3_1_bijective ℂ n).1 (h.trans (map_zero _).symm))
+  have hφfix : (g : C ℂ n) * varphi ℂ n (uC ⊗ₜ uC) * star (g : C ℂ n) =
+      varphi ℂ n (uC ⊗ₜ uC) := by
+    rw [← chevalley_III_3_1_equivariant ℂ n g uC uC, hfix]
+  have hφmem : varphi ℂ n (uC ⊗ₜ uC) ∈ cliffordTopPiece ℂ n W := by
+    rw [← (chevalley_III_3_2 ℂ n uC huC huC0).2]
+    exact Submodule.mem_span_singleton_self _
+  have hdet1 : LinearMap.det ((rho ℂ n g : V ℂ n →ₗ[ℂ] V ℂ n).restrict hstab) = 1 := by
+    have h := s22b_conj_cliffordTopPiece huC.2.1 huC.2.2 g hstab hφmem
+    rw [hφfix] at h
+    have h' : (1 - LinearMap.det ((rho ℂ n g : V ℂ n →ₗ[ℂ] V ℂ n).restrict hstab)) •
+        varphi ℂ n (uC ⊗ₜ uC) = 0 := by
+      rw [sub_smul, one_smul, ← h, sub_self]
+    exact (sub_eq_zero.mp ((smul_eq_zero.mp h').resolve_right hφ0)).symm
   set A' := A.comap W.subtype
   set B' := B.comap W.subtype
   have hAB' : IsCompl A' B' := by
@@ -2310,7 +2400,7 @@ theorem s22b_core (hJ : IsComplexStructure J) (hPJ : P.Pℚ ≤ hodgeRingX n J)
     (fun x hx => Subtype.ext (by
       rw [LinearMap.restrict_apply]
       exact hg01 _ hx))
-  rw [← hc2, hc1, one_pow] at hdet
+  rw [hdet1] at hdet
   have hfinA : Module.finrank ℂ A' = Module.finrank ℂ (W ⊓ A : Submodule ℂ (V ℂ n)) := by
     have : A' = (W ⊓ A).comap W.subtype := by
       rw [Submodule.comap_inf, Submodule.comap_subtype_self, top_inf_eq]
@@ -2511,15 +2601,16 @@ ring of `X`, then `W₁^{1,0} := W_{1,ℂ} ∩ V^{1,0}` and `W₂^{1,0} := W_{2,
 `n`-dimensional. Here `V^{1,0}` is the `i`-eigenspace of the complex structure of `X × X̂`. Standing
 hypotheses: `P` non-isotropic (not used by the proof), `K` imaginary quadratic.
 
-Departure from the paper (in the proof only): the paper gets `dim W_i^{1,0} = dim W_i^{0,1}` from
-Chevalley's `φ` being an isomorphism of Hodge structures with `φ(ℓ̃_i ⊗ ℓ̃_i) = ⋀^{2n} W_i`
-([Chevalley, III.3.1, III.3.2]). Those statements (`WeilClasses.External.Chevalley.Sec2_2`) import
-this file, so they cannot be cited here. We use the same fact in the form [Chevalley, III.3.2,
-III.4.5] (`chevalley_III_3_2_III_4_5`: if `ρ(g)` preserves `W = ker m_u` then `g u = c u` with
-`c² = det(ρ(g)|_W)`). It is applied to the spin lift `g` of `⋀T`, where `T` acts by `2` on `H^{1,0}`
-and by `1/2` on `H^{0,1}`. This `g` is an element of the complexified circle of the Hodge structure
-(`KSecant.s22b_core`). It fixes the classes of type `(p, p)`, so it fixes `u_i ∈ P_K`. Hence
-`c = 1`, and `det(ρ(g)|_{W_i}) = 2^{dim W_i^{0,1} - dim W_i^{1,0}} = 1`. -/
+Proof (the paper's, `KSecant.s22b_core`): the circle action of the Hodge structure is used through
+one element `g ∈ Spin(V_ℂ)` of the complexified circle, the spin lift of `⋀T` with `T = 2` on
+`H^{1,0}` and `1/2` on `H^{0,1}` (`s22b_exists_torus`; `ρ(g)` acts by `1/2` on `V^{1,0}` and by `2`
+on `V^{0,1}`). As `λᵢ ∈ P_K` lies in the Hodge ring, `g` fixes `λᵢ` (`ℓ̃ᵢ ⊗ ℓ̃ᵢ` is the trivial
+character), so `ρ(g)` preserves `W_{i,ℂ} = ker m_{λᵢ}` and `W_{i,ℂ} = W_i^{1,0} ⊕ W_i^{0,1}`.
+Chevalley's `φ` is an isomorphism [Chevalley, III.3.1] (`chevalley_III_3_1_bijective`) of Hodge
+structures (`chevalley_III_3_1_equivariant`: `φ(g u ⊗ g u) = g φ(u ⊗ u) g*`) mapping `ℓ̃ᵢ ⊗ ℓ̃ᵢ`
+onto `⋀^{2n} W_{i,ℂ} ⊆ C(V_ℂ)` [Chevalley, III.3.2] (`chevalley_III_3_2`). So the character
+`⋀^{2n} W_{i,ℂ}` is trivial: `det(ρ(g)|_{W_{i,ℂ}}) = 2^{dim W_i^{0,1} - dim W_i^{1,0}} = 1`
+(`s22b_conj_cliffordTopPiece`). -/
 theorem _root_.WeilClasses.lemma2_2_6 (hd : 0 < d) (hP : ¬ P.IsIsotropic)
     (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hPJ : P.Pℚ ≤ hodgeRingX n J) :
     Module.finrank ℂ (P.W₁ℂ ⊓ V10 n (productStructure n J) : Submodule ℂ (V ℂ n)) = n ∧

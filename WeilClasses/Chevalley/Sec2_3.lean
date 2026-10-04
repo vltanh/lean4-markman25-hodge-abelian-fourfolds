@@ -4,6 +4,7 @@ public import WeilClasses.Chevalley.Defs
 public import WeilClasses.Correspondence.FourierMukai
 public import WeilClasses.Spinor.Integral
 public import WeilClasses.External.Chevalley.Sec2_2
+public import WeilClasses.PureSpinor.Lemma2_2_6
 public import WeilClasses.External.Chevalley.Sec2_3
 public import WeilClasses.External.Trautman.Sec2_3
 import WeilClasses.Orlov.Basis

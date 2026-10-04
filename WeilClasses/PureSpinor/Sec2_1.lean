@@ -1,7 +1,9 @@
 module
 
 public import WeilClasses.Spinor.Integral
+public import WeilClasses.PureSpinor.Groups
 public import WeilClasses.External.GolyshevLuntsOrlov.Sec2_1
+import WeilClasses.External.Chevalley.Sec2_1
 import TauCeti.LinearAlgebra.CliffordAlgebra.Basic
 import TauCeti.LinearAlgebra.CliffordAlgebra.Lipschitz.CliffordGroup
 import TauCeti.LinearAlgebra.CliffordAlgebra.Contraction
@@ -29,10 +31,11 @@ The objects `C(V_F)`, `m`, `τ`, `S^±`, the Mukai pairing, `Spin(V_F)` (Mathlib
 
 * `WeilClasses.mEquiv`: the isomorphism (2.1.3) `m : C(V_F) ≅ End(S_F)` over a field
   ([GLO, Prop. 3.2.1(e)], `WeilClasses.glo_prop3_2_1_e_field`).
-* `WeilClasses.cliffordGroup F n`: the Clifford group `G(V_F) = {x ∈ C(V_F)ˣ : x V x⁻¹ ⊆ V}`
-  (untwisted, as in the paper).
-* `WeilClasses.cliffordGroupZ n`: the integral Clifford group `G(V) = {x ∈ C(V)ˣ : x V x⁻¹ ⊆ V}`,
-  inside `C(V_ℚ)ˣ`.
+
+The Clifford group `G(V_F) = {x ∈ C(V_F)ˣ : x V x⁻¹ ⊆ V}` (`WeilClasses.cliffordGroup F n`,
+untwisted, as in the paper) and the integral Clifford group `G(V)` (`WeilClasses.cliffordGroupZ n`,
+inside `C(V_ℚ)ˣ`) are defined in `WeilClasses.PureSpinor.Groups`, upstream of the statements of the
+cited results of [Chevalley] (`WeilClasses.External.Chevalley.Sec2_1`), which use `G(V_F)`.
 
 ## Statements (claims of §2.1)
 
@@ -77,9 +80,9 @@ relation, the parity of `L_w` and `D_θ`). The facts used without proof in §2.1
 * the generation of `Spin(V)` by the `v₁ v₂`, by the Euclidean algorithm on the hyperbolic lattice
   `V = U^{⊕ 2n}` with Eichler transformations (section `Generation` below).
 
-The isometry property of `m_v` for `(v, v)_V = 2` is derived from the self-adjointness of `m_v`
-(`s21_mukai_m_ι`) instead of [Chevalley, III.2.1]: the module stating the cited results imports this
-one (see `mukai_m_ι_m_ι_of_pairing_eq_two`).
+As in the paper, the isometry property of `m_v` for `(v, v)_V = 2` is [Chevalley, III.2.1]
+(`chevalley_III_2_1`) applied to `g = v ∈ G(V)` with `N(v) = 1`
+(`mukai_m_ι_m_ι_of_pairing_eq_two`).
 -/
 
 @[expose] public section
@@ -217,84 +220,6 @@ theorem s21_m_mem_evenOdd_of_odd (x : C F n) (hx : x ∈ evenOdd (Q F n) 1) (i :
       rw [add_assoc (i + 1), show (1 + 1 : ZMod 2) = 0 from rfl, add_zero]
     rwa [e] at h3
 
-omit [CharZero F] in
-/-- `∫_X D_θ z = 0`: a contraction has no top-degree component. -/
-theorem s21_integral_D (θ : Module.Dual F (H1 F n)) (z : S F n) :
-    integral F n (D F n θ z) = 0 := by
-  have hθ : θ = ∑ i, θ (e F n i) • (Pi.basisFun F (Fin (2 * n))).coord i := by
-    apply LinearMap.ext
-    intro w
-    rw [LinearMap.sum_apply]
-    simp only [LinearMap.smul_apply, smul_eq_mul, Module.Basis.coord_apply, Pi.basisFun_repr]
-    conv_lhs => rw [show w = ∑ i, w i • e F n i by ext j; simp [e, Pi.single_apply]]
-    simp [map_sum, mul_comm]
-  conv_lhs => rw [← (basisS F n).sum_repr z]
-  simp only [map_sum, map_smul]
-  refine Finset.sum_eq_zero fun K _ => ?_
-  refine mul_eq_zero_of_right _ ?_
-  rw [hθ]
-  simp only [D, map_sum, map_smul]
-  rw [LinearMap.sum_apply, map_sum]
-  refine Finset.sum_eq_zero fun i _ => ?_
-  rw [LinearMap.smul_apply, map_smul]
-  refine smul_eq_zero_of_right _ ?_
-  rw [show basisS F n K = (Pi.basisFun F (Fin (2 * n))).ExteriorAlgebra K from rfl,
-    TauCeti.ExteriorAlgebra.contractLeft_coord_basis]
-  split_ifs with hi
-  · have h0 : integral F n (basisS F n (K.erase i)) = 0 := by
-      rw [integral, Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_apply,
-        ite_eq_right_iff]
-      intro h
-      have : i ∈ K.erase i := h ▸ Finset.mem_univ i
-      simp at this
-    rw [Units.smul_def, map_zsmul,
-      show (Pi.basisFun F (Fin (2 * n))).ExteriorAlgebra (K.erase i) = basisS F n (K.erase i)
-        from rfl, h0, smul_zero]
-  · simp
-
-omit [CharZero F] in
-/-- `∫ τ(D_θ s) t = ∫ τ(s) D_θ t`. -/
-theorem s21_integral_tau_D (θ : Module.Dual F (H1 F n)) (s t : S F n) :
-    integral F n (tau F n (D F n θ s) * t) = integral F n (tau F n s * D F n θ t) := by
-  induction s using CliffordAlgebra.left_induction generalizing t with
-  | algebraMap r =>
-    have h0 : D F n θ (algebraMap F (S F n) r) = 0 :=
-      contractLeft_algebraMap (Q := (0 : QuadraticForm F (H1 F n))) θ r
-    have h1 : tau F n (algebraMap F (S F n) r) = algebraMap F (S F n) r :=
-      CliffordAlgebra.reverse.commutes r
-    rw [h0, map_zero, zero_mul, map_zero, h1, Algebra.algebraMap_eq_smul_one, smul_mul_assoc,
-      one_mul, map_smul, s21_integral_D, smul_zero]
-  | add a b ha hb => rw [map_add, map_add, add_mul, map_add, ha, hb, map_add, add_mul, map_add]
-  | ι_mul x u hx =>
-    have h1 : D F n θ (ι (0 : QuadraticForm F (H1 F n)) u * x) =
-        θ u • x - ι (0 : QuadraticForm F (H1 F n)) u * D F n θ x := contractLeft_ι_mul _ _ _
-    have h2 : D F n θ (ι (0 : QuadraticForm F (H1 F n)) u * t) =
-        θ u • t - ι (0 : QuadraticForm F (H1 F n)) u * D F n θ t := contractLeft_ι_mul _ _ _
-    rw [h1, map_sub, map_smul, sub_mul, map_sub, smul_mul_assoc, map_smul]
-    have h3 : tau F n (ι (0 : QuadraticForm F (H1 F n)) u * D F n θ x) * t =
-        tau F n (D F n θ x) * (ι (0 : QuadraticForm F (H1 F n)) u * t) := by
-      simp only [tau, CliffordAlgebra.reverse.map_mul, CliffordAlgebra.reverse_ι, mul_assoc]
-    rw [h3, hx, h2, mul_sub, map_sub, mul_smul_comm, map_smul]
-    have h4 : tau F n (ι (0 : QuadraticForm F (H1 F n)) u * x) * D F n θ t =
-        tau F n x * (ι (0 : QuadraticForm F (H1 F n)) u * D F n θ t) := by
-      simp only [tau, CliffordAlgebra.reverse.map_mul, CliffordAlgebra.reverse_ι, mul_assoc]
-    rw [h4]
-    abel
-
-/-- `m_v` is self-adjoint for the Mukai pairing: `(m_v s, t)_S = (s, m_v t)_S`. This is the
-content of [Chevalley, III.2.2] (`chevalley_III_2_2`), proved here because the module of that cited
-statement imports this one. -/
-theorem s21_mukai_m_ι (v : V F n) (s t : S F n) :
-    mukai F n (m F n (ι (Q F n) v) s) t = mukai F n s (m F n (ι (Q F n) v) t) := by
-  obtain ⟨θ, w⟩ := v
-  show integral F n (tau F n _ * t) = integral F n (tau F n s * _)
-  rw [s21_m_ι_apply, s21_m_ι_apply, map_add, add_mul, map_add, mul_add, map_add,
-    s21_integral_tau_D]
-  congr 1
-  simp only [tau, CliffordAlgebra.reverse.map_mul]
-  rw [show (ExteriorAlgebra.ι F w : S F n) = ι (0 : QuadraticForm F (H1 F n)) w from rfl,
-    CliffordAlgebra.reverse_ι, mul_assoc]
-
 end HelpersField
 
 /-! ### The volume element and the centre of `C(V_F)` -/
@@ -307,42 +232,6 @@ variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
 noncomputable def s21_volList (F : Type*) [Field F] [CharZero F] (n : ℕ) : List (V F n) :=
   (List.finRange (2 * n)).map (fun i => ((f F n i, e F n i) : V F n)) ++
     (List.finRange (2 * n)).map (fun i => ((-f F n i, e F n i) : V F n))
-
-omit [CharZero F] in
-theorem s21_f_e (i j : Fin (2 * n)) : f F n i (e F n j) = if i = j then 1 else 0 := by
-  simp only [f, e, LinearMap.proj_apply, Pi.single_apply]
-
-omit [CharZero F] in
-theorem s21_polar_apply (v w : V F n) : QuadraticMap.polar (Q F n) v w = v.1 w.2 + w.1 v.2 :=
-  TauCeti.polar_dualProd v w
-
-omit [CharZero F] in
-/-- `v = Σᵢ v₁(eᵢ) fᵢ + Σᵢ v₂(i) eᵢ` in the basis `fᵢ = (fᵢ, 0)`, `eᵢ = (0, eᵢ)` of `V_F`. -/
-theorem s21_V_decomp (v : V F n) :
-    v = ∑ i, v.1 (e F n i) • ((f F n i, 0) : V F n) + ∑ i, v.2 i • ((0, e F n i) : V F n) := by
-  obtain ⟨θ, w⟩ := v
-  have hθ : θ = ∑ i, θ (e F n i) • f F n i := by
-    apply (Pi.basisFun F (Fin (2 * n))).ext
-    intro j
-    rw [LinearMap.sum_apply, Finset.sum_eq_single j]
-    · rw [LinearMap.smul_apply, Pi.basisFun_apply,
-        show (Pi.single j (1 : F) : H1 F n) = e F n j from rfl, s21_f_e]
-      simp
-    · intro i _ hij
-      rw [LinearMap.smul_apply, Pi.basisFun_apply,
-        show (Pi.single j (1 : F) : H1 F n) = e F n j from rfl, s21_f_e]
-      simp [hij]
-    · simp
-  have hw : w = ∑ i, w i • e F n i := by
-    ext j
-    simp [e, Pi.single_apply]
-  refine Prod.ext ?_ ?_
-  · simp only [Prod.fst_add, Prod.fst_sum, Prod.smul_fst, smul_zero, Finset.sum_const_zero,
-      add_zero]
-    exact hθ
-  · simp only [Prod.snd_add, Prod.snd_sum, Prod.smul_snd, smul_zero, Finset.sum_const_zero,
-      zero_add]
-    exact hw
 
 theorem s21_volList_pairwise : (s21_volList F n).Pairwise (Q F n).IsOrtho := by
   have hO : ∀ v w : V F n, v.1 w.2 + w.1 v.2 = 0 → (Q F n).IsOrtho v w := fun v w h => by
@@ -549,66 +438,15 @@ theorem mem_spin_iff (hn : 0 < n) (x : C F n) :
     rw [involute_eq_of_mem_even he]
     exact ⟨u, hu.symm⟩
 
-/-- If `x V_F x⁻¹ ⊆ V_F` then `x⁻¹ V_F x ⊆ V_F`: `v ↦ x v x⁻¹` is an injective endomorphism of the
-finite-dimensional space `V_F`, hence onto. -/
-theorem s21_inv_conj_mem {x : (C F n)ˣ}
-    (hx : ∀ v : V F n, ∃ u : V F n, (x : C F n) * ι (Q F n) v * ((x⁻¹ : (C F n)ˣ) : C F n) =
-      ι (Q F n) u) (v : V F n) :
-    ∃ u : V F n, ((x⁻¹ : (C F n)ˣ) : C F n) * ι (Q F n) v * (((x⁻¹)⁻¹ : (C F n)ˣ) : C F n) =
-      ι (Q F n) u := by
-  let φ : V F n →ₗ[F] V F n := ιInv (Q F n) ∘ₗ
-    (LinearMap.mulLeft F (x : C F n) ∘ₗ LinearMap.mulRight F ((x⁻¹ : (C F n)ˣ) : C F n)) ∘ₗ
-      ι (Q F n)
-  have hφ : ∀ w, ι (Q F n) (φ w) = (x : C F n) * ι (Q F n) w * ((x⁻¹ : (C F n)ˣ) : C F n) := by
-    intro w
-    obtain ⟨u, hu⟩ := hx w
-    simp only [φ, LinearMap.coe_comp, Function.comp_apply, LinearMap.mulRight_apply,
-      LinearMap.mulLeft_apply, ← mul_assoc, hu, ιInv_ι]
-  have hinj : Function.Injective φ := by
-    intro a b hab
-    have h := congrArg (ι (Q F n)) hab
-    rw [hφ, hφ] at h
-    have h' : ι (Q F n) a = ι (Q F n) b :=
-      (Units.mul_right_inj x).mp ((Units.mul_left_inj x⁻¹).mp h)
-    exact ι_injective (Q F n) h'
-  obtain ⟨w, hw⟩ := LinearMap.injective_iff_surjective.mp hinj v
-  refine ⟨w, ?_⟩
-  have h := hφ w
-  rw [hw] at h
-  rw [inv_inv, h]
-  simp only [← mul_assoc, Units.inv_mul, one_mul]
-  rw [mul_assoc, Units.inv_mul, mul_one]
-
-/-- The Clifford group `G(V_F) = {x ∈ C(V_F)ˣ : x V_F x⁻¹ ⊆ V_F}` of §2.1 (the untwisted Clifford
-group, the paper's convention), as a subgroup of the units of `C(V_F)`. -/
-def cliffordGroup : Subgroup (C F n)ˣ where
-  carrier := {x | ∀ v : V F n, ∃ u : V F n,
-    (x : C F n) * ι (Q F n) v * ((x⁻¹ : (C F n)ˣ) : C F n) = ι (Q F n) u}
-  one_mem' := fun v => ⟨v, by simp⟩
-  mul_mem' := by
-    intro x y hx hy v
-    obtain ⟨u, hu⟩ := hy v
-    obtain ⟨u', hu'⟩ := hx u
-    refine ⟨u', ?_⟩
-    rw [← hu', ← hu]
-    simp only [mul_inv_rev, Units.val_mul, mul_assoc]
-  inv_mem' := fun {_} hx v => s21_inv_conj_mem F n hx v
-
 /-- **The standard representation `ρ : G(V_F) → O(V_F)`**, `ρ(x)(v) = x v x⁻¹` (§2.1), takes values
 in the orthogonal group: if `x v₁ x⁻¹ = u₁` and `x v₂ x⁻¹ = u₂` in `C(V_F)`, then
-`(u₁, u₂)_V = (v₁, v₂)_V`. -/
+`(u₁, u₂)_V = (v₁, v₂)_V`. (The computation, from the Clifford relation, is
+`s21_pairing_eq_of_conj_ι` in `WeilClasses.PureSpinor.Groups`, where `cliffordGroupZ` uses it.) -/
 theorem pairing_eq_of_conj_ι (x : (C F n)ˣ) (v₁ v₂ u₁ u₂ : V F n)
     (h₁ : (x : C F n) * ι (Q F n) v₁ * ((x⁻¹ : (C F n)ˣ) : C F n) = ι (Q F n) u₁)
     (h₂ : (x : C F n) * ι (Q F n) v₂ * ((x⁻¹ : (C F n)ˣ) : C F n) = ι (Q F n) u₂) :
-    pairing F n u₁ u₂ = pairing F n v₁ v₂ := by
-  have key : ι (Q F n) u₁ * ι (Q F n) u₂ + ι (Q F n) u₂ * ι (Q F n) u₁ =
-      (x : C F n) * (ι (Q F n) v₁ * ι (Q F n) v₂ + ι (Q F n) v₂ * ι (Q F n) v₁) *
-        ((x⁻¹ : (C F n)ˣ) : C F n) := by
-    rw [← h₁, ← h₂]
-    simp only [mul_add, add_mul, mul_assoc, Units.inv_mul_cancel_left]
-  rw [ι_mul_ι_add_swap, ι_mul_ι_add_swap, ← Algebra.commutes, mul_assoc, Units.mul_inv,
-    mul_one] at key
-  exact algebraMap_injective (Q F n) key
+    pairing F n u₁ u₂ = pairing F n v₁ v₂ :=
+  s21_pairing_eq_of_conj_ι F n x v₁ v₂ u₁ u₂ h₁ h₂
 
 /-- The norm character `N(g) = g τ(g)` (§2.1) takes scalar values on the Clifford group: for
 `g ∈ G(V_F)`, `g τ(g)` is a scalar. -/
@@ -697,17 +535,16 @@ theorem ι_mul_reverse_ι_of_pairing_eq_two (v : V F n) (hv : pairing F n v v = 
 
 /-- If `(v, v)_V = 2` then `m_v : S → S` is an isometry of the Mukai pairing (§2.1).
 
-Departure from the paper: the paper applies [Chevalley, III.2.1] (`(g s, g t)_S = N(g) (s, t)_S`)
-to `g = v`, with `N(v) = 1`. The Lean statement of that cited result (`chevalley_III_2_1`, in
-`WeilClasses.External.Chevalley.Sec2_1`) lives in a module that imports this one, so it cannot be
-used here. We prove the special case directly: `m_v` is self-adjoint (`s21_mukai_m_ι`, the content
-of [Chevalley, III.2.2] for vectors) and `m_v² = Q(v) = 1`, so `(m_v s, m_v t)_S = (s, m_v² t)_S =
-(s, t)_S`. -/
+Proof (the paper's): `v` belongs to `G(V)` (`exists_unit_ι_mem_cliffordGroup`) with
+`N(v) = v τ(v) = 1` (`ι_mul_reverse_ι_of_pairing_eq_two`), so
+`(m_v s, m_v t)_S = N(v) (s, t)_S = (s, t)_S` by [Chevalley, III.2.1] (`chevalley_III_2_1`). -/
 theorem mukai_m_ι_m_ι_of_pairing_eq_two (v : V F n) (hv : pairing F n v v = 2) (s t : S F n) :
     mukai F n (m F n (ι (Q F n) v) s) (m F n (ι (Q F n) v) t) = mukai F n s t := by
-  have hQ : Q F n v = 1 := s21_Q_eq_one hv
-  rw [s21_mukai_m_ι, ← Module.End.mul_apply, ← map_mul, ι_sq_scalar, hQ, map_one, map_one,
-    Module.End.one_apply]
+  obtain ⟨x, hx, hxG⟩ := exists_unit_ι_mem_cliffordGroup F n v (Or.inl hv)
+  have hN : (x : C F n) * reverse (x : C F n) = algebraMap F (C F n) 1 := by
+    rw [hx, ι_mul_reverse_ι_of_pairing_eq_two F n v hv, map_one]
+  have h := chevalley_III_2_1 F n x hxG 1 hN s t
+  rwa [hx, one_mul] at h
 
 /-- If `(v, v)_V = 2` then `m_v² = 1_S` (§2.1). -/
 theorem m_ι_mul_m_ι_of_pairing_eq_two (v : V F n) (hv : pairing F n v v = 2) :
@@ -732,75 +569,6 @@ end Field
 section HelpersIntegral
 
 variable {n : ℕ}
-
-theorem s21_e_mem_VZ (i : Fin (2 * n)) : ((0, e ℚ n i) : V ℚ n) ∈ VZ n := by
-  refine ⟨fun j => ⟨0, by simp⟩, fun j => ?_⟩
-  by_cases hij : j = i
-  · exact ⟨1, by simp [e, hij]⟩
-  · exact ⟨0, by simp [e, hij]⟩
-
-theorem s21_f_mem_VZ (i : Fin (2 * n)) : ((f ℚ n i, 0) : V ℚ n) ∈ VZ n := by
-  refine ⟨fun j => ?_, fun j => ⟨0, by simp⟩⟩
-  by_cases hij : i = j
-  · exact ⟨1, by simp [e, f, hij]⟩
-  · exact ⟨0, by simp [e, f, hij]⟩
-
-/-- The lattice `V` spans `V_ℚ`: a subspace containing `V` is everything. -/
-theorem s21_eq_top_of_VZ (P : Submodule ℚ (V ℚ n)) (hP : ∀ v ∈ VZ n, v ∈ P) : P = ⊤ := by
-  rw [eq_top_iff]
-  rintro v -
-  rw [s21_V_decomp v]
-  exact P.add_mem (P.sum_mem fun i _ => P.smul_mem _ (hP _ (s21_f_mem_VZ i)))
-    (P.sum_mem fun i _ => P.smul_mem _ (hP _ (s21_e_mem_VZ i)))
-
-/-- If `a v b ∈ V_ℚ` for all `v ∈ V`, then for all `v ∈ V_ℚ` (`V` spans `V_ℚ`). -/
-theorem s21_forall_of_VZ (a b : C ℚ n)
-    (h : ∀ v ∈ VZ n, ∃ u, a * ι (Q ℚ n) v * b = ι (Q ℚ n) u) (w : V ℚ n) :
-    ∃ u, a * ι (Q ℚ n) w * b = ι (Q ℚ n) u := by
-  let φ : V ℚ n →ₗ[ℚ] C ℚ n := (LinearMap.mulLeft ℚ a ∘ₗ LinearMap.mulRight ℚ b) ∘ₗ ι (Q ℚ n)
-  have hφ : ∀ v, φ v = a * ι (Q ℚ n) v * b := fun v => by
-    simp only [φ, LinearMap.coe_comp, Function.comp_apply, LinearMap.mulRight_apply,
-      LinearMap.mulLeft_apply, mul_assoc]
-  have hP := s21_eq_top_of_VZ ((LinearMap.range (ι (Q ℚ n))).comap φ) fun v hv => by
-    obtain ⟨u, hu⟩ := h v hv
-    exact ⟨u, by rw [hφ, hu]⟩
-  have hw : w ∈ (LinearMap.range (ι (Q ℚ n))).comap φ := hP ▸ Submodule.mem_top
-  obtain ⟨u, hu⟩ := hw
-  exact ⟨u, by rw [← hφ, hu]⟩
-
-/-- `θ(w) = Σᵢ θ(eᵢ) wᵢ`. -/
-theorem s21_dual_apply (θ : Module.Dual ℚ (H1 ℚ n)) (w : H1 ℚ n) :
-    θ w = ∑ i, θ (e ℚ n i) * w i := by
-  conv_lhs => rw [show w = ∑ i, w i • e ℚ n i by ext j; simp [e, Pi.single_apply]]
-  simp [map_sum, mul_comm]
-
-/-- The pairing (1.2.2) is integral on `V`. -/
-theorem s21_pairing_VZ {v y : V ℚ n} (hv : v ∈ VZ n) (hy : y ∈ VZ n) :
-    ∃ z : ℤ, pairing ℚ n v y = z := by
-  have hR : pairing ℚ n v y ∈ (Int.castRingHom ℚ).range := by
-    rw [pairing, QuadraticMap.polarBilin_apply_apply, s21_polar_apply, s21_dual_apply,
-      s21_dual_apply]
-    refine Subring.add_mem _ (Subring.sum_mem _ fun i _ => Subring.mul_mem _ ?_ ?_)
-      (Subring.sum_mem _ fun i _ => Subring.mul_mem _ ?_ ?_)
-    · obtain ⟨z, hz⟩ := hv.1 i; exact ⟨z, by simp [hz]⟩
-    · obtain ⟨z, hz⟩ := hy.2 i; exact ⟨z, by simp [hz]⟩
-    · obtain ⟨z, hz⟩ := hy.1 i; exact ⟨z, by simp [hz]⟩
-    · obtain ⟨z, hz⟩ := hv.2 i; exact ⟨z, by simp [hz]⟩
-  obtain ⟨z, hz⟩ := hR
-  exact ⟨z, by simpa using hz.symm⟩
-
-/-- `V` is unimodular: a vector of `V_ℚ` with integral pairing against `V` lies in `V`. -/
-theorem s21_mem_VZ_of_pairing (u : V ℚ n)
-    (h : ∀ y ∈ VZ n, ∃ z : ℤ, pairing ℚ n u y = z) : u ∈ VZ n := by
-  refine ⟨fun i => ?_, fun i => ?_⟩
-  · obtain ⟨z, hz⟩ := h _ (s21_e_mem_VZ i)
-    refine ⟨z, ?_⟩
-    rw [← hz, pairing, QuadraticMap.polarBilin_apply_apply, s21_polar_apply]
-    simp
-  · obtain ⟨z, hz⟩ := h _ (s21_f_mem_VZ i)
-    refine ⟨z, ?_⟩
-    rw [← hz, pairing, QuadraticMap.polarBilin_apply_apply, s21_polar_apply]
-    simp [f]
 
 theorem s21_intCast_smul_mem_VZ {v : V ℚ n} (hv : v ∈ VZ n) (z : ℤ) : (z : ℚ) • v ∈ VZ n := by
   rw [Int.cast_smul_eq_zsmul]
@@ -988,48 +756,6 @@ theorem mem_SpinZ_iff (hn : 0 < n) (x : C ℚ n) :
       exact hxu
     rw [ι_injective (Q ℚ n) h]
     exact hu
-
-/-- If `x V x⁻¹ ⊆ V` (integrally) then `x⁻¹ V x ⊆ V`: by unimodularity of `V`, since
-`v ↦ x v x⁻¹` is an isometry of `V_ℚ` (`pairing_eq_of_conj_ι`). -/
-theorem s21_inv_conj_mem_VZ {x : (C ℚ n)ˣ}
-    (hx : ∀ v ∈ VZ n, ∃ u ∈ VZ n,
-      (x : C ℚ n) * ι (Q ℚ n) v * ((x⁻¹ : (C ℚ n)ˣ) : C ℚ n) = ι (Q ℚ n) u)
-    (v : V ℚ n) (hv : v ∈ VZ n) :
-    ∃ u ∈ VZ n, ((x⁻¹ : (C ℚ n)ˣ) : C ℚ n) * ι (Q ℚ n) v * (((x⁻¹)⁻¹ : (C ℚ n)ˣ) : C ℚ n) =
-      ι (Q ℚ n) u := by
-  have hxQ : ∀ w : V ℚ n, ∃ u, (x : C ℚ n) * ι (Q ℚ n) w * ((x⁻¹ : (C ℚ n)ˣ) : C ℚ n) =
-      ι (Q ℚ n) u :=
-    s21_forall_of_VZ _ _ fun w hw => (hx w hw).imp fun u hu => hu.2
-  obtain ⟨u, hu⟩ := s21_inv_conj_mem ℚ n hxQ v
-  refine ⟨u, ?_, hu⟩
-  apply s21_mem_VZ_of_pairing
-  intro y hy
-  obtain ⟨y', hy', hyy'⟩ := hx y hy
-  have hv' : (x : C ℚ n) * ι (Q ℚ n) u * ((x⁻¹ : (C ℚ n)ˣ) : C ℚ n) = ι (Q ℚ n) v := by
-    rw [← hu, inv_inv]
-    simp only [mul_assoc, Units.mul_inv_cancel_left, Units.mul_inv, mul_one]
-  rw [← pairing_eq_of_conj_ι ℚ n x u y v y' hv' hyy']
-  exact s21_pairing_VZ hv hy'
-
-/-- The integral Clifford group `G(V) = {x ∈ C(V)ˣ : x V x⁻¹ ⊆ V}` of §2.1, inside `C(V_ℚ)ˣ`: the
-units `x` of `C(V_ℚ)` with `x, x⁻¹ ∈ C(V)` (`CZ n`) and `x V x⁻¹ ⊆ V` (`VZ n`). -/
-noncomputable def cliffordGroupZ : Subgroup (C ℚ n)ˣ where
-  carrier := {x | (x : C ℚ n) ∈ CZ n ∧ ((x⁻¹ : (C ℚ n)ˣ) : C ℚ n) ∈ CZ n ∧
-    ∀ v ∈ VZ n, ∃ u ∈ VZ n, (x : C ℚ n) * ι (Q ℚ n) v * ((x⁻¹ : (C ℚ n)ˣ) : C ℚ n) = ι (Q ℚ n) u}
-  one_mem' := ⟨Subring.one_mem _, by simp, fun v hv => ⟨v, hv, by simp⟩⟩
-  mul_mem' := by
-    rintro x y ⟨hx, hx', hxV⟩ ⟨hy, hy', hyV⟩
-    refine ⟨?_, ?_, fun v hv => ?_⟩
-    · rw [Units.val_mul]; exact Subring.mul_mem _ hx hy
-    · rw [mul_inv_rev, Units.val_mul]; exact Subring.mul_mem _ hy' hx'
-    · obtain ⟨u, hu, huv⟩ := hyV v hv
-      obtain ⟨u', hu', hu'v⟩ := hxV u hu
-      refine ⟨u', hu', ?_⟩
-      rw [← hu'v, ← huv]
-      simp only [mul_inv_rev, Units.val_mul, mul_assoc]
-  inv_mem' := by
-    rintro x ⟨hx, hx', hxV⟩
-    exact ⟨hx', by rw [inv_inv]; exact hx, fun v hv => s21_inv_conj_mem_VZ n hxV v hv⟩
 
 /-- The integral Clifford group lies in the rational one. -/
 theorem s21_mem_cliffordGroup_of_Z {x : (C ℚ n)ˣ} (hx : x ∈ cliffordGroupZ n) :

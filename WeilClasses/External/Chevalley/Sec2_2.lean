@@ -1,6 +1,8 @@
 module
 
-public import WeilClasses.PureSpinor.Lemma2_2_6
+public import WeilClasses.PureSpinor.Defs
+public import WeilClasses.PureSpinor.Groups
+public import WeilClasses.Spinor.Embeddings
 import WeilClasses.External.Chevalley.Sec3
 import TauCeti.LinearAlgebra.CliffordAlgebra.Dimension
 import TauCeti.RepresentationTheory.Spin.Structure

@@ -1,6 +1,6 @@
 module
 
-public import WeilClasses.PureSpinor.Sec2_1
+public import WeilClasses.PureSpinor.Groups
 import TauCeti.LinearAlgebra.ExteriorAlgebra.Contraction
 
 /-!

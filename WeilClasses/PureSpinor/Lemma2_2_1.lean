@@ -3,6 +3,7 @@ module
 public import WeilClasses.PureSpinor.Defs
 public import WeilClasses.PureSpinor.Sec2_1
 import WeilClasses.External.Chevalley.Sec2_1
+import WeilClasses.External.Chevalley.Sec2_2
 import WeilClasses.PureSpinor.CM
 import TauCeti.LinearAlgebra.CliffordAlgebra.VolumeElement
 
@@ -36,13 +37,12 @@ including the paragraph following Lemma 2.2.1:
 
 ## Proofs
 
-The cited results [Chevalley, III.2.4] and [III.1.12] have statements of record in
-`WeilClasses.External.Chevalley.Sec2_2`, which imports this file (through
-`WeilClasses.PureSpinor.Lemma2_2_6`); they are proved here (`s22a_chevalley_III_2_4`,
-`s22a_chevalley_III_2_4_self`, `s22a_chevalley_III_1_12`) from [Chevalley, III.2.2]
-(`chevalley_III_2_2`) and [GLO, Prop. 3.2.1(e)] (`glo_prop3_2_1_e_field`), which are imported. The
-helpers on change of coefficients and Galois conjugation are adapted from those of prover P08
-(`WeilClasses.Hermitian.Defs`, downstream of this file).
+The proofs cite [Chevalley, III.2.4] (`chevalley_III_2_4`, `chevalley_III_2_4_self`) and
+[Chevalley, III.1.12] (`chevalley_III_1_12`) from `WeilClasses.External.Chevalley.Sec2_2`, where the
+paper cites them. The helpers of the sections `S22aPure` (nondegeneracy of the Mukai pairing) and
+`S22aFock` (the number operator, `s22a_ann_combo_eq_bot`) are used by
+`WeilClasses.PureSpinor.Stabilizer`. The helpers on change of coefficients and Galois conjugation
+are adapted from those of prover P08 (`WeilClasses.Hermitian.Defs`, downstream of this file).
 -/
 
 @[expose] public section
@@ -242,15 +242,13 @@ theorem s22a_mukai_swap (s t : S F n) : mukai F n t s = (-1 : F) ^ n * mukai F n
 
 end S22aGeneral
 
-/-! ## Helpers (prover P03): pure spinors, the Mukai pairing, [Chevalley, III.2.4]
+/-! ## Helpers (prover P03): pure spinors, the Mukai pairing
 
-The paper cites [Chevalley, III.2.4] in the proof of Lemma 2.2.1. The statement of record
-(`WeilClasses.chevalley_III_2_4` in `WeilClasses.External.Chevalley.Sec2_2`) cannot be imported
-here: that module imports this one (through `WeilClasses.PureSpinor.Lemma2_2_6`). We prove the
-facts used, following the plan of `notes/proof-plans.md` ((e)): a vector of `ker m_{u₁} ∩ ker m_{u₂}`
-forces `(u₁, u₂)_S = 0` by self-adjointness of `m_v` [Chevalley, III.2.2]; conversely, if
-`V = ker m_{u₁} + ker m_{u₂}`, then `S = m(⟨ker m_{u₁}⟩) u₂` ([GLO, Prop. 3.2.1(e)]) and
-`(u₁, m_a u₂)_S = (m_{τ(a)} u₁, u₂)_S ∈ F (u₁, u₂)_S`, so `(u₁, u₂)_S ≠ 0` by nondegeneracy. -/
+The proof of Lemma 2.2.1 cites [Chevalley, III.2.4] (`chevalley_III_2_4`,
+`chevalley_III_2_4_self`). The helpers below are used by `WeilClasses.PureSpinor.Stabilizer`: the
+Mukai pairing is nondegenerate; if `V = ker m_{u₁} + ker m_{u₂}`, then `S = m(⟨ker m_{u₁}⟩) u₂`
+([GLO, Prop. 3.2.1(e)]) and `(u₁, m_a u₂)_S = (m_{τ(a)} u₁, u₂)_S ∈ F (u₁, u₂)_S`, so
+`(u₁, u₂)_S ≠ 0`; and a spinor killed by `ker m_u` is a multiple of `u`. -/
 
 section S22aPure
 
@@ -392,25 +390,6 @@ theorem s22a_mukai_adjoin {u₁ u₂ : S F n} {a : C F n}
   rw [CliffordAlgebra.reverse_reverse, hε, map_smul, LinearMap.smul_apply, smul_eq_mul] at h
   exact h.symm
 
-/-- **[Chevalley, III.2.4]**, first half: if `ker m_{u₁} ∩ ker m_{u₂} ≠ 0`, then
-`(u₁, u₂)_S = 0`. For `v ≠ 0` in the intersection and `(v, w)_V ≠ 0`,
-`(v, w)_V (u₁, u₂)_S = (m_v m_w u₁, u₂)_S = (m_w u₁, m_v u₂)_S = 0`. -/
-theorem s22a_mukai_eq_zero_of_inf_ne_bot {u₁ u₂ : S F n}
-    (h : ann F n u₁ ⊓ ann F n u₂ ≠ ⊥) : mukai F n u₁ u₂ = 0 := by
-  obtain ⟨v, hv, hv0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot h
-  obtain ⟨w, hw⟩ : ∃ w, pairing F n v w ≠ 0 := by
-    by_contra hcon
-    push Not at hcon
-    exact hv0 (s22a_pairing_sepLeft v hcon)
-  have hv1 : m F n (ι (Q F n) v) u₁ = 0 := (Submodule.mem_inf.mp hv).1
-  have hv2 : m F n (ι (Q F n) v) u₂ = 0 := (Submodule.mem_inf.mp hv).2
-  have hrel := s22a_m_anticomm v w u₁
-  rw [hv1, map_zero, add_zero] at hrel
-  have : pairing F n v w * mukai F n u₁ u₂ = 0 := by
-    rw [← smul_eq_mul, ← LinearMap.smul_apply, ← map_smul, ← hrel, chevalley_III_2_2, hv2,
-      map_zero]
-  exact (mul_eq_zero.mp this).resolve_left hw
-
 /-- **[Chevalley, III.2.4]**, second half: if `V = ker m_{u₁} + ker m_{u₂}` and `u₁, u₂ ≠ 0`, then
 `(u₁, u₂)_S ≠ 0`. -/
 theorem s22a_mukai_ne_zero_of_sup_eq_top {u₁ u₂ : S F n} (hu₁ : u₁ ≠ 0) (hu₂ : u₂ ≠ 0)
@@ -423,52 +402,20 @@ theorem s22a_mukai_ne_zero_of_sup_eq_top {u₁ u₂ : S F n} (hu₁ : u₁ ≠ 0
   obtain ⟨ε, hε⟩ := s22a_mukai_adjoin (u₂ := u₂) ha
   rw [hε, h0, mul_zero]
 
-/-- **[Chevalley, III.2.4]** for even pure spinors (the statement of record
-`WeilClasses.chevalley_III_2_4`, proved here since it cannot be imported). -/
-theorem s22a_chevalley_III_2_4 (hn : 0 < n) (u₁ u₂ : S F n) (h₁ : IsEvenPureSpinor F n u₁)
-    (h₂ : IsEvenPureSpinor F n u₂) :
-    mukai F n u₁ u₂ = 0 ↔ ann F n u₁ ⊓ ann F n u₂ ≠ ⊥ := by
-  refine ⟨fun h hbot => ?_, s22a_mukai_eq_zero_of_inf_ne_bot⟩
-  have hd1 := h₁.2.2
-  have hd2 := h₂.2.2
-  have h3 := Submodule.finrank_sup_add_finrank_inf_eq (ann F n u₁) (ann F n u₂)
-  rw [hbot, finrank_bot, hd1, hd2, add_zero] at h3
-  have htop : ann F n u₁ ⊔ ann F n u₂ = ⊤ := by
-    apply Submodule.eq_top_of_finrank_eq
-    rw [h3, s22a_finrank_V]
-  refine s22a_mukai_ne_zero_of_sup_eq_top ?_ ?_ htop h
-  · rintro rfl
-    have : ann F n (0 : S F n) = ⊤ := by
-      ext v
-      simp only [Submodule.mem_top, iff_true]
-      exact s22a_mem_ann.mpr (map_zero _)
-    rw [this, finrank_top, s22a_finrank_V] at hd1
-    omega
-  · rintro rfl
-    have : ann F n (0 : S F n) = ⊤ := by
-      ext v
-      simp only [Submodule.mem_top, iff_true]
-      exact s22a_mem_ann.mpr (map_zero _)
-    rw [this, finrank_top, s22a_finrank_V] at hd2
-    omega
-
-/-- **[Chevalley, III.2.4]**, the special case `λ₁ = λ₂`: a pure spinor is isotropic. -/
-theorem s22a_chevalley_III_2_4_self (hn : 0 < n) (u : S F n) (hu : IsEvenPureSpinor F n u) :
-    mukai F n u u = 0 := by
-  apply s22a_mukai_eq_zero_of_inf_ne_bot
-  rw [inf_idem]
-  intro h
-  have := hu.2.2
-  rw [h, finrank_bot] at this
-  omega
-
-/-- `(m_g s, m_g t)_S = (s, t)_S` for `g ∈ Spin(V_F)` ([Chevalley, III.2.1], `N(g) = 1`). -/
+/-- `(m_g s, m_g t)_S = (s, t)_S` for `g ∈ Spin(V_F)`: [Chevalley, III.2.1] (`chevalley_III_2_1`),
+as `g ∈ G(V_F)` with `N(g) = g τ(g) = g g* = 1` (`g` is even). -/
 theorem s22a_mukai_spin (g : Spin F n) (s t : S F n) :
     mukai F n (m F n (g : C F n) s) (m F n (g : C F n) t) = mukai F n s t := by
-  rw [s22a_mukai_m, ← Module.End.mul_apply, ← map_mul]
-  have h1 := spinGroup.star_mul_self_of_mem g.2
-  rw [CliffordAlgebra.star_def, spinGroup.involute_eq g.2] at h1
-  rw [h1, map_one, Module.End.one_apply]
+  let x : (C F n)ˣ := ⟨g, star (g : C F n), spinGroup.mul_star_self_of_mem g.2,
+    spinGroup.star_mul_self_of_mem g.2⟩
+  have hx : x ∈ cliffordGroup F n := fun v => ⟨rho F n g v, (ι_rho F n g v).symm⟩
+  have hN : (x : C F n) * reverse (x : C F n) = algebraMap F (C F n) 1 := by
+    show (g : C F n) * reverse (g : C F n) = algebraMap F (C F n) 1
+    rw [map_one, ← spinGroup.mul_star_self_of_mem g.2, CliffordAlgebra.star_def,
+      spinGroup.involute_eq g.2]
+  have h := chevalley_III_2_1 F n x hx 1 hN s t
+  rw [one_mul] at h
+  exact h
 
 /-- If `W ⊆ ker m_s`, then `(s, m_a t)_S ∈ F (s, t)_S` for `a` in the subalgebra generated by
 `ι(W)`. -/
@@ -603,15 +550,15 @@ theorem mukai_swap_of_mem_Splus (s t : S F n) (hs : s ∈ Splus F n) (ht : t ∈
 
 end General
 
-/-! ## Helpers (prover P03): dual bases, the number operator, [Chevalley, III.1.12]
+/-! ## Helpers (prover P03): dual bases, the number operator
 
-The paper cites [Chevalley, III.1.12] after Lemma 2.2.1 and in Remark 2.2.3. The statement of record
-(`WeilClasses.chevalley_III_1_12`) cannot be imported here (see above). We prove it as in
-`notes/proof-plans.md` ((f)), without coordinates adapted to `W₁, W₂`: for dual bases `xᵢ` of
-`W₁ = ker m_{u₁}` and `yᵢ` of `W₂ = ker m_{u₂}`, the number operator `N = Σᵢ m_{xᵢ} m_{yᵢ}`
-satisfies `[N, m_x] = m_x`, `[N, m_y] = -m_y`, `N u₁ = 2n u₁`, `N u₂ = 0`; so for
-`v = x + y ∈ ker m_{a u₁ + b u₂}` the vectors `m_y u₁` and `m_x u₂` are eigenvectors of `N` with the
-distinct eigenvalues `2n - 1` and `1` (for `n > 1`) and must vanish. -/
+The paper cites [Chevalley, III.1.12] after Lemma 2.2.1 and in Remark 2.2.3; this file uses
+`chevalley_III_1_12` (`WeilClasses.External.Chevalley.Sec2_2`). The helpers below are used by
+`WeilClasses.PureSpinor.Stabilizer`. For dual bases `xᵢ` of `W₁ = ker m_{u₁}` and `yᵢ` of
+`W₂ = ker m_{u₂}`, the number operator `N = Σᵢ m_{xᵢ} m_{yᵢ}` satisfies `[N, m_x] = m_x`,
+`[N, m_y] = -m_y`, `N u₁ = 2n u₁`, `N u₂ = 0`; so for `v = x + y ∈ ker m_{a u₁ + b u₂}` the vectors
+`m_y u₁` and `m_x u₂` are eigenvectors of `N` with the distinct eigenvalues `2n - 1` and `1` (for
+`n > 1`) and must vanish (`s22a_ann_combo_eq_bot`). -/
 
 section S22aFock
 
@@ -799,17 +746,13 @@ theorem s22a_ann_combo_eq_bot (hn : 1 < n) {u₁ u₂ : S F n} (h₁ : IsEvenPur
     exact this
   rw [hx'0, hy'0, add_zero]
 
-/-- **[Chevalley, III.1.12]** (the statement of record `WeilClasses.chevalley_III_1_12`, proved
-here since it cannot be imported). -/
+/-- [Chevalley, III.1.12] (`chevalley_III_1_12`), under the name used by
+`WeilClasses.PureSpinor.Stabilizer`. -/
 theorem s22a_chevalley_III_1_12 (hn : 1 < n) (u₁ u₂ : S F n) (h₁ : IsEvenPureSpinor F n u₁)
     (h₂ : IsEvenPureSpinor F n u₂) (hW : ann F n u₁ ⊓ ann F n u₂ = ⊥) (a b : F)
     (hab : IsEvenPureSpinor F n (a • u₁ + b • u₂)) :
-    a = 0 ∨ b = 0 := by
-  by_contra h
-  push Not at h
-  have h3 := hab.2.2
-  rw [s22a_ann_combo_eq_bot hn h₁ h₂ hW h.1 h.2, finrank_bot] at h3
-  omega
+    a = 0 ∨ b = 0 :=
+  chevalley_III_1_12 F n hn u₁ u₂ h₁ h₂ hW a b hab
 
 /-- A nonzero multiple of an even pure spinor is an even pure spinor. -/
 theorem s22a_isEvenPureSpinor_smul {u : S F n} (hu : IsEvenPureSpinor F n u) {c : F}
@@ -1714,18 +1657,17 @@ theorem isCompl_of_inf_eq_bot (hW : P.W₁ ⊓ P.W₂ = ⊥) : IsCompl P.W₁ P.
 
 /-! ## Lemma 2.2.1 -/
 
-/-- `(λ₁, λ₁)_S = 0` ([Chevalley, III.2.4], local version `s22a_chevalley_III_2_4_self`). -/
+/-- `(λ₁, λ₁)_S = 0` ([Chevalley, III.2.4], `chevalley_III_2_4_self`). -/
 theorem s22a_mukai_u₁_u₁ : mukai (Kd d) n P.u₁ P.u₁ = 0 :=
-  s22a_chevalley_III_2_4_self (s22a_n_pos P) _ P.isPure
+  chevalley_III_2_4_self (Kd d) n (s22a_n_pos P) _ P.isPure
 
-/-- `(λ₂, λ₂)_S = 0` ([Chevalley, III.2.4]). -/
+/-- `(λ₂, λ₂)_S = 0` ([Chevalley, III.2.4], `chevalley_III_2_4_self`). -/
 theorem s22a_mukai_u₂_u₂ : mukai (Kd d) n P.u₂ P.u₂ = 0 :=
-  s22a_chevalley_III_2_4_self (s22a_n_pos P) _ P.isPure₂
+  chevalley_III_2_4_self (Kd d) n (s22a_n_pos P) _ P.isPure₂
 
-/-- `(λ₁, λ₂)_S = 0 ↔ W₁ ∩ W₂ ≠ 0` ([Chevalley, III.2.4], local version
-`s22a_chevalley_III_2_4`). -/
+/-- `(λ₁, λ₂)_S = 0 ↔ W₁ ∩ W₂ ≠ 0` ([Chevalley, III.2.4], `chevalley_III_2_4`). -/
 theorem s22a_mukai_u₁_u₂_eq_zero_iff : mukai (Kd d) n P.u₁ P.u₂ = 0 ↔ P.W₁ ⊓ P.W₂ ≠ ⊥ :=
-  s22a_chevalley_III_2_4 (s22a_n_pos P) _ _ P.isPure P.isPure₂
+  chevalley_III_2_4 (Kd d) n (s22a_n_pos P) _ _ P.isPure P.isPure₂
 
 /-- The pairing on `P` in the basis `p₁ = λ₁ + λ₂`, `p₂ = √-d (λ₁ - λ₂)` (the computation of the
 proof of Lemma 2.2.1): with `c = (λ₁, λ₂)_S`, `c' = (λ₂, λ₁)_S` and `(λᵢ, λᵢ)_S = 0`,
@@ -1762,11 +1704,8 @@ as printed (true for all `n`): `P` is isotropic with respect to the Mukai pairin
 pairing vanishes identically on `P`) if and only if `W₁ ∩ W₂ ≠ 0`. The hypothesis `0 < d` is the paper's "`K` purely imaginary" (it is implied
 by the existence of `P`).
 
-Departure from the paper: the proof cites [Chevalley, III.2.4]; the Lean statement of that cited
-result (`chevalley_III_2_4`, `chevalley_III_2_4_self` in `WeilClasses.External.Chevalley.Sec2_2`)
-lives in a module that imports this one (through `WeilClasses.PureSpinor.Lemma2_2_6`), so it cannot
-be used here. We prove the statements used (`s22a_chevalley_III_2_4`,
-`s22a_chevalley_III_2_4_self`) and then follow the paper's computation, in the rational basis
+Proof (the paper's): `(λᵢ, λᵢ)_S = 0` and `(λ₁, λ₂)_S = 0 ↔ W₁ ∩ W₂ ≠ 0` by [Chevalley, III.2.4]
+(`chevalley_III_2_4_self`, `chevalley_III_2_4`), and the paper's computation, in the rational basis
 `p₁ = λ₁ + λ₂`, `p₂ = √-d (λ₁ - λ₂)` of `P` (the paper's `a = p₁/2`, `b = -p₂/(2d)`). -/
 theorem _root_.WeilClasses.lemma2_2_1 (hd : 0 < d) : P.IsIsotropic ↔ P.W₁ ⊓ P.W₂ ≠ ⊥ := by
   -- The paper's proof: `(λᵢ, λᵢ) = 0` and `(λ₁, λ₂) = 0 ↔ W₁ ∩ W₂ ≠ 0` [Chevalley, III.2.4], and the
@@ -1806,7 +1745,8 @@ for even `n` (as printed): the restriction of `(·,·)_S` to `P` is definite if 
 Correction of the paper: the second sentence is false for odd n because (·,·)_S is alternating on
 S⁺ ((t,s) = (−1)ⁿ(s,t)); see REPORT.md. For odd `n` see `lemma2_2_1_odd`.
 
-Departure from the paper: [Chevalley, III.2.4] is proved locally, as for `lemma2_2_1`. -/
+Proof (the paper's): [Chevalley, III.2.4] (`chevalley_III_2_4`) and the computation of
+`lemma2_2_1`. -/
 theorem _root_.WeilClasses.lemma2_2_1_even (hd : 0 < d) (hn : Even n) :
     BilinDefiniteOn (mukai ℚ n) P.Pℚ ↔ P.W₁ ⊓ P.W₂ = ⊥ := by
   obtain ⟨p₁, p₂, h₁, h₂, hli, hspan⟩ := P.s22a_Pℚ_basis
@@ -1882,7 +1822,7 @@ Correction of the paper: the second sentence is false for odd n because (·,·)_
 S⁺ ((t,s) = (−1)ⁿ(s,t)); see REPORT.md. (The paper's proof writes `λ₁ = a + ib` and uses the
 symmetry of the pairing; for odd `n`, `(λ₁, λ₂) = -2√-d (a, b)_S` instead.)
 
-Departure from the paper: [Chevalley, III.2.4] is proved locally, as for `lemma2_2_1`. -/
+Proof: [Chevalley, III.2.4] (`chevalley_III_2_4`) and the computation of `lemma2_2_1`. -/
 theorem _root_.WeilClasses.lemma2_2_1_odd (hd : 0 < d) (hn : Odd n) :
     (∀ s ∈ Splus ℚ n, mukai ℚ n s s = 0) ∧
       (BilinNondegOn (mukai ℚ n) P.Pℚ ↔ P.W₁ ⊓ P.W₂ = ⊥) := by
@@ -1966,10 +1906,8 @@ theorem isCompl_of_not_isIsotropic (hd : 0 < d) (hP : ¬ P.IsIsotropic) : IsComp
 `u₂`; that is, the set-theoretic intersection of `IGr₊(2n, V_ℂ)` (the spinor variety in
 `ℙ(S⁺_ℂ)`) with the line through `ℓ₁` and `ℓ₂` is `{ℓ₁, ℓ₂}`.
 
-Departure from the paper: [Chevalley, III.1.12] (`chevalley_III_1_12`) lives in a module that
-imports this one, so it cannot be used here; we prove it (`s22a_chevalley_III_1_12`, with the number
-operator of dual bases of `W₁`, `W₂`) and apply it over `ℂ` to the base change of `u₁, u₂`
-(`s22a_bc_pure_pair`). -/
+Proof (the paper's): [Chevalley, III.1.12] (`chevalley_III_1_12`), applied over `ℂ` to the base
+change of `u₁, u₂` (`s22a_bc_pure_pair`). -/
 theorem isEvenPureSpinor_iff_of_mem_span (hd : 0 < d) (hn : 1 < n) (hW : P.W₁ ⊓ P.W₂ = ⊥)
     (w : S ℂ n) (hw : w ∈ Submodule.span ℂ {bcS (Kd d) ℂ n P.u₁, bcS (Kd d) ℂ n P.u₂}) :
     IsEvenPureSpinor ℂ n w ↔
@@ -1981,7 +1919,7 @@ theorem isEvenPureSpinor_iff_of_mem_span (hd : 0 < d) (hn : 1 < n) (hW : P.W₁ 
   · intro hpure
     refine ⟨IsEvenPureSpinor.ne_zero (by omega) hpure, ?_⟩
     obtain ⟨a, b, rfl⟩ := Submodule.mem_span_pair.mp hw
-    rcases s22a_chevalley_III_1_12 hn _ _ p₁ p₂ hW' a b hpure with rfl | rfl
+    rcases chevalley_III_1_12 ℂ n hn _ _ p₁ p₂ hW' a b hpure with rfl | rfl
     · right
       rw [zero_smul, zero_add]
       exact Submodule.smul_mem _ _ (Submodule.mem_span_singleton_self _)
