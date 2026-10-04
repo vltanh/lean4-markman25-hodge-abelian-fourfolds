@@ -568,7 +568,9 @@ noncomputable def muStar : S F n ⊗[F] S F n →ₗ[F] S F n ⊗[F] S F n :=
   (kunnethXX F n).symm.toLinearMap ∘ₗ (ExteriorAlgebra.map (mu1 F n)).toLinearMap ∘ₗ
     (kunnethXX F n).toLinearMap
 
-/-- `c₁(𝒫) = Σᵢ π_X^*eᵢ ∪ π_X̂^*fᵢ ∈ H²(X × X̂)`, the first Chern class of the Poincaré bundle. -/
+/-- `c₁(𝒫) = Σᵢ π_X^*eᵢ ∪ π_X̂^*fᵢ ∈ H²(X × X̂)`, the first Chern class of the Poincaré bundle. Its
+sign depends on the identification `H¹(X̂) = H¹(X)*`; this is the sign for which the paper's
+Lemma 6.3.1 and Proposition 6.1.2 hold. -/
 noncomputable def c1P : ExtV F n :=
   ∑ i : Fin (2 * n), pullX F n (ExteriorAlgebra.ι F (e F n i)) *
     pullXHat F n (ExteriorAlgebra.ι F (f F n i))

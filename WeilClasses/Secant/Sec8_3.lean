@@ -102,7 +102,7 @@ theorem chF1_tmul_tau_decomp :
 /-- **Lemma 8.3.1** (`lemma-kappa-3-is-linearly-independent-from-h-cube`), first sentence: the rank
 of `Φ(F₁ ⊠ F₁)` is non-zero. Model: the rank is the degree-`0` coefficient of
 `ch(Φ(F₁ ⊠ F₁)) = φ(w ⊗ w)`, `w = chF1 d`; `d > 0` (the paper: a positive integer). -/
-theorem lemma8_3_1_rank : rankExt ℚ 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d)) ≠ 0 := by
+theorem lemma8_3_1_rank (hd : 0 < d) : rankExt ℚ 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d)) ≠ 0 := by
   sorry
 
 /-- The rank of `Φ(F₁ ⊠ F₁)` is `8d` (the rank of the sheaf `E` of Theorem 1.4.1(2); checked
@@ -115,7 +115,7 @@ invariant under the integral group `Spin(V)_P` acting by `ρ` (for `κ₃`: Coro
 `w ⊗ w = w ⊗ τ(τ w)` with `w, τ w ∈ P`). -/
 theorem lemma8_3_1_invariant :
     (PJac d hΘ hd).hClass (PJac_isCompl d hΘ hd) ^ 3 ∈ invariantsExt ℚ 3 (PJac d hΘ hd).spinPZ ∧
-      kappaDeg ℚ 3 3 (kappa ℚ 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d))) ∈
+      kappaDeg ℚ 3 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d)) ∈
         invariantsExt ℚ 3 (PJac d hΘ hd).spinPZ := by
   sorry
 
@@ -128,7 +128,7 @@ statement). (Checked numerically for `d = 1, 2, 3, 5, 7`.) -/
 theorem lemma8_3_1 :
     LinearIndependent ℚ
       ![(PJac d hΘ hd).hClass (PJac_isCompl d hΘ hd) ^ 3,
-        kappaDeg ℚ 3 3 (kappa ℚ 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d)))] := by
+        kappaDeg ℚ 3 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d))] := by
   sorry
 
 end Lemma831

@@ -36,9 +36,10 @@ The second half of §2.4 (the class `Θ`, `exp(√-d Θ)`, the plane `P_Θ` and 
 * The `F'`-linear extension of a rational endomorphism of `V_ℚ` (`F' = K, ℝ, ℂ`) is computed in the
   bases `basisV` (`WeilClasses.bcEndV`); `f` on `V_ℝ` is `KSecant.fR`.
 * The complex structure of `V_ℝ = H¹(X × X̂, ℝ)` induced by the complex structure `J` of
-  `H¹(X, ℝ)` (with `H^{1,0}(X)` its `i`-eigenspace) is `productStructure n J : (y, w) ↦ (-y ∘ J, J w)`
-  (the paper's footnote in §2.4: `I_{X̂}` acts by composing with `-I_X`); `V^{1,0} = V10 n I` is its
-  `i`-eigenspace in `V_ℂ`.
+  `H¹(X, ℝ)` (with `H^{1,0}(X)` its `i`-eigenspace) is, in the paper's convention (footnote in §2.4:
+  the dual of the tangent complex structures, a dual composing with `-I`),
+  `productStructure n J : (y, w) ↦ (y ∘ J, -J w)`, the negative of the standard Hodge structure;
+  the paper's `V^{1,0} = V10 n I` is its `i`-eigenspace in `V_ℂ`.
 -/
 
 @[expose] public section

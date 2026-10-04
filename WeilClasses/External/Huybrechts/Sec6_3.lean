@@ -38,7 +38,9 @@ theorem huybrechts_lemma9_23_X (k : ℕ) {s : S F n} (hs : s ∈ ⋀[F]^k (H1 F 
 
 /-- **[Huybrechts, Lemma 9.23]** for `X̂ → X` (footnote in the proof of Lemma 6.3.1):
 `φ_𝒫 : H^k(X̂) → H^{2n-k}(X)` equals `(-1)^{k(k+1)/2+n} PD_k`, where `PD_k` is read as the inverse
-of `PD_X : H^{2n-k}(X) → H^k(X̂)` (see the module docstring). -/
+of `PD_X : H^{2n-k}(X) → H^k(X̂)` (see the module docstring; the paper's wording is ambiguous, and
+this is the reading compatible with the sign of `c₁(𝒫)` fixed by Lemma 6.3.1 and Proposition 6.1.2,
+`WeilClasses.Correspondence.FourierMukai`). -/
 theorem huybrechts_lemma9_23_Xhat (k : ℕ) {t : SHat F n}
     (ht : t ∈ ⋀[F]^k (Module.Dual F (H1 F n))) :
     phiP F n t = (-1 : F) ^ (k * (k + 1) / 2 + n) • PDXinv F n t := by

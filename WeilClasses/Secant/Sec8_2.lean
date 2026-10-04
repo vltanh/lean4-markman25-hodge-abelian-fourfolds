@@ -38,10 +38,23 @@ open CliffordAlgebra
 variable (d : ℚ)
 
 /-- (§8.2, TeX lines 3735–3739) `exp(√-d Θ) = 1 + √-dΘ - (d/2)Θ² - d√-d[pt] = α + √-d β` in
-`H^{ev}(X, K)` (`Θ = ThetaStd ℚ 3`, `Θ³ = 6[pt]`). -/
-theorem expUS_ThetaStd_eq :
+`H^{ev}(X, K)` (`Θ = ThetaStd ℚ 3`, `Θ³ = 6[pt]`), for `d > 0` (the paper: a positive integer). -/
+theorem expUS_ThetaStd_eq (hd : 0 < d) :
     expUS 3 d (ThetaStd ℚ 3) =
       bcS ℚ (Kd d) 3 (alphaJac d) + Kd.sqrtNeg d • bcS ℚ (Kd d) 3 (betaJac d) := by
+  sorry
+
+/-- **Example 8.2.2** (no label; TeX lines 3773–3775), cohomological part: on an abelian surface
+(`n = 2`), if `w, h ∈ S⁺_ℚ = H^{ev}(X, ℚ)` satisfy `(w, w)_S < 0`, `(h, h)_S < 0` and
+`(w, h)_S = 0`, then `ℙ(span_ℚ{w, h})` is a secant to the spinor variety inducing complex
+multiplication by `ℚ(√-d)`, `d = (w, w)_S (h, h)_S / 4`: `span_ℚ{w, h}` is the rational plane of a
+`K`-secant. The paper cites [M2, Prop. 1.7] (Markman, *The monodromy of generalized Kummer varieties
+and algebraic cycles on their intermediate Jacobians*, JEMS 25 (2023)); for `n = 2` the pure spinors
+in `S⁺` are its isotropic vectors. That `w = ch(F)` and that `h` is algebraic play no role in this
+statement. -/
+theorem example8_2_2 (w h : S ℚ 2) (hw : w ∈ Splus ℚ 2) (hh : h ∈ Splus ℚ 2)
+    (hww : mukai ℚ 2 w w < 0) (hhh : mukai ℚ 2 h h < 0) (hwh : mukai ℚ 2 w h = 0) :
+    ∃ P : KSecant 2 (mukai ℚ 2 w w * mukai ℚ 2 h h / 4), P.Pℚ = Submodule.span ℚ {w, h} := by
   sorry
 
 /-- (Proof of Lemma 8.2.1, TeX lines 3758–3764) The product

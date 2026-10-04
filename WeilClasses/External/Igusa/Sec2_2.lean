@@ -53,7 +53,8 @@ theorem igusa_lemma1_range (u₁ u₂ : S F n) (h₁ : IsEvenPureSpinor F n u₁
 
 /-- **[Igusa, Lemma 1]** (the action on `W₂`), as used in §2.2: an element `g` of
 `Spin(V_F)_{ℓ₁,ℓ₂}` acts on `W₂ ≅ W₁*` by the inverse transpose of its action on `W₁`, i.e.
-`(ρ(g) x, ρ(g) y)_V = (x, y)_V` for `x ∈ W₁`, `y ∈ W₂`. -/
+`(ρ(g) x, ρ(g) y)_V = (x, y)_V` for `x ∈ W₁`, `y ∈ W₂` (this is the isometry property of `ρ(g)`
+restricted to `W₁ × W₂`, which identifies `W₂` with `W₁*`). -/
 theorem igusa_lemma1_dual (u₁ u₂ : S F n)
     (g : (lineStabilizer F n u₁ ⊓ lineStabilizer F n u₂ : Subgroup (Spin F n)))
     (x y : V F n) (hx : x ∈ ann F n u₁) (hy : y ∈ ann F n u₂) :
@@ -82,7 +83,8 @@ theorem igusa_lemma2_stab_odd (hn : 3 ≤ n) (hodd : Odd n) (u₁ u₂ : S F n)
 /-- **[Igusa, Lemma 2]** and the remark following it, `n` even, as used in Remark 2.2.3: for
 `n ≥ 3` even, the stabilizer of `w = a u₁ + b u₂` has two connected components, the identity
 component being the pointwise stabilizer of `u₁` and `u₂`. For `F`-points: the pointwise stabilizer
-of `u₁, u₂` is a normal subgroup of index at most `2` of the stabilizer of `w`. -/
+of `u₁, u₂` is a normal subgroup of index `2` of the stabilizer of `w` (an element of `Spin(V_F)`
+exchanging the lines of `u₁` and `u₂` and fixing `w` exists for `n` even). -/
 theorem igusa_lemma2_stab_even (hn : 3 ≤ n) (heven : Even n) (u₁ u₂ : S F n)
     (h₁ : IsEvenPureSpinor F n u₁) (h₂ : IsEvenPureSpinor F n u₂)
     (hW : ann F n u₁ ⊓ ann F n u₂ = ⊥) (a b : F) (ha : a ≠ 0) (hb : b ≠ 0) :
@@ -91,7 +93,7 @@ theorem igusa_lemma2_stab_even (hn : 3 ≤ n) (heven : Even n) (u₁ u₂ : S F 
       ((fixingSpin F n (Submodule.span F {u₁, u₂})).subgroupOf
           (fixingSpin F n (Submodule.span F {a • u₁ + b • u₂}))).Normal ∧
       (fixingSpin F n (Submodule.span F {u₁, u₂})).relIndex
-          (fixingSpin F n (Submodule.span F {a • u₁ + b • u₂})) ≤ 2 := by
+          (fixingSpin F n (Submodule.span F {a • u₁ + b • u₂})) = 2 := by
   sorry
 
 end WeilClasses

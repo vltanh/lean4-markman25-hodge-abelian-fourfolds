@@ -124,26 +124,28 @@ theorem remark2_3_1_altPart_add_pairing : altPart F n (B0 F n + pairing F n) = B
 theorem B0_eq_half_pairing_add_B0bar : B0 F n = (2 : F)⁻¹ • pairing F n + B0bar F n := by
   sorry
 
-/-- **Remark 2.3.1** (`remark-non-equivariance-of-varphi-tilde`): `B̄₀ = ½ c₁(𝒫)`.
-
-Reading: the remark identifies the alternating form `B̄₀ ∈ ∧²V*` with the class
-`½c₁(𝒫) ∈ H²(X × X̂) = ∧²V` ([BL, Th. 2.5.1 and 2.6(2b)]); the identification of `∧²V*` with `∧²V`
-is the one by which the remark is used (it motivates Prop. 6.1.2 through Lemma 6.1.1): under the
-isomorphism `φ_𝒫 ⊗ ψ_{𝒫⁻¹[n]} : H*(X̂ × X) → H*(X × X̂)` (Poincaré duality up to sign, Lemma 6.3.2),
-the change of form by `B̄₀` on `⋀•V` (the exponential of contraction with `B̄₀`; `changeB0bar`)
-becomes cup product with `exp(½c₁(𝒫))`. (Checked numerically for `n = 1, 2`.) With the
-identification through the determinant pairing induced by `(·,·)_V`, `B̄₀` corresponds to
-`-½c₁(𝒫)` instead (`B0bar_eq_neg_half_extPairing_c1P`); the sign of `c₁(𝒫)` is fixed by
-Lemma 6.3.1 and Prop. 6.1.2 (see `WeilClasses.Correspondence.FourierMukai`). -/
-theorem remark2_3_1_B0bar_eq_half_c1P (x : ExtV F n) :
+/-- The operator form of the identification of `B̄₀` with a multiple of `c₁(𝒫)` (Remark 2.3.1), the
+form in which the proof of Proposition 6.1.2 uses it: under the isomorphism
+`φ_𝒫 ⊗ ψ_{𝒫⁻¹[n]} : H*(X̂ × X) → H*(X × X̂)` (Poincaré duality up to sign, Lemma 6.3.2), the change of
+form by `B̄₀` on `⋀•V` (the exponential of contraction with `B̄₀`; `changeB0bar`) becomes cup product
+with `exp(½c₁(𝒫))`. (Checked numerically for `n = 1, 2`.) Not a statement of the paper. -/
+theorem PiMap_changeB0bar (x : ExtV F n) :
     PiMap F n (changeB0bar F n x) =
       IsNilpotent.exp ((2 : F)⁻¹ • c1P F n) * PiMap F n x := by
   sorry
 
-/-- Sign bridge for Remark 2.3.1: through the determinant pairing `⟨a ∧ b, x ∧ y⟩ =
-(a, x)_V (b, y)_V - (a, y)_V (b, x)_V`, the class `c₁(𝒫) = Σ eᵢ ∧ fᵢ` is the alternating form
-`(v₁, v₂) ↦ θ₁(w₂) - θ₂(w₁) = -2 B̄₀(v₁, v₂)`. -/
-theorem B0bar_eq_neg_half_extPairing_c1P (v₁ v₂ : V F n) :
+/-- **Remark 2.3.1** (`remark-non-equivariance-of-varphi-tilde`), corrected: `B̄₀ = -½ c₁(𝒫)`. The
+alternating form `B̄₀ ∈ ∧²V*` is identified with a class in `H²(X × X̂) = ∧²V` through the determinant
+pairing induced by `(·,·)_V`, `⟨a ∧ b, x ∧ y⟩ = (a, x)_V (b, y)_V - (a, y)_V (b, x)_V`; the class
+`c₁(𝒫) = Σ eᵢ ∧ fᵢ` is the alternating form `(v₁, v₂) ↦ θ₁(w₂) - θ₂(w₁) = -2 B̄₀(v₁, v₂)`.
+
+**Correction of the paper** (agreed with the project owner; REPORT.md). The paper states
+`B̄₀ = ½c₁(𝒫)` ([BL, Th. 2.5.1 and 2.6(2b)]), which holds only for the opposite sign of `c₁(𝒫)`.
+The sign `c₁(𝒫) = +Σ eᵢ ∪ fᵢ` is forced by Lemma 6.3.1, Lemma 6.1.1 and Proposition 6.1.2, which
+fail with the other sign (`WeilClasses.Correspondence.FourierMukai`); no sign makes all of the
+paper's sign statements hold (compare Lemma 6.3.2). The operator form used in the proof of
+Proposition 6.1.2 is `PiMap_changeB0bar`. -/
+theorem remark2_3_1_B0bar_eq_neg_half_c1P (v₁ v₂ : V F n) :
     B0bar F n v₁ v₂ = -((2 : F)⁻¹ * extPairing F n (c1P F n)
         (ExteriorAlgebra.ι F v₁ * ExteriorAlgebra.ι F v₂)) := by
   sorry

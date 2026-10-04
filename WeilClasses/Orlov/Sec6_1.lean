@@ -2,6 +2,7 @@ module
 
 public import WeilClasses.Orlov.Defs
 public import WeilClasses.Spinor.Integral
+public import WeilClasses.Chevalley.Sec2_3
 
 /-!
 # §6.1: `Spin(V)`-equivariance properties of Orlov's equivalence
@@ -10,7 +11,8 @@ Statements of the paper's §6.1 (TeX lines 2139–2348), in the model where Orlo
 isomorphism `φ` (6.1.3) is the composite `(id ⊗ ψ_{𝒫⁻¹[n]}) ∘ μ^*` (`phiOrlov`, see
 `WeilClasses.Orlov.Defs`):
 
-* `φ` is an isomorphism (`phiOrlov_bijective`); (6.1.4) as printed (`rhoPrime_eq_phiOrlov_conj`);
+* `φ` is an isomorphism (`phiOrlov_bijective`), integrally (`phiOrlov_image_SZZ`); (6.1.4) as
+  printed (`rhoPrime_eq_phiOrlov_conj`);
 * Lemma 6.1.1 (`lemma6_1_1`);
 * `ρ'_g` preserves the decreasing filtration (6.1.5) with associated graded action `ρ`
   (`rhoPrime_mem_extFiltGE`, `rhoPrime_projDeg`; [GLO, Prop. 4.3.7, Cor. 4.3.8]);
@@ -44,6 +46,13 @@ variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
 /-- (6.1.3) Orlov's cohomological map `φ : S ⊗ S → ⋀•V` is an isomorphism. -/
 theorem phiOrlov_bijective : Function.Bijective (phiOrlov F n) := by
+  sorry
+
+/-- (6.1.3) over the integers: `φ` maps `H*(X × X, ℤ) = S_ℤ ⊗ S_ℤ` onto `H*(X × X̂, ℤ) = ⋀•V_ℤ` (the
+paper's `φ` is the correspondence isomorphism of an equivalence of derived categories, between
+integral cohomology groups; checked numerically for `n = 1, 2`). -/
+theorem phiOrlov_image_SZZ (n : ℕ) :
+    phiOrlov ℚ n '' (SZZ n : Set (S ℚ n ⊗[ℚ] S ℚ n)) = (ExtZ n : Set (ExtV ℚ n)) := by
   sorry
 
 /-- **(6.1.4)** (`rho-prime-g`) as printed: `ρ'_g = φ (m_g × m†_g) φ⁻¹`. -/

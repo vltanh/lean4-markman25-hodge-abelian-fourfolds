@@ -9,8 +9,9 @@ public import Mathlib.LinearAlgebra.CliffordAlgebra.Contraction
 Definitions for the paper's §2.3 ("The isomorphism `φ̃ : S ⊗ S → ∧*V`") and for the map `φ` of
 (2.2.5) (defined in the proof of Lemma 2.2.6).
 
-* `SHat F n = ⋀• H¹(X̂, F)` (`H¹(X̂) = H¹(X)*`), its basis `f_K`, `[pt_X̂] = f₁ ∧ ⋯ ∧ f_{2n}` and
-  `∫_X̂`; `ExtV F n = ⋀• V_F`.
+(`H*(X̂) = SHat`, `⋀•V = ExtV` and `[pt_X̂]` are in `WeilClasses.Defs` and
+`WeilClasses.Spinor.Embeddings`.)
+
 * `B0`: the paper's bilinear form `B₀(v₁, v₂) = θ₂(w₁)` for `vᵢ = (wᵢ, θᵢ)` (in our order
   `vᵢ = (θᵢ, wᵢ)`), with `B₀(u, u) = ½(u, u)_V = Q(u)`; its alternating part `B0bar`.
 * `Lprime x = L_x + δ_x` on `⋀•V` (`δ_x` = contraction with `B₀(x, ·)`), the algebra homomorphism
@@ -19,11 +20,10 @@ Definitions for the paper's §2.3 ("The isomorphism `φ̃ : S ⊗ S → ∧*V`")
   `CliffordAlgebra 0 = ExteriorAlgebra` for the bilinear form `-B₀`; `psi_apply_eq_psiPrime`
   (in `WeilClasses.Chevalley.Sec2_3`) is the bridge to the paper's definition.
 * The filtrations `C(V)_k` (`CFilt`, and `CFiltLT k = C(V)_{k-1}`), `F^k(⋀•V) = ⊕_{i ≤ k} ⋀^i V`
-  (`extFiltLE`), `F_k(⋀•V) = ⊕_{i ≥ k} ⋀^i V` (`extFiltGE`, (6.1.5)), the projection `projDeg k`
-  to `⋀^k V`.
-* The embeddings `S_X = ⋀•H¹(X) → C(V)` (`iotaX`, `w ↦ ι(0, w)`) and `S_X̂ → C(V)` (`iotaXHat`),
-  `[pt_X̂] ∈ C(V)` (`ptHatC`), Chevalley's `φ(u ⊗ v) = u [pt_X̂] τ(v)` (`varphi`, (2.2.5)) and
-  `φ̃ = ψ ∘ φ` (`varphiTilde`, (2.3.2)).
+  (`extFiltLE`), `F_k(⋀•V) = ⊕_{i ≥ k} ⋀^i V` (`extFiltGE`, (6.1.5)); the projection `projDeg k`
+  to `⋀^k V` is in `WeilClasses.Defs`.
+* Chevalley's `φ(u ⊗ v) = u [pt_X̂] τ(v)` (`varphi`, (2.2.5), in `WeilClasses.Spinor.Embeddings`,
+  with the embeddings `iotaX`, `iotaXHat` and `ptHatC`) and `φ̃ = ψ ∘ φ` (`varphiTilde`, (2.3.2)).
 * The symmetric variant of Remark 2.3.1 (`B₀` replaced by `½(·,·)_V`): `psiSym` (Mathlib's
   `CliffordAlgebra.equivExterior`) and `varphiTildeSym`; `changeB0bar`, the change of form by the
   alternating part `B̄₀` (so that `ψ = changeB0bar ∘ psiSym`).
@@ -39,8 +39,6 @@ open CliffordAlgebra TensorProduct
 section Defs
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
-
-/-! ## Cohomology of `X̂` and of `X × X̂` -/
 
 /-! ## The bilinear form `B₀` -/
 
@@ -151,7 +149,7 @@ noncomputable def extFiltGE (k : ℕ) : Submodule F (ExtV F n) :=
 /-! ## Chevalley's `φ : S ⊗ S → C(V)` (2.2.5) -/
 
 /-- **(2.3.2)** (`eq-tilde-varphi`) `φ̃ = ψ ∘ φ : S ⊗ S → ⋀•V`. Via the Künneth theorem this is an
-isomorphism `H*(X × X) → H*(X̂ × X)` (§2.3, §6.3). -/
+isomorphism `H*(X × X) → H*(X × X̂)` (§2.3; in the Künneth order of §6.3, `H*(X̂ × X)`). -/
 noncomputable def varphiTilde : S F n ⊗[F] S F n →ₗ[F] ExtV F n := psi F n ∘ₗ varphi F n
 
 /-! ## The symmetric variant (Remark 2.3.1) -/

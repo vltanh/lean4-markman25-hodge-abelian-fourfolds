@@ -26,7 +26,8 @@ basis `basisExt` of `⋀• V_ℝ` along Mathlib's linear isomorphism `C(V_ℝ) 
 (`CliffordAlgebra.equivExterior`) (`WeilClasses.spinTopology`, not an instance). `S^{-p,p}_ℂ` is the
 subspace of `S⁺_ℂ` on which the element of the identity component over `cos θ + sin θ I` acts by
 `e^{-2ipθ}` (`z^{-p} z̄^{p}`, `z = e^{iθ}`, the convention for which `I` acts on `V^{1,0}` by `z`);
-for `I = I_{V_ℝ}`, `H^{p,q}(X) ⊆ S^{(p-q)/2, (q-p)/2}` and `S^{0,0}_ℂ = ⊕_p H^{p,p}(X)`. Only
+for `I = I_{V_ℝ}` (the paper's convention, the negative of the standard one),
+`H^{p,q}(X) ⊆ S^{(q-p)/2, (p-q)/2}` and `S^{0,0}_ℂ = ⊕_p H^{p,p}(X)`. Only
 `S^{0,0}` (the invariants) enters the results.
 -/
 

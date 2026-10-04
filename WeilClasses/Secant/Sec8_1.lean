@@ -225,10 +225,10 @@ and the line of `Θⁿ` to that of `1`; i.e. it extends `ι ∘ τ` (`τ(exp(kΘ
 **Correction of the paper** (agreed with the project owner; REPORT.md). As printed ("extends `ι`") the
 claim is false: the matrix acts on the pure spinors by the Möbius map `k ↦ -1/k`
 (`m_exp_mem_span_hdgMatrix`), so it maps the line of `exp(kΘ)` to that of `exp(-k⁻¹Θ)`, not of
-`ι(exp(kΘ)) ∝ exp(k⁻¹Θ)` (checked numerically for `n = 1, 2, 3`, `k = 2`); no element of
-`SO⁺_Hdg(V_K)` induces `k ↦ 1/k` (that is `[[0, f⁻¹], [f, 0]]`, of determinant `-1`). The paper uses
-the claim only to lift `ι` to `Aut(Dᵇ(X))` and obtain an object of non-zero rank, which `ι ∘ τ` also
-gives. -/
+`ι(exp(kΘ)) ∝ exp(k⁻¹Θ)` (checked numerically for `n = 1, 2, 3`, `k = 2`). (An element
+`[[0, c f⁻¹], [c f, 0]]` of `SO⁺_Hdg(V_K)` inducing `k ↦ 1/k` needs `-c² = 1`, so it exists only for
+`K = ℚ(√-1)`.) The paper uses the claim only to lift `ι` to `Aut(Dᵇ(X))` and obtain an object of
+non-zero rank, which `ι ∘ τ` also gives. -/
 theorem iota_tau_extends (hd : 0 < d) (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
     (hθ : Function.Bijective (thetaExt n (Kd d) Θ)) (g : Spin (Kd d) n)
     (hg : (rho (Kd d) n g : V (Kd d) n →ₗ[Kd d] V (Kd d) n) =

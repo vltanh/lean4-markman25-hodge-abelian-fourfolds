@@ -59,7 +59,8 @@ theorem muStar_basis (K L : Finset (Fin (2 * n))) :
   sorry
 
 /-- (§6.3, TeX lines 2705–2716 and footnote) The cohomological action of `Ψ_{𝒫⁻¹[n]}` is
-`Ψ_{𝒫⁻¹[n]}(e_K) = σ_K PD(e_K) = σ_K ε_{K,K^c} f_{K^c}`, `σ_K = (-1)^{k(k+3)/2}`. -/
+`Ψ_{𝒫⁻¹[n]}(e_K) = σ_K PD(e_K) = σ_K ε_{K,K^c} f_{K^c}`, `σ_K = (-1)^{k(k+3)/2}`. (This, (6.3.1) and
+(6.3.2) depend on the sign convention `c₁(𝒫) = +Σ eᵢ ∪ fᵢ`, `WeilClasses.Correspondence.FourierMukai`.) -/
 theorem psiPinvShift_basis (K : Finset (Fin (2 * n))) :
     psiPinvShift F n (basisS F n K) =
       ((-1 : F) ^ (K.card * (K.card + 3) / 2) * epsSign F n K Kᶜ) • basisSHat F n Kᶜ := by
@@ -137,8 +138,9 @@ the footnote's `(-1)^{ℓ(ℓ+1)/2 + n} ε_{L,L^c} e_{L^c}`; they differ by `(-1
 printed sign: `n = 1`, `α = f₁`, `β = f₂ ∧ e₁ ∧ e₂`: the left side is `1`, the printed right side
 `-1`. The paper only uses that the map reverses degrees (Proposition 6.4.1), which is unaffected.
 
-Reading: `ψ_{𝒫⁻¹}` without shift, as printed (the proof says `φ_𝒫⁻¹ = ψ_{𝒫⁻¹}`, while
-`φ_𝒫⁻¹ = ψ_{𝒫⁻¹[n]} = (-1)ⁿ ψ_{𝒫⁻¹}`; the two `(-1)ⁿ` in the proof's first display cancel). -/
+Reading: `ψ_{𝒫⁻¹}` without shift, as printed. (The paper's proof says `φ_𝒫⁻¹ = ψ_{𝒫⁻¹}`, while
+`φ_𝒫⁻¹ = ψ_{𝒫⁻¹[n]} = (-1)ⁿ ψ_{𝒫⁻¹}`; a factor `(-1)ⁿ` is lost between its first and second
+displays. The statement for `ψ_{𝒫⁻¹}` is as printed.) -/
 theorem lemma6_3_2 (d : ℕ) {α : ExtV F n} (hα : α ∈ ⋀[F]^d (V F n)) (β : ExtV F n) :
     extPairing F n (PiMap0 F n α) β = (-1 : F) ^ (d * (d - 1) / 2) * integralExt F n (α * β) := by
   sorry

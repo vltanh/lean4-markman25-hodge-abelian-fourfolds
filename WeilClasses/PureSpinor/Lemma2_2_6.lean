@@ -37,7 +37,8 @@ ring of `X` is `hodgeRingX n J`.
 
 The Hodge structure on `C(V)` induced by `m : C(V) ≅ End(S)`, used in the paper's proof, is not
 formalized as such; in the model it is the action of the circle `exp(t I)` on `V` and of its lift
-`exp(t D_J)` on `S` (`D_J` the derivation of `⋀• H¹(X)` extending `J`).
+`exp(-t D_J)` on `S` (`D_J` the derivation of `⋀• H¹(X)` extending `J`; `I = I_{V_ℝ}` acts on the
+summand `H¹(X)` by `-J`).
 -/
 
 @[expose] public section

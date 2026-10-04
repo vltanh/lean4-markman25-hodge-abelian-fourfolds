@@ -11,18 +11,20 @@ public import Mathlib.Algebra.Algebra.Rat
 In the model (see `WeilClasses.Correspondence.Defs`), the geometric objects are replaced by their
 cohomology classes:
 
-* `c1P = c₁(𝒫) = Σᵢ π_X^*eᵢ ∪ π_X̂^*fᵢ ∈ H²(X × X̂) = ⋀²V`, the first Chern class of the
-  (normalized) Poincaré line bundle. **Sign convention.** The class of `𝒫` in
+* `c1P = c₁(𝒫) = Σᵢ π_X^*eᵢ ∪ π_X̂^*fᵢ ∈ H²(X × X̂) = ⋀²V` (`WeilClasses.Defs`), the first Chern
+  class of the (normalized) Poincaré line bundle. **Sign convention.** The class of `𝒫` in
   `H¹(X) ⊗ H¹(X̂) = End(H¹(X))` is `±id`, the sign depending on the identification
   `H¹(X̂) = H¹(X)*` ([BL, Th. 2.5.1, 2.6(2b)]). We fix the sign `+`: it is the one for which the
   footnote formula `ψ_{𝒫⁻¹[n]}(e_K) = (-1)^{k(k+3)/2} ε_{K,K^c} f_{K^c}` (proof of Lemma 6.3.1),
   Lemma 6.3.1 and Proposition 6.1.2 hold (checked numerically for `n = 1, 2`; with the opposite sign
-  all three fail). No sign makes all of the paper's sign formulas hold: with this sign, Lemma 6.3.2
-  fails in odd degrees (`WeilClasses.Orlov.Sec6_3`), the footnote's [Huybrechts, Lemma 9.23] for
-  `H^k(X̂) → H^{2n-k}(X)` holds only with `PD_k` read as the inverse of `PD_X` (it fails by `(-1)^k`
-  with `PD(f_L) = ε_{L,L^c} e_{L^c}`, `WeilClasses.External.Huybrechts.Sec6_3`), and Remark 2.3.1's
-  `B̄₀ = ½c₁(𝒫)` holds through the isomorphism `φ_𝒫 ⊗ ψ_{𝒫⁻¹[n]}` but is `B̄₀ = -½c₁(𝒫)` through
-  the determinant pairing (`WeilClasses.Chevalley.Sec2_3`).
+  all three fail; so does Lemma 6.1.1). No sign makes all of the paper's sign formulas hold: with
+  this sign, Lemma 6.3.2 fails in odd degrees and Remark 2.3.1's `B̄₀ = ½c₁(𝒫)` fails (it is
+  `B̄₀ = -½c₁(𝒫)` through the determinant pairing); both are formalized with corrected signs, as
+  agreed with the project owner (`WeilClasses.Orlov.Sec6_3`, `WeilClasses.Chevalley.Sec2_3`). The
+  footnote's [Huybrechts, Lemma 9.23] for `H^k(X̂) → H^{2n-k}(X)` holds only with `PD_k` read as the
+  inverse of `PD_X` (it fails by `(-1)^k` with `PD(f_L) = ε_{L,L^c} e_{L^c}`,
+  `WeilClasses.External.Huybrechts.Sec6_3`). The main theorems do not depend on the sign: the other
+  sign changes the relevant classes by the pullback along `-1` on `X̂`.
 * `chP = ch(𝒫) = exp(c₁(𝒫))` and `chPinvShift = ch(𝒫⁻¹[n]) = (-1)ⁿ exp(-c₁(𝒫))` (the shift `[n]`
   multiplies the Chern character by `(-1)ⁿ`), in `H*(X × X̂) = H*(X̂ × X) = ⋀•V`.
 * `phiP = φ_𝒫 : H*(X̂) → H*(X)`, the cohomological transform `ch(𝒫)_*` of `Φ_𝒫 : Dᵇ(X̂) → Dᵇ(X)`

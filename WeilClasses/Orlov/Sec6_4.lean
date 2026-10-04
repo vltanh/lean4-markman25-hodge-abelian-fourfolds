@@ -64,6 +64,12 @@ variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 def HasWeight (U : Submodule F (ExtV F n)) (k : ℕ) : Prop :=
   U ≤ extFiltGE F n k ∧ ¬ U ≤ extFiltGE F n (k + 1)
 
+/-- (§6.4, TeX line 2867) "Both [`ρ` and `ρ'`] factor through the image `SO⁺(V)` of `Spin(V)`":
+`ρ'_g` depends only on `ρ(g)` (`ρ` on `⋀•V` is `⋀ρ(g)` by definition). -/
+theorem rhoPrime_factors (g g' : Spin F n) (h : rho F n g = rho F n g') :
+    rhoPrime F n g = rhoPrime F n g' := by
+  sorry
+
 /-- (§6.4, TeX lines 2891–2895) Let `U` be an irreducible representation of a subgroup
 `G ⊆ Spin(V_F)` acting by `ρ'`, of weight `k`. Then `U ∩ F_{k+1} = 0` (a proper subrepresentation of
 `U`), so `U` projects injectively and `G`-equivariantly (for the `ρ`-action) into `H^k`. -/

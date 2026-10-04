@@ -16,7 +16,7 @@ only `f^*Ξ_P = d Ξ_P` for `f = η(√-d)`, "verifying the condition on the pol
 [van Geemen, Def. 4.9]". The statement below is the (elementary) fact that this suffices: for
 `η(a + b√-d) = a + b f` with `f² = -d`, `f^*E = d E` implies `η(k)^*E = Nm(k) E` for every `k ∈ K`.
 The model of polarized abelian varieties of Weil type is `WeilClasses.PolarizedWeilType`
-(`WeilClasses.AbelianVariety.Defs`).
+(`WeilClasses.Defs`).
 -/
 
 @[expose] public section

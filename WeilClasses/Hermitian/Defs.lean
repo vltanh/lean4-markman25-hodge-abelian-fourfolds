@@ -14,8 +14,11 @@ public import WeilClasses.External.Chevalley.Sec3
 * Lemma 3.1.1: `ρ : Spin(V_ℚ)_P ≅ SO_+(V_ℚ)_f` (and the real version used in §4);
 * the `K`-valued form `H(x, y) = d (x, y)_V + √-d (f x, y)_V` of (3.1.2) (`KSecant.hermH`);
 * Lemma 3.1.2: `H` is Hermitian, `SO_+(V_ℚ)_f`-invariant, of signature `(n, n)`;
-  `SO_+(V_ℚ)_f` has finite index in `SU(V_ℚ, H)` — **suspected false as printed** (literal
-  reading), see `lemma3_1_2_finiteIndex`; corrected: `SO_+(V_ℚ)_f = SU(V_ℚ, H)`;
+  `SO_+(V_ℚ)_f` has finite index in `SU(V_ℚ, H)`, read with `SU(V_ℚ, H)` the special unitary group
+  of `H` (`V_ℚ` as a `K`-vector space, as the lemma says; `lemma3_1_2_finiteIndex`); with this
+  reading the index is in fact `1` (`lemma3_1_2_eq_SUH`). The literal reading (`ℚ`-determinant `1`)
+  gives `U(V_ℚ, H)`, of infinite index. The paper's proof of the finite index needs integrality at
+  its last step (a gap; REPORT.md);
 * the discriminant `det H ∈ ℚ^×/Nm(K^×)` (`KSecant.DiscIs`) and Lemma 3.1.3 (`det H = (-1)^n` for
   `P = P_Θ`).
 

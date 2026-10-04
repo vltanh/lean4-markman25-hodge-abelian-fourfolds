@@ -214,14 +214,14 @@ theorem _root_.WeilClasses.remark2_2_3_odd (hd : 0 < d) (hn : 3 ≤ n) (hodd : O
 /-- **Remark 2.2.3** (`remark-stabilizer-of-w-may-have-two-connected-components`), `n` even
 ([Igusa, Lemma 2] and the remark after it): "the stabilizer has two connected components and the
 identity component is `Spin(V_K)_P`". Reading for the group of `K`-points: `Spin(V_K)_P` is a normal
-subgroup of index at most `2` of the stabilizer of `w` in `Spin(V_K)`. (The index is in fact `2`:
-the non-identity component, the elements exchanging `ℓ₁` and `ℓ₂`, has `K`-points.) -/
+subgroup of index `2` of the stabilizer of `w` in `Spin(V_K)` (the non-identity component, the
+elements exchanging `ℓ₁` and `ℓ₂`, has `K`-points). -/
 theorem _root_.WeilClasses.remark2_2_3_even (hd : 0 < d) (hn : 3 ≤ n) (heven : Even n)
     (hW : P.W₁ ⊓ P.W₂ = ⊥) (w : S (Kd d) n) (hwP : w ∈ P.PK)
     (hw₁ : w ∉ Submodule.span (Kd d) {P.u₁}) (hw₂ : w ∉ Submodule.span (Kd d) {P.u₂}) :
     P.spinPK ≤ fixingSpin (Kd d) n (Submodule.span (Kd d) {w}) ∧
       (P.spinPK.subgroupOf (fixingSpin (Kd d) n (Submodule.span (Kd d) {w}))).Normal ∧
-      P.spinPK.relIndex (fixingSpin (Kd d) n (Submodule.span (Kd d) {w})) ≤ 2 := by
+      P.spinPK.relIndex (fixingSpin (Kd d) n (Submodule.span (Kd d) {w})) = 2 := by
   sorry
 
 /-- **Remark 2.2.3** (`remark-stabilizer-of-w-may-have-two-connected-components`), "in particular,

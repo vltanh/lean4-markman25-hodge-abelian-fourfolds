@@ -29,7 +29,7 @@ variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 noncomputable def basisSHat : Module.Basis (Finset (Fin (2 * n))) F (SHat F n) :=
   ((Pi.basisFun F (Fin (2 * n))).dualBasis).ExteriorAlgebra
 
-/-- `[pt_X̂] = f₁ ∧ ⋯ ∧ f_{2n} ∈ H^{2n}(X̂, F)` (proof of Lemma 2.3.2). -/
+/-- `[pt_X̂] = f₁ ∧ ⋯ ∧ f_{2n} ∈ H^{2n}(X̂, F)` ((2.2.5), in the proof of Lemma 2.2.6). -/
 noncomputable def ptHat : SHat F n := basisSHat F n Finset.univ
 
 /-- Integration `∫_X̂ : H*(X̂, F) → F`: the coefficient of `[pt_X̂] = f₁ ∧ ⋯ ∧ f_{2n}`. -/

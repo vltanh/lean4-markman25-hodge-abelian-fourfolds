@@ -68,8 +68,9 @@ theorem thetaMap_apply_eq_eval2 (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ 
   sorry
 
 /-- `θ` is a morphism of Hodge structures `H¹(X̂, ℝ) = H¹(X, ℝ)* → H¹(X, ℝ)` when `Θ` is of type
-`(1,1)`: it intertwines the complex structure `y ↦ -y ∘ J` of `H¹(X̂, ℝ)` (footnote in §2.4) with
-`J` (§2.4, after (2.4.3): "`θ` is an isomorphism of rational Hodge structures under the
+`(1,1)`: it intertwines the standard complex structure `y ↦ -y ∘ J` of `H¹(X̂, ℝ) = H¹(X, ℝ)*` with
+`J` (the paper's footnote in §2.4 uses the negatives `y ↦ y ∘ J` and `-J`; the statement is the
+same) (§2.4, after (2.4.3): "`θ` is an isomorphism of rational Hodge structures under the
 identification of `H¹(X, ℚ)*` with `H¹(X̂, ℚ)`"). -/
 theorem thetaExt_comp_neg_dualMap (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J)
     (Θ : S ℚ n) (hΘ : Θ ∈ hodgeClassesX n J 1) :

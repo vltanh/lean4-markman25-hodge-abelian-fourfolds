@@ -256,7 +256,7 @@ theorem theorem1_4_1_4_finrank (hJ : IsComplexStructure J) (hΘ : IsAmple 3 J (T
 acting by `(-1)^i` on `H^{2i}`, so `κ(τ x) = τ(κ x)`. Relates Theorem 1.4.1(4) to Lemma 8.3.1 (which
 is about `Φ(F₁ ⊠ F₁)`, with the same Chern character as `Φ(F₂ ⊠ F₁)`). -/
 theorem kappa3E_eq_neg :
-    kappa3E d = -kappaDeg ℚ 3 3 (kappa ℚ 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d))) := by
+    kappa3E d = -kappaDeg ℚ 3 3 (phiOrlov ℚ 3 (chF1 d ⊗ₜ[ℚ] chF1 d)) := by
   sorry
 
 end Theorem141

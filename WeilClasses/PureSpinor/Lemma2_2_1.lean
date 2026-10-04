@@ -126,8 +126,8 @@ theorem isCompl_of_inf_eq_bot (hW : P.W₁ ⊓ P.W₂ = ⊥) : IsCompl P.W₁ P.
 /-! ## Lemma 2.2.1 -/
 
 /-- **Lemma 2.2.1** (`lemma-P-is-non-isotropic-iff-W-1-and-W-2-are-transversal`), first sentence,
-as printed (true for all `n`): `P` is isotropic with respect to the Mukai pairing (1.2.3) if and
-only if `W₁ ∩ W₂ ≠ 0`. The hypothesis `0 < d` is the paper's "`K` purely imaginary" (it is implied
+as printed (true for all `n`): `P` is isotropic with respect to the Mukai pairing (1.2.3) (the
+pairing vanishes identically on `P`) if and only if `W₁ ∩ W₂ ≠ 0`. The hypothesis `0 < d` is the paper's "`K` purely imaginary" (it is implied
 by the existence of `P`). -/
 theorem _root_.WeilClasses.lemma2_2_1 (hd : 0 < d) : P.IsIsotropic ↔ P.W₁ ⊓ P.W₂ ≠ ⊥ := by
   sorry

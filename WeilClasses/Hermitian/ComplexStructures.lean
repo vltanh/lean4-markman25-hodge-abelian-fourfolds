@@ -6,7 +6,8 @@ public import WeilClasses.Hermitian.Defs
 # Elements of `Spin(V)_P` which are complex structures of abelian varieties of Weil type (§3.2)
 
 §3.2 of the paper (TeX lines 1611–1706), under Assumption 2.4.1. Let `I ∈ ρ(Spin(V_ℝ)_P)` be a
-complex structure of `V_ℝ` (`I = ρ(Ĩ)`, `Ĩ ∈ Spin(V_ℝ)_P`, `KSecant.spinPR`):
+complex structure of `V_ℝ` (`I = ρ(Ĩ)`, `Ĩ ∈ Spin(V_ℝ)_P`, `KSecant.spinPR`; before (3.2.1), TeX line
+1678, the paper writes `Spin(V_ℝ)_w`, a misprint for `Spin(V_ℝ)_P`):
 
 * `I` commutes with `f`, `(I ∘ f)² = d`, and `ν(I)` is the multiplicity of `√d` as an eigenvalue of
   `I ∘ f` (`KSecant.nu`);
