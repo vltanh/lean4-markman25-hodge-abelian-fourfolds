@@ -97,13 +97,228 @@ def stdAlt (r : ℕ) : Matrix (Fin (r + r)) (Fin (r + r)) R :=
 
 /-- The normalization of §10.1 for `r = 2`: `Pf [[0, I₂], [-I₂, 0]] = 1`. -/
 theorem pf4_stdAlt : pf4 (stdAlt (R := R) 2) = 1 := by
-  sorry
+  have h1 : stdAlt (R := R) 2 0 2 = 1 := rfl
+  have h2 : stdAlt (R := R) 2 1 3 = 1 := rfl
+  have h3 : stdAlt (R := R) 2 0 1 = 0 := rfl
+  have h4 : stdAlt (R := R) 2 2 3 = 0 := rfl
+  have h5 : stdAlt (R := R) 2 0 3 = 0 := rfl
+  have h6 : stdAlt (R := R) 2 1 2 = 0 := rfl
+  simp [pf4, h1, h2, h3, h4, h5, h6]
+
+/-- The increasing enumerations of `{0, …, 5} ∖ {0, j}` (the five minors of the first-row
+expansion of `pf6`). -/
+theorem s10_skipTwo_1 : skipTwo ⟨((0 : Fin 6), (0 : Fin 5).succ), Fin.succ_pos _⟩ = ![2, 3, 4, 5] := by
+  funext k; fin_cases k <;> rfl
+
+theorem s10_skipTwo_2 : skipTwo ⟨((0 : Fin 6), (1 : Fin 5).succ), Fin.succ_pos _⟩ = ![1, 3, 4, 5] := by
+  funext k; fin_cases k <;> rfl
+
+theorem s10_skipTwo_3 : skipTwo ⟨((0 : Fin 6), (2 : Fin 5).succ), Fin.succ_pos _⟩ = ![1, 2, 4, 5] := by
+  funext k; fin_cases k <;> rfl
+
+theorem s10_skipTwo_4 : skipTwo ⟨((0 : Fin 6), (3 : Fin 5).succ), Fin.succ_pos _⟩ = ![1, 2, 3, 5] := by
+  funext k; fin_cases k <;> rfl
+
+theorem s10_skipTwo_5 : skipTwo ⟨((0 : Fin 6), (4 : Fin 5).succ), Fin.succ_pos _⟩ = ![1, 2, 3, 4] := by
+  funext k; fin_cases k <;> rfl
+
+/-- `pf6` written out along the first row, with the minors made explicit. -/
+theorem s10_pf6_expand (A : Matrix (Fin 6) (Fin 6) R) :
+    pf6 A = A 0 1 * (A 2 4 * A 3 5 - A 2 3 * A 4 5 - A 2 5 * A 3 4) -
+      A 0 2 * (A 1 4 * A 3 5 - A 1 3 * A 4 5 - A 1 5 * A 3 4) +
+      A 0 3 * (A 1 4 * A 2 5 - A 1 2 * A 4 5 - A 1 5 * A 2 4) -
+      A 0 4 * (A 1 3 * A 2 5 - A 1 2 * A 3 5 - A 1 5 * A 2 3) +
+      A 0 5 * (A 1 3 * A 2 4 - A 1 2 * A 3 4 - A 1 4 * A 2 3) := by
+  simp only [pf6, pf4, crossOut, Matrix.submatrix_apply, Fin.sum_univ_five, s10_skipTwo_1,
+    s10_skipTwo_2, s10_skipTwo_3, s10_skipTwo_4, s10_skipTwo_5]
+  have h1 : (0 : Fin 5).succ = (1 : Fin 6) := rfl
+  have h2 : (1 : Fin 5).succ = (2 : Fin 6) := rfl
+  have h3 : (2 : Fin 5).succ = (3 : Fin 6) := rfl
+  have h4 : (3 : Fin 5).succ = (4 : Fin 6) := rfl
+  have h5 : (4 : Fin 5).succ = (5 : Fin 6) := rfl
+  simp only [h1, h2, h3, h4, h5, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.cons_val_three, Fin.val_zero, Fin.val_one, Fin.val_two]
+  norm_num
+  ring
 
 /-- The normalization of §10.1 for `r = 3`: `Pf [[0, I₃], [-I₃, 0]] = 1`. -/
 theorem pf6_stdAlt : pf6 (stdAlt (R := R) 3) = 1 := by
-  sorry
+  have e : ∀ i j : Fin 6, stdAlt (R := R) 3 i j =
+      if (i : ℕ) + 3 = j then 1 else if (j : ℕ) + 3 = i then -1 else 0 := by
+    intro i j; fin_cases i <;> fin_cases j <;> first | rfl | exact neg_zero
+  rw [s10_pf6_expand]
+  simp [e]
+
+/-- `pf4` is quadratic: `Pf(c A) = c² Pf(A)`. -/
+theorem s10_pf4_smul (c : R) (A : Matrix (Fin 4) (Fin 4) R) : pf4 (c • A) = c ^ 2 * pf4 A := by
+  simp only [pf4, Matrix.smul_apply, smul_eq_mul]
+  ring
+
+theorem s10_crossOut_smul (c : R) (A : Matrix (Fin 6) (Fin 6) R) (p : Pair6) :
+    crossOut (c • A) p = c • crossOut A p := rfl
+
+/-- `pf6` is cubic: `Pf(c A) = c³ Pf(A)`. -/
+theorem s10_pf6_smul (c : R) (A : Matrix (Fin 6) (Fin 6) R) : pf6 (c • A) = c ^ 3 * pf6 A := by
+  simp only [pf6, s10_crossOut_smul, s10_pf4_smul, Matrix.smul_apply, smul_eq_mul, Finset.mul_sum]
+  exact Finset.sum_congr rfl fun j _ => by ring
+
+theorem s10_pf4_map {R' : Type*} [CommRing R'] (f : R →+* R') (A : Matrix (Fin 4) (Fin 4) R) :
+    pf4 (A.map f) = f (pf4 A) := by
+  simp [pf4]
+
+theorem s10_crossOut_map {R' : Type*} [CommRing R'] (f : R →+* R') (A : Matrix (Fin 6) (Fin 6) R)
+    (p : Pair6) : crossOut (A.map f) p = (crossOut A p).map f := rfl
+
+theorem s10_pf6_map {R' : Type*} [CommRing R'] (f : R →+* R') (A : Matrix (Fin 6) (Fin 6) R) :
+    pf6 (A.map f) = f (pf6 A) := by
+  simp [pf6, s10_crossOut_map, s10_pf4_map]
+
+theorem s10_pf4_zero : pf4 (0 : Matrix (Fin 4) (Fin 4) R) = 0 := by
+  simp [pf4]
+
+theorem s10_pf6_zero : pf6 (0 : Matrix (Fin 6) (Fin 6) R) = 0 := by
+  rw [s10_pf6_expand]; simp
+
+theorem s10_crossOut_zero (p : Pair6) : crossOut (0 : Matrix (Fin 6) (Fin 6) R) p = 0 := rfl
 
 end Pfaffian
+
+/-! ## Helpers (prover P14, prefix `s10_`): exterior bases as ordered products -/
+
+section S10Basis
+
+variable {R' M ι : Type*} [CommRing R'] [AddCommGroup M] [Module R' M] [LinearOrder ι]
+  (b : Module.Basis ι R' M)
+
+/-- The exterior basis vector `b_s` is the product of the `ι (b i)`, `i ∈ s`, in increasing order. -/
+theorem s10_basis_eq_prod (s : Finset ι) :
+    b.ExteriorAlgebra s = ((s.sort (· ≤ ·)).map fun i => ExteriorAlgebra.ι R' (b i)).prod := by
+  rw [ExteriorAlgebra.basis_apply_ofCard b rfl, ExteriorAlgebra.ιMulti_family,
+    ExteriorAlgebra.ιMulti_apply, Set.powersetCard.ofFinEmbEquiv_symm_apply]
+  congr 1
+  apply List.ext_getElem
+  · simp
+  · intro i h1 h2
+    simp [Finset.orderEmbOfFin_apply, Set.powersetCard.ofCard]
+
+theorem s10_basis_insert_min (a : ι) (s : Finset ι) (h : ∀ x ∈ s, a < x) :
+    b.ExteriorAlgebra (insert a s) = ExteriorAlgebra.ι R' (b a) * b.ExteriorAlgebra s := by
+  have ha : a ∉ s := fun ha => lt_irrefl a (h a ha)
+  rw [s10_basis_eq_prod, s10_basis_eq_prod, Finset.sort_insert _ (fun x hx => (h x hx).le) ha]
+  simp
+
+theorem s10_basis_empty : b.ExteriorAlgebra ∅ = 1 := by
+  rw [s10_basis_eq_prod]; simp
+
+/-- Inserting a basis vector: `ι(b i) ∧ b_s = ± b_{s ∪ {i}}`, the sign counting the elements of `s`
+below `i`. -/
+theorem s10_ι_mul_basis (i : ι) (s : Finset ι) :
+    ExteriorAlgebra.ι R' (b i) * b.ExteriorAlgebra s =
+      if i ∈ s then 0 else (-1 : R') ^ (s.filter (· < i)).card • b.ExteriorAlgebra (insert i s) := by
+  classical
+  induction s using Finset.induction_on_min with
+  | empty =>
+    simp only [Finset.notMem_empty, ite_false, Finset.filter_empty, Finset.card_empty, pow_zero,
+      one_smul]
+    rw [s10_basis_insert_min b i ∅ (by simp), s10_basis_empty]
+  | insert a s ha ih =>
+    rw [s10_basis_insert_min b a s ha]
+    rcases lt_trichotomy i a with hia | rfl | hai
+    · have hi : i ∉ insert a s := by
+        simp only [Finset.mem_insert, not_or]
+        exact ⟨hia.ne, fun hs => lt_asymm hia (ha i hs)⟩
+      have hf : (insert a s).filter (· < i) = ∅ := by
+        ext x
+        simp only [Finset.mem_filter, Finset.mem_insert, Finset.notMem_empty, iff_false, not_and]
+        rintro (rfl | hx) hxi
+        · exact lt_asymm hxi hia
+        · exact lt_asymm hxi (hia.trans (ha x hx))
+      rw [ite_eq_right hi, hf, Finset.card_empty, pow_zero, one_smul,
+        s10_basis_insert_min b i (insert a s), s10_basis_insert_min b a s ha]
+      intro x hx
+      rcases Finset.mem_insert.mp hx with rfl | hx
+      · exact hia
+      · exact hia.trans (ha x hx)
+    · rw [ite_eq_left (Finset.mem_insert_self _ _), ← mul_assoc, ExteriorAlgebra.ι_sq_zero,
+        zero_mul]
+    · have hswap : ExteriorAlgebra.ι R' (b i) * ExteriorAlgebra.ι R' (b a) =
+          -(ExteriorAlgebra.ι R' (b a) * ExteriorAlgebra.ι R' (b i)) :=
+        eq_neg_of_add_eq_zero_left (ExteriorAlgebra.ι_add_mul_swap _ _)
+      rw [← mul_assoc, hswap, neg_mul, mul_assoc, ih]
+      by_cases his : i ∈ s
+      · rw [ite_eq_left his, ite_eq_left (Finset.mem_insert_of_mem his), mul_zero, neg_zero]
+      · have hi : i ∉ insert a s := by
+          simp only [Finset.mem_insert, not_or]
+          exact ⟨hai.ne', his⟩
+        rw [ite_eq_right his, ite_eq_right hi, mul_smul_comm,
+          ← s10_basis_insert_min b a (insert i s)]
+        · have hf : (insert a s).filter (· < i) = insert a (s.filter (· < i)) := by
+            rw [Finset.filter_insert, ite_eq_left hai]
+          have ha' : a ∉ s.filter (· < i) := fun h => lt_irrefl a (ha a (Finset.mem_filter.mp h).1)
+          rw [hf, Finset.card_insert_of_notMem ha', Finset.insert_comm, pow_succ, mul_neg_one,
+            neg_smul]
+        · intro x hx
+          rcases Finset.mem_insert.mp hx with rfl | hx
+          · exact hai
+          · exact ha x hx
+
+end S10Basis
+
+section S10BasisS
+
+variable (F : Type*) [Field F] (n : ℕ)
+
+theorem s10_basisS_empty : basisS F n ∅ = 1 := s10_basis_empty _
+
+theorem s10_repr_basisS (L K : Finset (Fin (2 * n))) :
+    (basisS F n).repr (basisS F n L) K = if L = K then 1 else 0 := by
+  rw [Module.Basis.repr_self, Finsupp.single_apply]
+
+theorem s10_repr_one (K : Finset (Fin (2 * n))) :
+    (basisS F n).repr 1 K = if K = ∅ then 1 else 0 := by
+  rw [← s10_basisS_empty, s10_repr_basisS]
+  simp only [eq_comm]
+
+theorem s10_ι_e_mul_basisS (i : Fin (2 * n)) (C : Finset (Fin (2 * n))) :
+    ExteriorAlgebra.ι F (e F n i) * basisS F n C =
+      if i ∈ C then 0 else (-1 : F) ^ (C.filter (· < i)).card • basisS F n (insert i C) := by
+  have h : e F n i = Pi.basisFun F (Fin (2 * n)) i := by rw [Pi.basisFun_apply]; rfl
+  rw [h, basisS, s10_ι_mul_basis]
+
+variable (F' : Type*) [Field F'] [Algebra F F']
+
+theorem s10_bcS_ι (w : H1 F n) :
+    bcS F F' n (ExteriorAlgebra.ι F w) = ExteriorAlgebra.ι F' (bcH1 F F' n w) := by
+  exact ExteriorAlgebra.lift_ι_apply F _ _ w
+
+theorem s10_bcH1_e (i : Fin (2 * n)) : bcH1 F F' n (e F n i) = e F' n i := by
+  funext j
+  simp [bcH1, e, Pi.single_apply]
+
+theorem s10_bcS_basisS (K : Finset (Fin (2 * n))) : bcS F F' n (basisS F n K) = basisS F' n K := by
+  rw [basisS, basisS, s10_basis_eq_prod, s10_basis_eq_prod, map_list_prod, List.map_map]
+  congr 1
+  apply List.map_congr_left
+  intro i _
+  simp only [Function.comp_apply, Pi.basisFun_apply]
+  rw [s10_bcS_ι]
+  congr 1
+  exact s10_bcH1_e F n F' i
+
+theorem s10_repr_bcS (x : S F n) (K : Finset (Fin (2 * n))) :
+    (basisS F' n).repr (bcS F F' n x) K = algebraMap F F' ((basisS F n).repr x K) := by
+  have hx : bcS F F' n x = ∑ L, algebraMap F F' ((basisS F n).repr x L) • basisS F' n L := by
+    conv_lhs => rw [← (basisS F n).sum_repr x]
+    rw [map_sum]
+    refine Finset.sum_congr rfl fun L _ => ?_
+    rw [map_smul, s10_bcS_basisS, algebraMap_smul]
+  rw [hx, map_sum, Finsupp.finsetSum_apply]
+  simp only [map_smul, Module.Basis.repr_self, Finsupp.smul_apply, Finsupp.single_apply,
+    smul_eq_mul, mul_ite, mul_one, mul_zero]
+  rw [Finset.sum_ite_eq']
+  simp
+
+end S10BasisS
 
 /-! ## Coordinates on `S_F = H*(X, F)` for an abelian threefold -/
 
@@ -165,17 +380,63 @@ def VJ : Set (Projectivization F (Splus F 3)) := {p | J F (p.rep : S F 3) = 0}
 
 /-- `J` is a homogeneous quartic: `J(c x) = c⁴ J(x)`. -/
 theorem J_smul (c : F) (x : S F 3) : J F (c • x) = c ^ 4 * J F x := by
-  sorry
+  have hr : ∀ K, (basisS F 3).repr (c • x) K = c * (basisS F 3).repr x K := fun K => by simp
+  have hx0 : x0 F (c • x) = c * x0 F x := hr _
+  have hy0 : y0 F (c • x) = c * y0 F x := hr _
+  have hxC : ∀ i j, xCoord F (c • x) i j = c * xCoord F x i j := fun i j => hr _
+  have hyC : ∀ i j, yCoord F (c • x) i j = c * yCoord F x i j := fun i j => by
+    simp only [yCoord, hr]; ring
+  have hxM : xMat F (c • x) = c • xMat F x := by
+    ext i j
+    simp only [xMat, Matrix.of_apply, Matrix.smul_apply, hxC, smul_eq_mul]
+    split_ifs <;> ring
+  have hyM : yMat F (c • x) = c • yMat F x := by
+    ext i j
+    simp only [yMat, Matrix.of_apply, Matrix.smul_apply, hyC, smul_eq_mul]
+    split_ifs <;> ring
+  simp only [J, hx0, hy0, hxM, hyM, s10_crossOut_smul, s10_pf6_smul, s10_pf4_smul, hxC, hyC]
+  have e1 : ∑ p : Pair6, c ^ 2 * pf4 (crossOut (xMat F x) p) * (c ^ 2 * pf4 (crossOut (yMat F x) p))
+      = c ^ 4 * ∑ p : Pair6, pf4 (crossOut (xMat F x) p) * pf4 (crossOut (yMat F x) p) := by
+    rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun p _ => by ring
+  have e2 : ∑ p : Pair6, c * xCoord F x p.1.1 p.1.2 * (c * yCoord F x p.1.1 p.1.2) =
+      c ^ 2 * ∑ p : Pair6, xCoord F x p.1.1 p.1.2 * yCoord F x p.1.1 p.1.2 := by
+    rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun p _ => by ring
+  rw [e1, e2]
+  ring
 
 /-- `[w] ∈ V(J)` if and only if `J(w) = 0`. -/
 theorem mk_mem_VJ_iff (w : Splus F 3) (hw : w ≠ 0) :
     Projectivization.mk F w hw ∈ VJ F ↔ J F (w : S F 3) = 0 := by
-  sorry
+  obtain ⟨a, ha⟩ := Projectivization.exists_smul_eq_mk_rep F w hw
+  show J F (((Projectivization.mk F w hw).rep : Splus F 3) : S F 3) = 0 ↔ _
+  rw [← ha, Units.smul_def, Submodule.coe_smul, J_smul]
+  constructor
+  · intro h
+    exact (mul_eq_zero.mp h).resolve_left (pow_ne_zero _ a.ne_zero)
+  · intro h
+    rw [h, mul_zero]
 
 /-- `J` is defined over `ℚ`: it commutes with every change of coefficients `F → F'`. -/
 theorem J_bcS (F' : Type*) [Field F'] [CharZero F'] [Algebra F F'] (x : S F 3) :
     J F' (bcS F F' 3 x) = algebraMap F F' (J F x) := by
-  sorry
+  have hr := s10_repr_bcS F 3 F' x
+  have hx0 : x0 F' (bcS F F' 3 x) = algebraMap F F' (x0 F x) := hr _
+  have hy0 : y0 F' (bcS F F' 3 x) = algebraMap F F' (y0 F x) := hr _
+  have hxC : ∀ i j, xCoord F' (bcS F F' 3 x) i j = algebraMap F F' (xCoord F x i j) :=
+    fun i j => hr _
+  have hyC : ∀ i j, yCoord F' (bcS F F' 3 x) i j = algebraMap F F' (yCoord F x i j) := by
+    intro i j
+    simp only [yCoord, hr, map_mul, map_pow, map_neg, map_one]
+  have hxM : xMat F' (bcS F F' 3 x) = (xMat F x).map (algebraMap F F') := by
+    ext i j
+    simp only [xMat, Matrix.of_apply, Matrix.map_apply, hxC]
+    split_ifs <;> simp
+  have hyM : yMat F' (bcS F F' 3 x) = (yMat F x).map (algebraMap F F') := by
+    ext i j
+    simp only [yMat, Matrix.of_apply, Matrix.map_apply, hyC]
+    split_ifs <;> simp
+  simp only [J, hx0, hy0, hxM, hyM, s10_crossOut_map, s10_pf6_map, s10_pf4_map, hxC, hyC]
+  simp only [map_sub, map_add, map_mul, map_sum, map_pow, map_div₀, map_one, map_ofNat]
 
 end Coordinates
 
