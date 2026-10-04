@@ -63,16 +63,44 @@ by an element of `Spin(V)_{ℓ₁,ℓ₂}` with prescribed character (`sc_exists
 * `igusa_lemma2`: `ρ` maps the stabilizer of `1 + c [pt_X]` (`c ≠ 0`, over `ℂ`) onto the image of
   `e : SL(W₁) → SO(V_ℂ)`. **Proved** from `igusa_lemma2_stab_odd` and `igusa_lemma1_range`.
 * `igusa_prop3_orbit_complex`: `J⁻¹(c) ⊆ S⁺_ℂ`, `c ≠ 0`, is one orbit. **Proved from**
-  `igusa_prop3_normalForm_of_sq`.
+  `igusa_prop3_normalForm_of_sq`, hence conditional on `IgusaProp3NormalForm`.
 * `igusa_prop3_normalForm`: the case `F = K = ℚ(√-d)` used in Lemma 10.2.1. **Proved from**
-  `igusa_prop3_normalForm_of_sq`.
+  `igusa_prop3_normalForm_of_sq`, hence conditional on `IgusaProp3NormalForm`.
 * `igusa_prop3_normalForm_of_sq` (if `s² = -J(w) ≠ 0` then `w ~ 1 + 2s [pt_X]` over `F`):
-  **`sorry`** — the classification of the generic orbit (every `w` with `J(w) ≠ 0` lies on a
-  transversal secant defined over `F`); see the report.
-* `igusa_prop3_orbit_subfield` (`J⁻¹(d) ⊆ S⁺_F` one orbit for `F ⊆ ℂ`, `d ≠ 0`): **`sorry`** — the
-  case `-d ∈ F^{×2}` follows from `igusa_prop3_normalForm_of_sq`; the other case needs Galois
-  cohomology of the stabilizer (a special unitary group), absent from Mathlib.
-* `igusa_prop3_invariants` (every `Spin(V)_ℤ`-invariant polynomial is a polynomial in `J`): **`sorry`**
-  — needs `igusa_prop3_orbit_complex` plus the passage from `Spin(V)_ℤ`- to `Spin(V_ℂ)`-invariance
-  (the generators above with integer parameters, polynomial in the parameter) and a density argument.
-  Not used in any proof.
+  **assumed**, the named hypothesis `IgusaProp3NormalForm`.
+* `igusa_prop3_orbit_subfield` (`J⁻¹(d) ⊆ S⁺_F` one orbit for `F ⊆ ℂ`, `d ≠ 0`): **assumed**, the
+  named hypothesis `IgusaProp3OrbitSubfield`.
+
+### The two named hypotheses
+
+The project owner chose (2026-10-04) to assume these two parts of [I, Prop. 3] rather than build the
+classification they need. They are `Prop`-valued definitions, not axioms or instances: every result
+that uses one takes it as an explicit argument, so a reader of the statement sees it.
+
+* `IgusaProp3NormalForm`: over every field `F` (in `Type`) of characteristic zero, if `w ∈ S⁺_F`,
+  `s ≠ 0` and `s² = -J(w)`, some `g ∈ Spin(V_F)` maps `w` to `1 + 2s [pt_X]`. This is the last
+  paragraph of Igusa's proof. Its proof needs the classification of the generic `Spin(12)`-orbit on
+  `S⁺`: every `w` with `J(w) ≠ 0` lies on a secant through two pure spinors with transversal
+  maximal isotropic subspaces, defined over `F` when `-J(w)` is a square. Estimated at 1500–3000
+  lines on top of the generation result above.
+* `IgusaProp3OrbitSubfield`: for a subfield `F ⊆ ℂ` and `d ∈ F`, `d ≠ 0`, the level set `J⁻¹(d) ⊆ S⁺_F`
+  is one `Spin(V_F)`-orbit. When `-d` is a square in `F` this follows from `IgusaProp3NormalForm`.
+  Otherwise the stabilizer is the special unitary group of a hermitian form over `F(√-d)`, and the
+  proof needs Galois cohomology (the injectivity of `H¹(F, SU(h)) → H¹(F, Spin(V))`, from Jacobson's
+  theorem on hermitian forms), which Mathlib does not have.
+
+Results of the paper that take a hypothesis (all in §10; the paper's main theorems do not use §10):
+
+| Result | Lean | Hypothesis |
+| --- | --- | --- |
+| Lemma 10.1.1 (all three sentences) | `lemma10_1_1`, `lemma10_1_1_stabilizer`, `lemma10_1_1_rational` | `IgusaProp3NormalForm` |
+| Remark 10.1.2(1), first sentence | `remark10_1_2_orbit` | `IgusaProp3OrbitSubfield` |
+| Remark 10.1.2(2), rationality | `remark10_1_2_rational` | `IgusaProp3NormalForm` |
+| Lemma 10.2.1 (both sentences, and the secant of its proof) | `lemma10_2_1`, `lemma10_2_1_centralizer`, `lemma10_2_1_secant` | `IgusaProp3NormalForm` |
+
+The other results of §10 (Remark 10.1.2(1) second sentence and (2) first sentence, Examples 10.2.2,
+10.2.3, the image of `η`) are unconditional.
+
+Not stated, because no proof uses them: that the `Spin(V)`-invariant polynomials on `S⁺_ℚ` are the
+polynomials in `J` (§10.1, l. 9642, context only), and the tangential-variety description of `V(J)`
+([Abuaf, Rem. 2.1.1], l. 9643).
