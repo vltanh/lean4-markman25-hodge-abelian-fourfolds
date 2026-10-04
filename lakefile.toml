@@ -1,0 +1,31 @@
+name = "WeilClasses"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["WeilClasses", "Challenge", "Solution"]
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "ec6a61cec0d8f9fda04453e9bb5761a79aa43a70"
+
+# Tau Ceti (https://github.com/TauCetiProject/TauCeti) is used in proofs only: the Challenge
+# imports nothing but Mathlib. Its pin fixes the Mathlib commit above.
+[[require]]
+name = "TauCeti"
+git = "https://github.com/TauCetiProject/TauCeti"
+rev = "fd2b86b9fdc571f8b827ad8ded4039057c3139f3"
+
+[[lean_lib]]
+name = "WeilClasses"
+globs = ["WeilClasses.+"]
+
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"

@@ -1,0 +1,4 @@
+/.lake
+/notes
+__pycache__/
+*.pyc
