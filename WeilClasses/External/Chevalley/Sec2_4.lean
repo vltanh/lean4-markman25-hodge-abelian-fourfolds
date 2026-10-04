@@ -1,6 +1,7 @@
 module
 
 public import WeilClasses.WeilType.CliffordExp
+import TauCeti.LinearAlgebra.CliffordAlgebra.Lipschitz.CliffordGroup
 
 /-!
 # Chevalley, *The algebraic theory of spinors*, III.1.7 (as used in §2.4 of the paper)
@@ -16,6 +17,17 @@ spin representation image of an element `exp(u)` of `Spin(V_K)` which acts on `V
 `exp(u)·(w, y) = (w - √-d θ(y), y)` (see [III.1.7] and its proof)". We state the special case for an
 arbitrary `u ∈ ⋀² H¹(X, F)` over a field `F` of characteristic `0`; the cup product statement is
 `WeilClasses.m_exp_jH`.
+
+## Proof
+
+We prove the statement for an arbitrary isotropic linear map `φ : M → V` (`sa_J`: the induced
+algebra map `⋀ M → C(V)`), so that it also applies to `L = H¹(X̂) × 0` (used in
+`WeilClasses.External.Chevalley.Sec3`). For `x ∈ V`, Clifford's relation gives the graded
+commutation `x · J(s) = J(ℓ_x ⌋ s) + J(α s) · x` with `ℓ_x = (x, φ ·)_V` (`sa_ι_mul_J`). For
+`B ∈ ⋀² M`, `N = J(B)` is nilpotent and `[x, N] = J(ℓ_x ⌋ B) = φ(c)` is a vector of `φ(M)`, which
+commutes with `N`. Hence `exp(N) x exp(-N) = x - φ(c)` (`sa_exp_mul_eq`), `exp(N)` is even, and
+`exp(N)* = exp(-N)` (since `N* = -N`), so `exp(N)` lies in `Spin(V)` by Tau Ceti's description of
+`spinGroup` as the even unitary Clifford group.
 -/
 
 @[expose] public section
@@ -24,7 +36,317 @@ namespace WeilClasses
 
 open CliffordAlgebra
 
+/-! ### A conjugation formula for exponentials of nilpotent elements -/
+
+/-- If `N` is nilpotent, `N X = X N - Y` and `N` commutes with `Y`, then
+`exp(N) X = (X - Y) exp(N)`. -/
+theorem sa_exp_mul_eq {A : Type*} [Ring A] [Algebra ℚ A] {N X Y : A} (hN : IsNilpotent N)
+    (h1 : N * X = X * N - Y) (h2 : N * Y = Y * N) :
+    IsNilpotent.exp N * X = (X - Y) * IsNilpotent.exp N := by
+  obtain ⟨k, hk⟩ := hN
+  have hk1 : N ^ (k + 1) = 0 := by rw [pow_succ, hk, zero_mul]
+  have hY : ∀ j : ℕ, N * (Y * N ^ j) = Y * N ^ (j + 1) := by
+    intro j
+    rw [← mul_assoc, h2, mul_assoc, ← pow_succ']
+  -- `N^{i+1} X = X N^{i+1} - (i+1) Y N^i`
+  have key : ∀ i : ℕ, N ^ (i + 1) * X = X * N ^ (i + 1) - ((i : ℚ) + 1) • (Y * N ^ i) := by
+    intro i
+    induction i with
+    | zero => simp [h1]
+    | succ i ih =>
+      rw [pow_succ', mul_assoc, ih, mul_sub, ← mul_assoc, h1, mul_smul_comm, hY, sub_mul,
+        mul_assoc, ← pow_succ']
+      push_cast
+      module
+  have hterm : ∀ j : ℕ, ((j + 1).factorial : ℚ)⁻¹ • (N ^ (j + 1) * X) =
+      ((j + 1).factorial : ℚ)⁻¹ • (X * N ^ (j + 1)) - (j.factorial : ℚ)⁻¹ • (Y * N ^ j) := by
+    intro j
+    rw [key, smul_sub, smul_smul]
+    congr 2
+    rw [Nat.factorial_succ, Nat.cast_mul, mul_inv, mul_comm ((((j + 1 : ℕ)) : ℚ))⁻¹, mul_assoc]
+    push_cast
+    rw [inv_mul_cancel₀ (by positivity), mul_one]
+  have hL : (∑ i ∈ Finset.range (k + 1), (i.factorial : ℚ)⁻¹ • N ^ i) * X =
+      X + ∑ j ∈ Finset.range k, ((j + 1).factorial : ℚ)⁻¹ • (X * N ^ (j + 1)) -
+        ∑ j ∈ Finset.range k, (j.factorial : ℚ)⁻¹ • (Y * N ^ j) := by
+    rw [Finset.sum_mul, Finset.sum_range_succ']
+    simp only [smul_mul_assoc, hterm, Finset.sum_sub_distrib, pow_zero, one_mul,
+      Nat.factorial_zero, Nat.cast_one, inv_one, one_smul]
+    abel
+  have hR1 : X * ∑ i ∈ Finset.range (k + 1), (i.factorial : ℚ)⁻¹ • N ^ i =
+      X + ∑ j ∈ Finset.range k, ((j + 1).factorial : ℚ)⁻¹ • (X * N ^ (j + 1)) := by
+    rw [Finset.mul_sum, Finset.sum_range_succ']
+    simp only [mul_smul_comm, pow_zero, mul_one, Nat.factorial_zero, Nat.cast_one, inv_one,
+      one_smul]
+    abel
+  have hR2 : Y * ∑ i ∈ Finset.range (k + 1), (i.factorial : ℚ)⁻¹ • N ^ i =
+      ∑ j ∈ Finset.range k, (j.factorial : ℚ)⁻¹ • (Y * N ^ j) := by
+    rw [Finset.mul_sum, Finset.sum_range_succ, hk, smul_zero, mul_zero, add_zero]
+    simp only [mul_smul_comm]
+  rw [IsNilpotent.exp_eq_sum hk1, sub_mul, hL, hR1, hR2]
+
+/-! ### Exterior algebras of isotropic subspaces inside `C(V)` (prefix `sa_`) -/
+
+section Isotropic
+
+variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
+variable {M : Type*} [AddCommGroup M] [Module F M]
+
+/-- The algebra homomorphism `⋀ M → C(V_F)` induced by an isotropic linear map `φ : M → V_F`
+(products of vectors of `M` go to Clifford products). For `φ = inr` it is `iotaX`, for `φ = inl`
+it is `iotaXHat`. -/
+noncomputable def sa_J (φ : M →ₗ[F] V F n) (hφ : ∀ x, Q F n (φ x) = 0) :
+    ExteriorAlgebra F M →ₐ[F] C F n :=
+  ExteriorAlgebra.lift F ⟨(ι (Q F n)) ∘ₗ φ, fun x => by
+    rw [LinearMap.comp_apply, ι_sq_scalar, hφ, map_zero]⟩
+
+omit [CharZero F] in
+theorem sa_J_ι (φ : M →ₗ[F] V F n) (hφ : ∀ x, Q F n (φ x) = 0) (x : M) :
+    sa_J φ hφ (ExteriorAlgebra.ι F x) = ι (Q F n) (φ x) := by
+  simp [sa_J]
+
+omit [CharZero F] in
+/-- An isotropic map has isotropic image: `(φ a, φ b)_V = 0`. -/
+theorem sa_polar_isotropic (φ : M →ₗ[F] V F n) (hφ : ∀ x, Q F n (φ x) = 0) (a b : M) :
+    QuadraticMap.polar (Q F n) (φ a) (φ b) = 0 := by
+  rw [QuadraticMap.polar, ← map_add, hφ, hφ, hφ, sub_zero, sub_zero]
+
+/-- The functional `ℓ_x = (x, φ ·)_V` on `M`. -/
+noncomputable def sa_ell (φ : M →ₗ[F] V F n) (x : V F n) : Module.Dual F M :=
+  (QuadraticMap.polarBilin (Q F n) x) ∘ₗ φ
+
+omit [CharZero F] in
+theorem sa_ell_apply (φ : M →ₗ[F] V F n) (x : V F n) (y : M) :
+    sa_ell φ x y = QuadraticMap.polar (Q F n) x (φ y) := rfl
+
+omit [CharZero F] in
+/-- **Graded commutation** of a vector with the image of `⋀ M`:
+`x · J(s) = J(ℓ_x ⌋ s) + J(α s) · x`. -/
+theorem sa_ι_mul_J (φ : M →ₗ[F] V F n) (hφ : ∀ x, Q F n (φ x) = 0) (x : V F n)
+    (s : ExteriorAlgebra F M) :
+    ι (Q F n) x * sa_J φ hφ s =
+      sa_J φ hφ (contractLeft (Q := (0 : QuadraticForm F M)) (sa_ell φ x) s) +
+        sa_J φ hφ (involute (Q := (0 : QuadraticForm F M)) s) * ι (Q F n) x := by
+  induction s using CliffordAlgebra.left_induction with
+  | algebraMap r =>
+    rw [contractLeft_algebraMap, map_zero, zero_add, involute.commutes, AlgHom.commutes,
+      Algebra.commutes]
+  | add a b ha hb =>
+    rw [map_add, mul_add, ha, hb, map_add, map_add, map_add, map_add, add_mul]
+    abel
+  | ι_mul s y hs =>
+    have hJ : sa_J φ hφ (ι (0 : QuadraticForm F M) y) = ι (Q F n) (φ y) := sa_J_ι φ hφ y
+    have hD : contractLeft (Q := (0 : QuadraticForm F M)) (sa_ell φ x)
+        (ι (0 : QuadraticForm F M) y * s) =
+        sa_ell φ x y • s - ι (0 : QuadraticForm F M) y *
+          contractLeft (Q := (0 : QuadraticForm F M)) (sa_ell φ x) s := contractLeft_ι_mul _ _ _
+    have hα : involute (Q := (0 : QuadraticForm F M)) (ι (0 : QuadraticForm F M) y * s) =
+        -(ι (0 : QuadraticForm F M) y * involute (Q := (0 : QuadraticForm F M)) s) := by
+      rw [map_mul, involute_ι, neg_mul]
+    rw [map_mul, hJ, ← mul_assoc, ι_mul_ι_comm, sub_mul, mul_assoc, hs, hD, hα, map_sub, map_smul,
+      map_neg, map_mul, map_mul, hJ, ← Algebra.smul_def, sa_ell_apply, mul_add, neg_mul,
+      mul_assoc]
+    abel
+
+omit [CharZero F] in
+/-- A `2`-form is even: `α(B) = B` for `B ∈ ⋀² M`. -/
+theorem sa_involute_of_mem_two (B : ExteriorAlgebra F M) (hB : B ∈ ⋀[F]^2 M) :
+    involute (Q := (0 : QuadraticForm F M)) B = B := by
+  rw [← ExteriorAlgebra.ιMulti_span_fixedDegree] at hB
+  induction hB using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨v, rfl⟩ := hx
+    rw [ExteriorAlgebra.ιMulti_apply]
+    simp only [List.ofFn_succ, List.ofFn_zero, List.prod_cons, List.prod_nil, mul_one, map_mul]
+    rw [show (ExteriorAlgebra.ι F (v 0) : ExteriorAlgebra F M) =
+      ι (0 : QuadraticForm F M) (v 0) from rfl,
+      show (ExteriorAlgebra.ι F (v (Fin.succ 0)) : ExteriorAlgebra F M) =
+      ι (0 : QuadraticForm F M) (v (Fin.succ 0)) from rfl, involute_ι, involute_ι, neg_mul_neg]
+  | zero => simp
+  | add x z _ _ hx hz => rw [map_add, hx, hz]
+  | smul a x _ hx => rw [map_smul, hx]
+
+omit [CharZero F] in
+/-- The contraction of a `2`-form is a vector. -/
+theorem sa_contractLeft_mem_range (d : Module.Dual F M) (B : ExteriorAlgebra F M)
+    (hB : B ∈ ⋀[F]^2 M) :
+    contractLeft (Q := (0 : QuadraticForm F M)) d B ∈ LinearMap.range (ExteriorAlgebra.ι F) := by
+  rw [← ExteriorAlgebra.ιMulti_span_fixedDegree] at hB
+  induction hB using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨v, rfl⟩ := hx
+    refine ⟨d (v 0) • v 1 - d (v 1) • v 0, ?_⟩
+    rw [ExteriorAlgebra.ιMulti_apply]
+    simp only [List.ofFn_succ, List.ofFn_zero, List.prod_cons, List.prod_nil, mul_one,
+      Fin.succ_zero_eq_one]
+    rw [show (ExteriorAlgebra.ι F (v 0) : ExteriorAlgebra F M) =
+      ι (0 : QuadraticForm F M) (v 0) from rfl,
+      show (ExteriorAlgebra.ι F (v 1) : ExteriorAlgebra F M) =
+      ι (0 : QuadraticForm F M) (v 1) from rfl, contractLeft_ι_mul, contractLeft_ι,
+      ← Algebra.commutes, ← Algebra.smul_def, map_sub, map_smul, map_smul]
+  | zero => simp
+  | add x z _ _ hx hz => rw [map_add]; exact add_mem hx hz
+  | smul a x _ hx => rw [map_smul]; exact Submodule.smul_mem _ a hx
+
+omit [CharZero F] in
+/-- `J(B)` commutes with the vectors of `φ(M)`. -/
+theorem sa_J_commute (φ : M →ₗ[F] V F n) (hφ : ∀ x, Q F n (φ x) = 0) (B : ExteriorAlgebra F M)
+    (hB : B ∈ ⋀[F]^2 M) (y : M) :
+    sa_J φ hφ B * ι (Q F n) (φ y) = ι (Q F n) (φ y) * sa_J φ hφ B := by
+  have h0 : sa_ell φ (φ y) = 0 := by
+    ext z
+    rw [sa_ell_apply, sa_polar_isotropic φ hφ, LinearMap.zero_apply]
+  rw [sa_ι_mul_J, h0, map_zero, LinearMap.zero_apply, map_zero, zero_add,
+    sa_involute_of_mem_two B hB]
+
+omit [CharZero F] in
+/-- `J(B)` is nilpotent for a `2`-form `B` on a finite-dimensional `M`. -/
+theorem sa_isNilpotent_J [Module.Finite F M] (φ : M →ₗ[F] V F n) (hφ : ∀ x, Q F n (φ x) = 0)
+    (B : ExteriorAlgebra F M) (hB : B ∈ ⋀[F]^2 M) : IsNilpotent (sa_J φ hφ B) := by
+  refine IsNilpotent.map ?_ (sa_J φ hφ)
+  refine ⟨Module.finrank F M + 1, ?_⟩
+  have h1 : B ^ (Module.finrank F M + 1) ∈ ⋀[F]^(2 * (Module.finrank F M + 1)) M := by
+    rw [ExteriorAlgebra.exteriorPower, pow_mul]
+    exact Submodule.pow_mem_pow _ hB _
+  let b := Module.finBasis F M
+  have hsub : Subsingleton (⋀[F]^(2 * (Module.finrank F M + 1)) M) :=
+    exteriorPower.subsingleton_of_span_eq_top_of_card_lt b b.span_eq _ (by simp; omega)
+  have := hsub.elim ⟨_, h1⟩ 0
+  simpa using congrArg Subtype.val this
+
+omit [CharZero F] in
+/-- For a `2`-form `B`, `star J(B) = -J(B)`. -/
+theorem sa_star_J (φ : M →ₗ[F] V F n) (hφ : ∀ x, Q F n (φ x) = 0) (B : ExteriorAlgebra F M)
+    (hB : B ∈ ⋀[F]^2 M) : star (sa_J φ hφ B) = -sa_J φ hφ B := by
+  rw [← ExteriorAlgebra.ιMulti_span_fixedDegree] at hB
+  induction hB using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨v, rfl⟩ := hx
+    rw [ExteriorAlgebra.ιMulti_apply]
+    simp only [List.ofFn_succ, List.ofFn_zero, List.prod_cons, List.prod_nil, mul_one,
+      Fin.succ_zero_eq_one, map_mul, sa_J_ι, star_mul, star_ι, neg_mul_neg]
+    rw [ι_mul_ι_comm, sa_polar_isotropic φ hφ, map_zero, zero_sub]
+  | zero => simp
+  | add x z _ _ hx hz => rw [map_add, star_add, hx, hz, neg_add]
+  | smul a x _ hx => rw [map_smul, CliffordAlgebra.star_smul, hx, smul_neg]
+
+omit [CharZero F] in
+/-- `J(B)` is even for a `2`-form `B`. -/
+theorem sa_J_mem_even (φ : M →ₗ[F] V F n) (hφ : ∀ x, Q F n (φ x) = 0) (B : ExteriorAlgebra F M)
+    (hB : B ∈ ⋀[F]^2 M) : sa_J φ hφ B ∈ evenOdd (Q F n) 0 := by
+  rw [← ExteriorAlgebra.ιMulti_span_fixedDegree] at hB
+  induction hB using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨v, rfl⟩ := hx
+    rw [ExteriorAlgebra.ιMulti_apply]
+    simp only [List.ofFn_succ, List.ofFn_zero, List.prod_cons, List.prod_nil, mul_one, map_mul,
+      sa_J_ι]
+    exact ι_mul_ι_mem_evenOdd_zero _ _ _
+  | zero => simp
+  | add x z _ _ hx hz => rw [map_add]; exact add_mem hx hz
+  | smul a x _ hx => rw [map_smul]; exact Submodule.smul_mem _ a hx
+
+/-- **The conjugation formula**: for a `2`-form `B` and `x ∈ V`, if `c ∈ M` is the vector
+`ℓ_x ⌋ B`, then `exp(J B) x exp(-J B) = x - φ(c)`. -/
+theorem sa_exp_J_conj [Module.Finite F M] (φ : M →ₗ[F] V F n) (hφ : ∀ x, Q F n (φ x) = 0)
+    (B : ExteriorAlgebra F M) (hB : B ∈ ⋀[F]^2 M) (x : V F n) (c : M)
+    (hc : ExteriorAlgebra.ι F c = contractLeft (Q := (0 : QuadraticForm F M)) (sa_ell φ x) B) :
+    IsNilpotent.exp (sa_J φ hφ B) * ι (Q F n) x * IsNilpotent.exp (-sa_J φ hφ B) =
+      ι (Q F n) (x - φ c) := by
+  have hN := sa_isNilpotent_J φ hφ B hB
+  have h1 : sa_J φ hφ B * ι (Q F n) x = ι (Q F n) x * sa_J φ hφ B - ι (Q F n) (φ c) := by
+    rw [sa_ι_mul_J, sa_involute_of_mem_two B hB, ← hc, sa_J_ι]
+    abel
+  rw [sa_exp_mul_eq hN h1 (sa_J_commute φ hφ B hB c), mul_assoc,
+    IsNilpotent.exp_mul_exp_neg_self hN, mul_one, map_sub]
+
+/-- `star (exp N) = exp (-N)` when `star N = -N`. -/
+theorem sa_star_exp {A : Type*} [Ring A] [Algebra ℚ A] [StarRing A] {N : A} (hN : IsNilpotent N)
+    (hs : star N = -N) : star (IsNilpotent.exp N) = IsNilpotent.exp (-N) := by
+  obtain ⟨k, hk⟩ := hN
+  have hk' : (-N) ^ k = 0 := by rw [neg_pow, hk, mul_zero]
+  rw [IsNilpotent.exp_eq_sum hk, IsNilpotent.exp_eq_sum hk', star_sum]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [star_rat_smul, star_pow, hs]
+
+/-- **`exp(J B)` lies in `Spin(V_F)`** for every `2`-form `B` on a finite-dimensional `M` and
+every isotropic `φ : M → V_F`. -/
+theorem sa_exp_J_mem_spinGroup [Module.Finite F M] (φ : M →ₗ[F] V F n)
+    (hφ : ∀ x, Q F n (φ x) = 0) (B : ExteriorAlgebra F M) (hB : B ∈ ⋀[F]^2 M) :
+    IsNilpotent.exp (sa_J φ hφ B) ∈ spinGroup (Q F n) := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · -- `V_F = 0`: `J(B) = 0`.
+    have hH : ∀ w : H1 F 0, w = 0 := fun w => funext fun i => absurd i.2 (by simp)
+    have hV : ∀ v : V F 0, v = 0 := by
+      rintro ⟨θ, w⟩
+      refine Prod.ext ?_ (hH w)
+      exact LinearMap.ext fun x => by rw [hH x, map_zero]; rfl
+    have h0 : sa_J φ hφ B = 0 := by
+      rw [← ExteriorAlgebra.ιMulti_span_fixedDegree] at hB
+      induction hB using Submodule.span_induction with
+      | mem x hx =>
+        obtain ⟨v, rfl⟩ := hx
+        have hv : ∀ y : M, φ y = 0 := fun y => hV _
+        rw [ExteriorAlgebra.ιMulti_apply]
+        simp [List.ofFn_succ, sa_J_ι, hv]
+      | zero => simp
+      | add x z _ _ hx hz => rw [map_add, hx, hz, add_zero]
+      | smul a x _ hx => rw [map_smul, hx, smul_zero]
+    rw [h0, IsNilpotent.exp_zero]
+    exact one_mem _
+  have hN := sa_isNilpotent_J φ hφ B hB
+  have hQ : (Q F n).Nondegenerate := TauCeti.nondegenerate_dualProd (Module.eval_apply_injective F)
+  have hv : ∃ v, IsUnit (Q F n v) := by
+    refine ⟨(f F n ⟨0, by omega⟩, e F n ⟨0, by omega⟩), ?_⟩
+    rw [isUnit_iff_ne_zero, QuadraticForm.dualProd_apply]
+    simp [f, e]
+  have hstar : star (IsNilpotent.exp (sa_J φ hφ B)) = IsNilpotent.exp (-sa_J φ hφ B) :=
+    sa_star_exp hN (sa_star_J φ hφ B hB)
+  have heven : IsNilpotent.exp (sa_J φ hφ B) ∈ evenOdd (Q F n) 0 := by
+    obtain ⟨k, hk⟩ := hN
+    rw [IsNilpotent.exp_eq_sum hk]
+    refine Submodule.sum_mem _ fun i _ => ?_
+    rw [← algebraMap_smul F]
+    refine Submodule.smul_mem _ _ ?_
+    have hNe : sa_J φ hφ B ∈ even (Q F n) := by
+      rw [← Subalgebra.mem_toSubmodule, even_toSubmodule]
+      exact sa_J_mem_even φ hφ B hB
+    rw [← even_toSubmodule, Subalgebra.mem_toSubmodule]
+    exact Subalgebra.pow_mem _ hNe i
+  rw [mem_spinGroup_iff_unitary_even_and_involute_act_ι_mem_range_ι (Q F n) hQ hv]
+  refine ⟨?_, ?_, fun x => ?_⟩
+  · rw [Unitary.mem_iff, hstar]
+    exact ⟨IsNilpotent.exp_neg_mul_exp_self hN, IsNilpotent.exp_mul_exp_neg_self hN⟩
+  · rw [← Subalgebra.mem_toSubmodule, even_toSubmodule]
+    exact heven
+  · rw [involute_eq_of_mem_even heven, hstar]
+    obtain ⟨c, hc⟩ := sa_contractLeft_mem_range (sa_ell φ x) B hB
+    exact ⟨x - φ c, (sa_exp_J_conj φ hφ B hB x c hc).symm⟩
+
+/-- The action of `exp(J B) ∈ Spin(V_F)` on `V_F`: `ρ(exp J B)(x) = x - φ(ℓ_x ⌋ B)`. -/
+theorem sa_rho_exp_J [Module.Finite F M] (φ : M →ₗ[F] V F n) (hφ : ∀ x, Q F n (φ x) = 0)
+    (B : ExteriorAlgebra F M) (hB : B ∈ ⋀[F]^2 M) (x : V F n) (c : M)
+    (hc : ExteriorAlgebra.ι F c = contractLeft (Q := (0 : QuadraticForm F M)) (sa_ell φ x) B) :
+    rho F n ⟨IsNilpotent.exp (sa_J φ hφ B), sa_exp_J_mem_spinGroup φ hφ B hB⟩ x = x - φ c := by
+  apply ι_injective (Q F n)
+  rw [ι_rho]
+  have hstar : star (IsNilpotent.exp (sa_J φ hφ B)) = IsNilpotent.exp (-sa_J φ hφ B) :=
+    sa_star_exp (sa_isNilpotent_J φ hφ B hB) (sa_star_J φ hφ B hB)
+  simp only
+  rw [hstar, sa_exp_J_conj φ hφ B hB x c hc]
+
+end Isotropic
+
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
+
+omit [CharZero F] in
+theorem sa_inr_isotropic (w : H1 F n) :
+    Q F n (LinearMap.inr F (Module.Dual F (H1 F n)) (H1 F n) w) = 0 := by
+  simp
+
+omit [CharZero F] in
+/-- `iotaX` is the algebra map induced by the isotropic inclusion `w ↦ (0, w)`. -/
+theorem sa_iotaX_eq : iotaX F n = sa_J (LinearMap.inr F _ _) (sa_inr_isotropic F n) := rfl
 
 /-- **[Chevalley, *The algebraic theory of spinors*, III.1.7]**, the special case used in §2.4 of
 the paper (before (2.4.4)): for `u ∈ ⋀² H¹(X, F)`, viewed in `C(V_F)` through the subalgebra
@@ -32,7 +354,8 @@ generated by the maximal isotropic subspace `H¹(X, F) = 0 × H¹(X, F)` (`WeilC
 element `exp(u)` lies in `Spin(V_F)`. -/
 theorem chevalley_III_1_7_mem (u : S F n) (hu : u ∈ ⋀[F]^2 (H1 F n)) :
     IsNilpotent.exp (iotaX F n u) ∈ spinGroup (Q F n) := by
-  sorry
+  rw [sa_iotaX_eq]
+  exact sa_exp_J_mem_spinGroup _ _ u hu
 
 /-- **[Chevalley, *The algebraic theory of spinors*, III.1.7 and its proof]**, continued: `exp(u)`
 acts on `V_F = H¹(X, F)* × H¹(X, F)` by `ρ(exp u)(y, w) = (y, w - y ⌋ u)`. For `u = √-d Θ` this is
@@ -40,6 +363,19 @@ the paper's (2.4.4), `exp(u)·(w, y) = (w - √-d θ(y), y)` in the paper's orde
 theorem chevalley_III_1_7_rho (u : S F n) (hu : u ∈ ⋀[F]^2 (H1 F n)) (v : V F n) :
     rho F n ⟨IsNilpotent.exp (iotaX F n u), chevalley_III_1_7_mem F n u hu⟩ v =
       (v.1, v.2 - contractOne F n u v.1) := by
-  sorry
+  have hell : sa_ell (LinearMap.inr F (Module.Dual F (H1 F n)) (H1 F n)) v = v.1 := by
+    refine LinearMap.ext fun w => ?_
+    rw [sa_ell_apply, TauCeti.polar_dualProd]
+    simp
+  have hc : ExteriorAlgebra.ι F (contractOne F n u v.1) =
+      contractLeft (Q := (0 : QuadraticForm F (H1 F n)))
+        (sa_ell (LinearMap.inr F (Module.Dual F (H1 F n)) (H1 F n)) v) u := by
+    rw [hell, ι_contractOne F n u hu]
+    rfl
+  have h : rho F n ⟨IsNilpotent.exp (iotaX F n u), chevalley_III_1_7_mem F n u hu⟩ v =
+      v - LinearMap.inr F (Module.Dual F (H1 F n)) (H1 F n) (contractOne F n u v.1) :=
+    sa_rho_exp_J (LinearMap.inr F _ _) (sa_inr_isotropic F n) u hu v _ hc
+  rw [h]
+  ext <;> simp
 
 end WeilClasses
