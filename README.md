@@ -133,8 +133,9 @@ Palomar's preflight on demand.
 
 Nothing published since the paper casts doubt on its results; the author has corrected the integral Clifford algebra
 of §2.1 (E4) and a misprint in Lemma 2.2.2 (E28). Perry claims the paper's Conjecture 7.3.9 (preprint), which would
-simplify §9. For the formalization, the next layers are the assumed results of Section 2, starting with the Hodge
-theory of tori. See [REPORT.md, Section 10](REPORT.md#10-whats-next).
+simplify §9. See [REPORT.md, Section 10](REPORT.md#10-whats-next). [`ROADMAP.md`](ROADMAP.md) plans how to remove the
+hypotheses, in layers: first those about Hodge structures, then actual abelian varieties and their algebraic cycles,
+and finally the paper's sheaf theory.
 
 ## Building
 

@@ -26,4 +26,4 @@ jobs:
       - name: Check that the documentation's links to the code are current
         run: python3 scripts/linkify_docs.py --check
       - name: Check the Markdown tables
-        run: python3 scripts/check_md_tables.py README.md REPORT.md CREDITS.md
+        run: python3 scripts/check_md_tables.py README.md REPORT.md CREDITS.md ROADMAP.md

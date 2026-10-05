@@ -794,10 +794,11 @@ Google Scholar, MathOverflow, blogs, GitHub and Zenodo) and checked by a second 
 
 ### The formalization
 
-- Replace the hypotheses of Section 2 layer by layer, as the project owner intends. A possible order: first the
-  results that are linear algebra or Hodge theory of tori ([`VanGeemenModuli`](Challenge.lean#L405), the Moonen–Zarhin computations of Hodge
-  rings, [`IgusaProp3NormalForm`](WeilClasses/External/Igusa/Sec10.lean#L2034)), then the geometric ones ([`VoisinLocus`](Challenge.lean#L390), [`SchoenDegeneration`](Challenge.lean#L425)), and finally the sheaf
-  theory of §§7–9.
+- Replace the hypotheses of Section 2 layer by layer, as the project owner intends. [`ROADMAP.md`](ROADMAP.md) plans
+  the layers: first the hypotheses about Hodge structures (van Geemen's moduli, Igusa's Proposition 3, the
+  Moonen–Zarhin computations), and Schoen's degeneration traded for push-forward through Voisin's Lemma 2.9; then
+  actual abelian varieties and their algebraic classes; then the hypotheses about algebraic cycles; and finally the
+  sheaf theory of §§7–9.
 - Contributions to Mathlib that would help: Hodge structures and Mumford–Tate groups, algebraic groups with density
   theorems, Clifford algebras over `ℤ` (the integral `C(V)` of E4, here [`WeilClasses.CZ`](WeilClasses/Spinor/Integral.lean#L99) and [`WeilClasses.SpinZ`](WeilClasses/Spinor/Integral.lean#L183)), and
   the classification of Hermitian forms over number fields.
