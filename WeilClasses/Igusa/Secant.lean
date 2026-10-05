@@ -2368,16 +2368,15 @@ theorem lemma10_1_1_stabilizer (hIgusa : IgusaProp3NormalForm) (w : S ℂ 3) (hw
 /-- **Lemma 10.1.1** (`lemma-secant-to-spinor-variety`), last sentence. If `w` belongs to `S⁺_ℚ`
 (with `J(w) ≠ 0`), then the plane `P_w ⊆ S⁺_ℂ` is defined over `ℚ`: it is the base change of a
 plane of `S⁺_ℚ`.
-Gap in the paper (filled): the paper argues "the stabilizer `Spin(V_ℂ)_w` is defined over `ℚ`. The
-latter determines `P_w`. Hence, `P_w` is defined over `ℚ` as well" (l. 9716–9717), leaving the
-descent implicit; here it is an explicit Galois descent. Departure from the paper (reason 3) at the
-first step: fields of definition of algebraic subgroups are not part of the model (its groups are
-groups of points), so the intermediary is `w` instead of `Spin(V_ℂ)_w`: `P_w` is determined by `w`
-(the uniqueness in `lemma10_1_1`), hence every automorphism `τ` of `ℂ` maps `P_w` to the transversal
-secant through `τ(w) = w`, i.e. to `P_w`. The normal form over the algebraic closure `ℚ̄` of `ℚ` in
-`ℂ` (`IgusaProp3NormalForm`) gives `P_w` a basis of vectors defined over `ℚ̄`, and a plane with both
-properties is defined over `ℚ` (`s10_isDefinedOver_of_fixed`, with the Galois theory of `ℚ̄/ℚ` in
-`s10_rat_of_fixed`).
+Departure from the paper (reason 3): the paper argues "the stabilizer `Spin(V_ℂ)_w` is defined over
+`ℚ`. The latter determines `P_w`. Hence, `P_w` is defined over `ℚ` as well" (l. 9716–9717). Fields
+of definition of algebraic subgroups are not part of the model (its groups are groups of points), so
+the intermediary is `w` instead of `Spin(V_ℂ)_w`: `P_w` is determined by `w` (the uniqueness in
+`lemma10_1_1`), hence every automorphism `τ` of `ℂ` maps `P_w` to the transversal secant through
+`τ(w) = w`, i.e. to `P_w`. The descent is then explicit: the normal form over the algebraic closure
+`ℚ̄` of `ℚ` in `ℂ` (`IgusaProp3NormalForm`) gives `P_w` a basis of vectors defined over `ℚ̄`, and a
+plane with both properties is defined over `ℚ` (`s10_isDefinedOver_of_fixed`, with the Galois theory
+of `ℚ̄/ℚ` in `s10_rat_of_fixed`).
 Conditional on [Igusa, Prop. 3] (the normal form, `IgusaProp3NormalForm`), which the proof uses and
 this project assumes (see `WeilClasses/External/Igusa/README.md`). -/
 theorem lemma10_1_1_rational (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)

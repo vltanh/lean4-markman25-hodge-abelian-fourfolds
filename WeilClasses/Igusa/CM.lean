@@ -1147,8 +1147,8 @@ end S10Main
 The paper calls `W₁, W₂` "the two maximal isotropic subspaces of `V_ℂ` invariant under
 `Spin(V_ℚ)_w`". That no other maximal isotropic subspace is invariant needs that `Spin(V_ℚ)_w` is
 Zariski dense in `Spin(V_ℂ)_w ≅ SL(W₁)`, which the paper does not discuss (a gap). Zariski density
-is not available in Lean, so (departure, reason 2) we prove the needed consequence directly, along
-the plan of `notes/proof-plans.md` (unitary transvections):
+is not available in Lean, so (departure, reason 2) we prove the needed consequence directly, with
+unitary transvections:
 
 * for an isotropic `u ∈ V_ℚ` and `f = η(√-d)`, the unipotent `E_u = 1 + ι(f u) ι(u)` (Tau Ceti's
   `spinTransvection`) lies in `Spin(V_ℚ)_P = Spin(V_ℚ)_w` and acts on `V_ℂ` by `1 + Ñ(u, u)`,
@@ -1476,8 +1476,7 @@ polarizations of `Ñ` whose `Q`-part is `(a, b)_V = 0`.
 Gap in the paper (filled): the paper uses without comment that `W₁, W₂` are the only maximal
 isotropic subspaces invariant under `Spin(V_ℚ)_w` (l. 9793), which needs the Zariski density of
 `Spin(V_ℚ)_w` in `Spin(V_ℂ)_w ≅ SL(W₁)`. Departure from the paper (reason 2): Zariski density is not
-available in Lean; this lemma, with `s10_eq_A_or_B`, proves the consequence needed (plan of
-`notes/proof-plans.md`). -/
+available in Lean; this lemma, with `s10_eq_A_or_B`, proves the consequence needed. -/
 theorem s10_D_mem (hd : 0 < d) (W : Submodule ℂ (V ℂ 3))
     (hinv : IsInvariantUnder ℚ ℂ 3 P.spinPℚ W) {a b : V (Kd d) 3} (ha : a ∈ P.W₁)
     (hb : b ∈ P.W₂) (hab : pairing (Kd d) 3 a b = 0) (x : V ℂ 3) (hx : x ∈ W) :

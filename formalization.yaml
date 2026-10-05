@@ -1,0 +1,323 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Weil classes on abelian sixfolds and the Hodge conjecture for abelian fourfolds (Markman)"
+  description: >-
+    A conditional Lean 4 formalization of E. Markman, "Cycles on abelian 2n-folds of Weil type from secant
+    sheaves on abelian n-folds" (arXiv:2502.03415v2). The paper proves that the Hodge-Weil classes of
+    polarized abelian sixfolds of Weil type with discriminant -1 are algebraic (Theorem 1.5.1) and deduces the
+    Hodge conjecture for abelian fourfolds (Corollary 1.6.1).
+
+
+    Every result of the paper about cohomology classes, Clifford algebras, spin representations, Hodge
+    structures and period domains is proved in a linear-algebra model of the cohomology of abelian varieties
+    (abelian varieties up to isogeny as polarizable rational Hodge structures of weight one), by the paper's
+    arguments except the departures listed under fidelity (notably Proposition 6.1.2 and Lemma 4.0.2, proved by
+    other arguments with the owner's approval): rational secant lines to the spinor variety and the abelian 2n-folds of Weil type they give
+    (Sections 2-4), the Spin(V)-equivariance of Orlov's equivalence (Section 6, Proposition 6.1.2), Theorem
+    1.4.1(3) and (4) (the characteristic class of the secant-square sheaf stays of Hodge type on every Weil-type
+    deformation of X x X^, and its K-translates with h^3 span Q h^3 + HW), Corollary 1.3.2, the cohomological
+    results of Section 8, and Section 10. The results the paper cites from Chevalley, Igusa (Lemmas 1-2, Section
+    2, the invariance of the quartic), Golyshev-Lunts-Orlov, Orlov, Huybrechts, Trautman, van Geemen (Def. 4.9)
+    and Markman (2023) are proved in the case the paper uses.
+
+
+    Theorem 1.5.1 and Corollary 1.6.1 are proved assuming, as named hypotheses in their statements, the paper's
+    own sheaf-theoretic Sections 7-9 (in the form: the class kappa_3(E) is algebraic near X x X^ wherever kappa(E)
+    is of Hodge type) and results from algebraic geometry not yet available in Lean: about algebraic cycles,
+    pullbacks and products of algebraic classes, the Lefschetz (1,1) theorem, Voisin's algebraicity loci,
+    Schoen's degeneration and a theorem of Ramon-Mari; about Hodge structures, van Geemen's moduli of Weil-type
+    abelian varieties and two theorems of Moonen-Zarhin. Three results of Section 10 assume two parts of Igusa's
+    Proposition 3. Eleven statements of the paper are false or misprinted as printed and are formalized in
+    corrected form (the basis of Example 10.2.2 is also misprinted, with no effect on the value computed there);
+    REPORT.md audits the paper.
+  authors:
+    - "The-Anh Vu-Le"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "The-Anh Vu-Le"
+
+classification:
+  arxiv: ["math.AG"]
+  msc2020: ["14C30", "14C25", "14K22", "14K12", "15A66", "14F08"]
+
+sources:
+  - title: "Cycles on abelian 2n-folds of Weil type from secant sheaves on abelian n-folds"
+    authors:
+      - "Eyal Markman"
+    id: "arXiv:2502.03415v2"
+    type: "article"
+    location: "https://arxiv.org/abs/2502.03415v2"
+    relationship: "formalizes"
+    note: >-
+      The paper's results about cohomology, Clifford algebras, spin representations, Hodge structures and period
+      domains are formalized and proved by its arguments (with the departures listed under fidelity); Sections 7-9
+      (sheaf theory) enter as a named hypothesis of Theorem 1.5.1 and Corollary 1.6.1. REPORT.md audits the paper
+      against the formalization.
+    license: "arXiv non-exclusive license to distribute 1.0"
+    author_endorsement: "not-contacted"
+  - title: "The algebraic theory of spinors"
+    authors:
+      - "Claude Chevalley"
+    type: "book"
+    location: "Columbia University Press, 1954"
+    relationship: "background"
+    note: "The results on pure spinors and the Clifford algebra that the paper cites are proved in WeilClasses/External/Chevalley."
+  - title: "A classification of spinors up to dimension twelve"
+    authors:
+      - "Jun-Ichi Igusa"
+    type: "article"
+    location: "Amer. J. Math. 92 (1970), no. 4, 997-1028"
+    relationship: "background"
+    note: >-
+      Lemmas 1 and 2, the elements of Section 2 and the invariance of the quartic in Proposition 3 are proved in
+      WeilClasses/External/Igusa; two parts of Proposition 3 (the normal form, and the orbits over subfields of C)
+      are assumed as named hypotheses of three results of Section 10.
+  - title: "Mirror symmetry for abelian varieties"
+    authors:
+      - "Vasily Golyshev"
+      - "Valery Lunts"
+      - "Dmitri Orlov"
+    type: "article"
+    location: "J. Algebraic Geom. 10 (2001), 433-496"
+    relationship: "background"
+    note: "Prop. 3.2.1(e), Prop. 4.3.7 and Cor. 4.3.8, as the paper uses them, are proved in WeilClasses/External/GolyshevLuntsOrlov."
+  - title: "Derived categories of coherent sheaves on abelian varieties and equivalences between them"
+    authors:
+      - "Dmitri Orlov"
+    type: "article"
+    location: "Izv. Math. 66 (2002), no. 3, 569-594"
+    relationship: "background"
+    note: "The cohomological form of Theorem 2.10 used in (6.1.8) is proved in WeilClasses/External/Orlov."
+  - title: "Fourier-Mukai transforms in algebraic geometry"
+    authors:
+      - "Daniel Huybrechts"
+    type: "book"
+    location: "Oxford University Press, 2006"
+    relationship: "background"
+    note: "Lemma 9.23, Corollary 9.24 and Exercise 9.41, as the paper uses them, are proved in WeilClasses/External/Huybrechts."
+  - title: "Generalized pure spinors"
+    authors:
+      - "Andrzej Trautman"
+      - "Krzysztof Trautman"
+    type: "article"
+    location: "J. Geom. Phys. 15 (1994), 1-22"
+    relationship: "background"
+    note: "Theorem 1(i), as used in Remark 2.3.1, is proved in WeilClasses/External/Trautman."
+  - title: "An introduction to the Hodge conjecture for abelian varieties"
+    authors:
+      - "Bert van Geemen"
+    type: "book chapter"
+    location: "Algebraic cycles and Hodge theory (Torino, 1993), Lecture Notes in Math. 1594, Springer, 1994, 233-252"
+    relationship: "background"
+    note: >-
+      Definition 4.9 (the condition on the polarization) is proved in WeilClasses/External/VanGeemen; Theorem
+      5.2(3) is assumed as the named hypothesis VanGeemenModuli of Theorem 1.5.1 and Corollary 1.6.1.
+  - title: "The monodromy of generalized Kummer varieties and algebraic cycles on their intermediate Jacobians"
+    authors:
+      - "Eyal Markman"
+    type: "article"
+    location: "J. Eur. Math. Soc. 25 (2023), no. 1, 231-321"
+    relationship: "background"
+    note: "Proposition 1.7, as used in Example 8.2.2, is proved in WeilClasses/External/Markman."
+  - title: "The Hodge conjecture"
+    authors:
+      - "Claire Voisin"
+    type: "book chapter"
+    location: "Open problems in mathematics, Springer, 2016, 521-543"
+    relationship: "background"
+    note: "Section 4.2 (algebraicity loci) is assumed as the named hypothesis VoisinLocus of Theorem 1.5.1 and Corollary 1.6.1."
+  - title: "Addendum to: Hodge classes on self-products of a variety with an automorphism"
+    authors:
+      - "Chad Schoen"
+    type: "article"
+    location: "Compositio Math. 114 (1998), no. 3, 329-336"
+    relationship: "background"
+    note: "Proposition 10 is assumed as the named hypothesis SchoenDegeneration of Corollary 1.6.1."
+  - title: "Hodge classes and Tate classes on simple abelian fourfolds"
+    authors:
+      - "Ben Moonen"
+      - "Yuri Zarhin"
+    type: "article"
+    location: "Duke Math. J. 77 (1995), no. 3, 553-581"
+    relationship: "background"
+    note: "Theorem 2.11 is assumed as the named hypothesis MoonenZarhinSimple of Corollary 1.6.1."
+  - title: "Hodge classes on abelian varieties of low dimension"
+    authors:
+      - "Ben Moonen"
+      - "Yuri Zarhin"
+    type: "article"
+    location: "Math. Ann. 315 (1999), 711-733"
+    relationship: "background"
+    note: "Proposition 3.8 and Theorem 0.1(i) are assumed as the named hypothesis MoonenZarhinLowDim of Corollary 1.6.1."
+  - title: "On the Hodge conjecture for products of certain surfaces"
+    authors:
+      - "Jose J. Ramon Mari"
+    type: "article"
+    location: "Collect. Math. 59 (2008), no. 1, 1-26"
+    relationship: "background"
+    note: "Theorem 4.11 is assumed as the named hypothesis RamonMariProducts of Corollary 1.6.1."
+  - title: "A semi-regularity map for modules and applications to deformations"
+    authors:
+      - "Ragnar-Olaf Buchweitz"
+      - "Hubert Flenner"
+    type: "article"
+    location: "Compositio Math. 137 (2003), no. 2, 135-210"
+    relationship: "background"
+    note: "Theorem 5.1, through the paper's Section 7, is part of the assumed hypothesis SecantSheafDeformation."
+  - title: "Suggested program for JAVA 2026"
+    authors:
+      - "Eyal Markman"
+    type: "lecture notes"
+    location: "https://webusers.imj-prg.fr/~marco.maculan/java/2026/files/program.pdf (14 February 2026)"
+    relationship: "other"
+    note: "Footnotes 3 and 8 correct the definition of the integral Clifford algebra in Section 2.1 and the group in Lemma 2.2.2 of the paper (REPORT.md, E4 and E28)."
+
+related_formalizations:
+  - id: "https://github.com/Paul-Lez/HodgeConjecture"
+    relationship: "independent"
+    note: >-
+      A Lean statement of the Hodge conjecture (work in progress), including a variant for abelian varieties of
+      dimension at most five that cites this paper. It does not formalize the paper; this work did not consult it.
+
+status:
+  scope: >-
+    Conditional formalization. Proved in a linear-algebra model of the cohomology of abelian varieties, by the
+    paper's arguments except the departures listed under fidelity (notably Proposition 6.1.2 and Lemma 4.0.2,
+    with the owner's approval): every result of Sections 1-6, 8 and 10 of the paper about cohomology classes, Clifford
+    algebras, spin representations, Hodge structures and period domains, including Proposition 1.2.1, Proposition
+    1.3.1, Corollary 1.3.2, Theorem 1.4.1(1), (3), (4) and the rank in (2), and the results the paper cites from
+    Chevalley, Igusa (Lemmas 1-2, Section 2, the invariance of the quartic), Golyshev-Lunts-Orlov, Orlov,
+    Huybrechts, Trautman, van Geemen (Def. 4.9) and Markman (2023). Theorem 1.5.1 and Corollary 1.6.1 are proved
+    from named hypotheses: the paper's own Sections 7-9 (SecantSheafDeformation), PullbackClosed, SubalgebraClosed,
+    LefschetzOneOne, VoisinLocus, VanGeemenModuli, SchoenDegeneration, MoonenZarhinSimple, RamonMariProducts and
+    MoonenZarhinLowDim; three results of Section 10 assume IgusaProp3NormalForm or IgusaProp3OrbitSubfield. Not
+    formalized: the sheaf theory and derived categories of Sections 5.1, 6.2 (Lemma 6.2.1), 7, 8.2-8.5, 9 and 11, and algebraic cycles
+    themselves (algebraic classes are an abstract system with the hypotheses above). Eleven statements of the paper
+    are formalized in corrected form (fidelity.divergences).
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code {CCVERSION} (VS Code extension, Claude Agent SDK)"
+      tool_setup: >-
+        The formalize-math-paper skill, version 2.1.0 (https://github.com/vltanh/formalize-math-paper, commit
+        397f71c): one main session with {NAGENTS} sub-agents (at most {MAXAGENTS} at once) for the library survey,
+        statements, statement review, proofs, cited results, refactors, proof review, fixes and the audit's
+        verification; Lean v4.35.0-rc3, Mathlib, Tau Ceti.
+      cost:
+        wall_time: "{ELAPSED} elapsed; {AGENTHOURS} of sub-agent work"
+        spend_usd: "not tracked"
+        hardware: "local machine (Linux, 62 GB RAM)"
+      prompting_notes: >-
+        The owner invoked the skill on the arXiv identifier and answered its questions: the scope (prove the
+        paper's own mathematics in a cohomological model; keep Sections 7-9 and the cited results about algebraic
+        cycles as named hypotheses, to be formalized later), the two authorized departures, every correction of a
+        statement, and the hypotheses for Igusa's Proposition 3.
+  spend_usd: "not tracked"
+  notes: >-
+    Produced with Claude Opus 5.5 (Anthropic), run as an agent in Claude Code, under the direction of the
+    maintainer, who chose the scope and decided every change of a statement. Statements were reviewed against the TeX source by independent agents before any
+    proof; proofs were compared with the paper's proofs by independent agents afterwards; the audit's findings and
+    its literature survey were verified by separate agents. See CREDITS.md.
+
+fidelity:
+  divergences: >-
+    Corrections of statements (REPORT.md, Section 6): Proposition 1.3.1, (1.3.1), (1.3.2) with m (x) m instead of
+    m (x) m-dagger (E2); Lemma 2.2.1, second sentence, for odd n: nondegenerate instead of definite (E5); the image of
+    Spin(V_K)_{l1,l2} in GL(W1) is the subgroup of square determinant, not all of GL(W1) (E6); Lemma 2.2.2:
+    SL_{2n}(K) (misprint, E28); Remark 2.2.5: under the hypothesis that the whole circle lies in rho(Spin(V_R)_P)
+    (E9); Remark 2.3.1: B0bar = -1/2 c1(P) (E10); Lemma 6.3.2: the sign (-1)^{d(d-1)/2} (E21); (8.1.2) with the
+    hypothesis End_Q(X) = Q (E23); Section 8.1: the element extends iota composed with tau (E24); Section 8.1: the
+    coefficient 4 in the expansion of beta (misprint, E28); Remark 10.1.2(1) for d nonzero (E26). Readings (Section
+    6): abelian varieties up to isogeny as polarizable rational Hodge structures of weight one, algebraic classes as
+    an abstract system with named hypotheses, the explicit X x X^; c1(P) = +sum e_i f_i (forced); the orientation of
+    the complex structure of X x X^ as in the paper's footnote for the library's productStructure (E12), while the
+    statements of record use the standard structure JX = -productStructure, the Weil-type period domain being the
+    image of Omega_P under I -> -I; the integral Clifford algebra of the quadratic
+    form (the author's correction, E4); statements for K-points where the paper reasons about algebraic groups;
+    SU(V_Q, H) the special unitary group in Lemma 3.1.2. Departures from the paper's proofs (Section 7): Proposition
+    6.1.2 and Lemma 6.2.5 proved algebraically instead of by reduction to abelian surfaces (reason 2, authorized);
+    Lemma 4.0.2 by transitivity instead of a dimension count (reason 2, authorized); single steps in Lemma 2.2.1 (the
+    pairing on P computed for both parities, reason 1), Lemma 2.2.6 (Hodge structures transported to C(V), reason
+    3) and Lemma 2.2.7 (the type of the lines omega^j, reasons 3 and 1), Lemmas 2.2.4 and 2.2.7 (irreducibility via
+    transvections and weights instead of density, reasons 1-2), Remark 2.2.3 (infinitesimal stabilizer, reason 2),
+    Lemma 2.3.2(1) (a wrong step corrected, reason 1), Remark 2.4.3 (real lift via the spinor norm, reason 1),
+    Section 2.4 (theta via ampleness, not the isogeny phi_L, reason 3), Lemma 3.1.2 (spinor norm, reason 1), Lemma
+    4.0.1 (non-emptiness for general P, reason 1), Corollary 4.0.4 (density, reason 2), Section 6.2 (H^2 = H^2_P + Q Xi_P with H^2_P the span of the
+    rho_g x - x and an invariant pairing instead of complete reducibility, reason 2), Lemma 6.2.3 (invariant
+    pairing instead of complete reducibility, sl2 Lefschetz instead of hard Lefschetz, reason 2; the (1,1) type of
+    l, reason 1), Lemma 8.1.1 (cosets instead of a Zariski closure, reason 2), Theorem 1.4.1(2) (the rank from
+    ch(E), reason 3), Theorem 1.5.1 (d = 1, 2 via 4d and van Geemen's Th. 5.2(3) at the last step, reason 1), Lemma
+    10.1.1 (Galois descent through w, reason 3; uniqueness via Igusa's Lemma 2, reason 1), Lemma 10.2.1 (order of
+    two steps, reason 1; density via transvections, reason 2). Every other proof follows the paper's argument;
+    docs/route_differences.tsv records every difference between the results a formal proof uses and those the
+    paper's proof cites.
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "none"
+  notes: >-
+    No person has reviewed the proofs. Independent AI agents reviewed every statement against the TeX source
+    before the proofs were written, compared every formal proof with the paper's proof afterwards, verified each
+    finding of the audit against the TeX source (with an exact model of the paper's conventions), and verified the
+    literature survey against its sources.
+
+alignment:
+  namespace: "WeilClasses.Challenge"
+  statements:
+    - source: "Theorem 1.4.1(3)"
+      lean: "WeilClasses.Challenge.theorem1_4_1_3"
+      module: "Challenge"
+      status: "proved"
+      note: "For every principally polarized abelian threefold (the paper: the Jacobian of a non-hyperelliptic genus-3 curve) and d >= 3; deformations are the points of the connected component of X x X^ in its Weil-type period domain."
+    - source: "Theorem 1.4.1(4)"
+      lean: "WeilClasses.Challenge.theorem1_4_1_4"
+      module: "Challenge"
+      status: "proved"
+      note: "The K-translates of kappa_3(E) and h^3 span Q h^3 + HW, of dimension 3."
+    - source: "Theorem 1.5.1"
+      lean: "WeilClasses.Challenge.theorem1_5_1"
+      module: "Challenge"
+      status: "proved, conditional"
+      note: "Under the named hypotheses PullbackClosed, SubalgebraClosed, LefschetzOneOne, VoisinLocus, VanGeemenModuli and SecantSheafDeformation (the paper's Sections 7-9)."
+    - source: "Corollary 1.6.1"
+      lean: "WeilClasses.Challenge.corollary1_6_1"
+      module: "Challenge"
+      status: "proved, conditional"
+      note: "Under the hypotheses of Theorem 1.5.1 and SchoenDegeneration, MoonenZarhinSimple, RamonMariProducts, MoonenZarhinLowDim."
+    - source: "Section 1.2 (the norm of K = Q(sqrt(-d)))"
+      lean: "WeilClasses.Challenge.Kd_Nm"
+      module: "Challenge"
+      status: "proved"
+      note: "Compared theorem: Nm(a + b sqrt(-d)) = a^2 + d b^2 for the definition of K and Nm."
+    - source: "Section 2.4 (f^2 = -d)"
+      lean: "WeilClasses.Challenge.fX_mul_self"
+      module: "Challenge"
+      status: "proved"
+      note: "Compared theorem for the endomorphism f of H^1(X x X^)."
+    - source: "Proposition 2.4.4, Corollary 3.2.3"
+      lean: "WeilClasses.Challenge.JX_mem_weilDomain"
+      module: "Challenge"
+      status: "proved"
+      note: "Compared theorem: X x X^ with (eta, h) is a polarized abelian 2n-fold of Weil type."
+    - source: "Lemma 3.1.3"
+      lean: "WeilClasses.Challenge.discIs_XXhat"
+      module: "Challenge"
+      status: "proved"
+      note: "Compared theorem: the discriminant of X x X^ is (-1)^n."
+    - source: "Theorem 1.4.1(2) (the rank 8d)"
+      lean: "WeilClasses.Challenge.rank_chE"
+      module: "Challenge"
+      status: "proved"
+      note: "Compared theorem: the degree-0 part of ch(E) is 8d."
+
+acknowledgements: >-
+  Built on Mathlib and on the Tau Ceti library (Clifford algebras, spin groups, exterior algebras), used in proofs
+  only. Palomar's Comparator checked the statements of record.

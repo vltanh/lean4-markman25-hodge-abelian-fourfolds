@@ -54,7 +54,7 @@ The group of Lemma 2.2.7 is the *integral* group `Spin(V)_P` of (2.2.2), acting 
 arithmetic subgroup of a `ℚ`-form of `SL_{2n}` with noncompact real points, hence Zariski dense by
 Borel's density theorem; or an argument with unipotent elements `1 + t N`, `t ∈ ℤ`).
 
-The proofs use the second route (gap filled per `notes/proof-plans.md`):
+The proofs use the second route (gap filled):
 1. The unitary transvections `E_{x,t} = 1 + t ι(f x) ι(x)` (`x` isotropic and integral, `t ∈ ℤ`) lie
    in `Spin(V)_P`. Their action on `⋀• V_K` is a polynomial of degree `2` in `t`. So a subspace
    stable under `Spin(V)_P` is stable under the derivations `D_{N_x}` (`KSecant.s22b_Der_Dop_mem`).

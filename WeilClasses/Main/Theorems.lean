@@ -7,7 +7,7 @@ public import WeilClasses.AbelianVariety.Lemmas
 /-!
 # The main results in the model (Theorems 1.4.1 (3), (4), 1.5.1, Corollary 1.6.1)
 
-The statements of record (`Challenge.lean`) in the library: Theorem 1.4.1 (3), (4) for the explicit
+The statements of record (`Challenge.lean`) in the library: Theorem 1.4.1(3), (4) for the explicit
 polarized abelian sixfold of Weil type `X × X̂` of `WeilClasses.Defs` (`fX`, `hX`, `JX`, `kappaX`),
 Theorem 1.5.1 and Corollary 1.6.1 for a system of algebraic classes `Z` satisfying the hypotheses of
 `WeilClasses.Defs`, and the compared theorems that check the definitions of the block (`fX_mul_self`,
@@ -15,7 +15,7 @@ Theorem 1.5.1 and Corollary 1.6.1 for a system of algebraic classes `Z` satisfyi
 where Theorem 1.4.1 uses them). Where a statement fixes no complex structure on `X`, the complex
 structure `J₀` of `WeilClasses.Secant.Defs` (`s8_J0`, for which `ThetaStd` is ample) is used.
 
-* Theorem 1.4.1 (3), (4) follow from the paper's versions for the secant `P_Θ`
+* Theorem 1.4.1(3), (4) follow from the paper's versions for the secant `P_Θ`
   (`WeilClasses.Main.Intro`) through the bridges of `WeilClasses.Main.Compare` (`f = η(√-d)`,
   `h = Ξ_P^♯`, the standard complex structure `-I_{V_ℝ}`, `coordV`).
 * Theorem 1.5.1 follows the proof in §9.3: discriminant `-1` of `X × X̂` (Lemma 3.1.3 for `n = 3`),
@@ -316,9 +316,9 @@ theorem discIs_XXhat (n : ℕ) (d : ℚ) (hd : 0 < d) (A : AbVar (2 * n)) (X : P
       rw [pow_mul]
       ring
 
-/-! ### Theorem 1.4.1 (3), (4) in the model -/
+/-! ### Theorem 1.4.1(3), (4) in the model -/
 
-/-- **Theorem 1.4.1 (3)** (`main-theorem-introduction`), in the model: every graded summand of
+/-- **Theorem 1.4.1(3)** (`main-theorem-introduction`), in the model: every graded summand of
 `κ(E)` is a Hodge class on every deformation of `(X × X̂, η, h)` as a polarized abelian sixfold of
 Weil type (the connected component of its Weil-type period domain). -/
 theorem theorem1_4_1_3_model (d : ℕ) (hd : 3 ≤ d) (J : Module.End ℝ (H1 ℝ 3))
@@ -357,7 +357,7 @@ theorem main_kappaX_mem_hodge (d : ℕ) (hd : 3 ≤ d) (J : Module.End ℝ (H1 �
   rw [kappaX, map_mem_hodgeClassesX_iff 3 I hI.2.1]
   exact main_projDeg_mem_hodgeClassesV (main_kappa_chE_hodge hJ hΘ hd3 I hI) k
 
-/-- **Theorem 1.4.1 (4)** (`main-theorem-introduction`), in the model: the `η(K)`-translates of
+/-- **Theorem 1.4.1(4)** (`main-theorem-introduction`), in the model: the `η(K)`-translates of
 `κ₃(E)`, together with `h³`, span the `3`-dimensional subspace `ℚ h³ ⊕ ĤW` of `H⁶(X × X̂, ℚ)`.
 
 Reading: the model statement fixes no complex structure on `X`, and its conclusion does not depend
@@ -408,7 +408,13 @@ theorem theorem1_4_1_4_model (d : ℕ) (hd : 3 ≤ d) (η : Kd d →+* Module.En
 /-! ### Theorem 1.5.1 and Corollary 1.6.1 -/
 
 /-- Theorem 1.5.1 for `d ≥ 3`, following the proof in §9.3 (`d ≥ 3` is the range of the secant sheaf
-construction of §§8–9, `SecantSheafDeformation`). -/
+construction of §§8–9, `SecantSheafDeformation`).
+
+Gap in the paper (filled): the proof ends with "the locus contains the whole irreducible component
+of moduli of deformations of `(X × X̂, η, h)`" (TeX line 6847). That every polarized abelian sixfold
+of Weil type for `K` with discriminant `-1` lies, up to isogeny, in this component is
+[van Geemen, Th. 5.2(3)], which the paper states in §1.1 (TeX line 283) but does not invoke in the
+proof. Step (4) below invokes it (`VanGeemenModuli`). -/
 theorem main_theorem1_5_1_of_three_le (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
     [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
     (d : ℕ) (hd : 3 ≤ d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d)
@@ -499,12 +505,16 @@ theorem main_theorem1_5_1_of_three_le (Z : CycleClasses) [PullbackClosed Z] [Sub
 Hodge–Weil classes of polarized abelian sixfolds of Weil type with complex multiplication by `K`
 and with discriminant `-1` are algebraic.
 
-Gap in the paper (filled): the proof (§9.3, TeX lines 6841–6849) uses Theorem 1.4.1, which assumes
-`d ≥ 3` (TeX lines 497, 500), while the theorem claims every `d > 0`; the cases `d = 1, 2` are not
-treated. They are filled with the paper's own footnote (TeX line 563: "replace it with `4d` and note
-that `ℚ(√-4d) = ℚ(√-d)`"): a polarized abelian sixfold of Weil type for `ℚ(√-d)` is one for
-`ℚ(√-4d)`, `4d ≥ 3`, with the same Hodge–Weil classes and discriminant (`main_exists_four_mul`), to
-which the case `d ≥ 3` (`main_theorem1_5_1_of_three_le`) applies. -/
+Gaps in the paper (filled), in the proof (§9.3, TeX lines 6841–6849):
+* The proof uses Theorem 1.4.1, which assumes `d ≥ 3` (TeX lines 497, 500), while the theorem claims
+  every `d > 0`. The footnote at TeX line 563 ("If `d` is odd replace it with `4d` and note that
+  `ℚ(√-4d) = ℚ(√-d)`") turns `d = 1` into `4`; `d = 2` needs the same device, which the paper does
+  not state. Here both are replaced by `4d ≥ 3`: a polarized abelian sixfold of Weil type for
+  `ℚ(√-d)` is one for `ℚ(√-4d)`, with the same Hodge–Weil classes and discriminant
+  (`main_exists_four_mul`), to which the case `d ≥ 3` (`main_theorem1_5_1_of_three_le`) applies.
+* The passage from the component of moduli of `X × X̂` to every sixfold of Weil type for `K` with
+  discriminant `-1` is [van Geemen, Th. 5.2(3)] (`VanGeemenModuli`), stated in §1.1 (TeX line 283)
+  but not invoked in the proof; see `main_theorem1_5_1_of_three_le`. -/
 theorem theorem1_5_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
     [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
     (d : ℕ) (hd : 0 < d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d) (hdisc : X.DiscIs (-1)) :

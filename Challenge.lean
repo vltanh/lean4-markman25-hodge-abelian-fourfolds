@@ -47,10 +47,10 @@ the linear algebra that the paper's arguments act on.
 
 ## What is stated
 
-* **Theorem 1.4.1 (3)** (`theorem1_4_1_3`): every graded summand of `κ(E)` is a Hodge class on every
+* **Theorem 1.4.1(3)** (`theorem1_4_1_3`): every graded summand of `κ(E)` is a Hodge class on every
   deformation of `(X × X̂, η, h)` as a polarized abelian sixfold of Weil type (the connected
   component of the period domain).
-* **Theorem 1.4.1 (4)** (`theorem1_4_1_4`): the `η(K)`-translates of `κ₃(E)`, together with `h³`,
+* **Theorem 1.4.1(4)** (`theorem1_4_1_4`): the `η(K)`-translates of `κ₃(E)`, together with `h³`,
   span the `3`-dimensional subspace `ℚ h³ ⊕ ĤW` of `H⁶(X × X̂, ℚ)`.
 * **Theorem 1.5.1** (`theorem1_5_1`): for every positive integer `d`, the Hodge–Weil classes of
   every polarized abelian sixfold of Weil type for `ℚ(√-d)` with discriminant `-1` are algebraic.
@@ -71,7 +71,8 @@ in their signatures, the results that their proofs take from algebraic geometry:
 * `SubalgebraClosed Z`: `[A]` and intersection products are algebraic;
 * `LefschetzOneOne Z`: the Lefschetz (1,1) theorem;
 * `VoisinLocus Z`: [Voisin, *The Hodge conjecture*, in *Open Problems in Mathematics* (2016),
-  §4.2] the locus where a flat class is algebraic is a countable union of closed analytic subsets;
+  §4.2] the locus where a flat class is algebraic is a countable union of closed algebraic subsets
+  (used in the form: closed analytic subsets of a component of the period domain);
 * `VanGeemenModuli`: [van Geemen, *An introduction to the Hodge conjecture for abelian varieties*,
   Th. 5.2(3)] polarized abelian varieties of Weil type with the same `K` and discriminant form one
   connected family up to isogeny;
@@ -381,9 +382,11 @@ noncomputable def WeilDomainMat {m : ℕ} {d : ℚ} (η : Kd d →+* Module.End 
     (h : S ℚ (2 * m)) : Set (Matrix (Fin (2 * (2 * m))) (Fin (2 * (2 * m))) ℝ) :=
   LinearMap.toMatrix' '' WeilDomain η h
 
-/-- **[Voisin, *The Hodge conjecture*, §4.2]**: over a connected component `C` of a Weil-type
-period domain, the locus where a fixed rational class is algebraic is a countable union of closed
-analytic subsets; so if it contains a nonempty open subset of `C`, it is all of `C`. -/
+/-- **[Voisin, *The Hodge conjecture*, §4.2]**: the locus in moduli where a fixed rational class is
+algebraic is a countable union of closed algebraic subsets (TeX line 6847). Assumed here in the form
+used in the model: over a connected component `C` of a Weil-type period domain, the locus is a
+countable union of closed analytic subsets, so if it contains a nonempty open subset of `C`, it is
+all of `C`. -/
 class VoisinLocus (Z : CycleClasses) : Prop where
   spread : ∀ {m : ℕ} {d : ℚ} (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * m))) (h : S ℚ (2 * m))
     (α : S ℚ (2 * m)) (J₀ : Module.End ℝ (H1 ℝ (2 * m)))
@@ -701,7 +704,7 @@ theorem rank_chE (d : ℚ) : ExteriorAlgebra.algebraMapInv (chE d) = 8 * d := by
 
 /-! ### Theorem 1.4.1 -/
 
-/-- **Theorem 1.4.1 (3).** Let `X` be a principally polarized abelian threefold (in the paper the
+/-- **Theorem 1.4.1(3).** Let `X` be a principally polarized abelian threefold (in the paper the
 Jacobian of a non-hyperelliptic curve of genus `3`) and `d ≥ 3`. Every graded summand `κ_k(E)` of
 `κ(E)` is of Hodge type on every deformation of `(X × X̂, η, h)` as a polarized abelian sixfold of
 Weil type. -/
@@ -713,7 +716,7 @@ theorem theorem1_4_1_3 (d : ℕ) (hd : 3 ≤ d) (J : Module.End ℝ (H1 ℝ 3))
     (k : ℕ) : kappaX k d ∈ hodgeClassesX (2 * 3) (Matrix.toLin' M) k := by
   sorry
 
-/-- **Theorem 1.4.1 (4).** The `η(K)`-translates of `κ₃(E) ∈ H⁶(X × X̂, ℚ)`, together with `h³`,
+/-- **Theorem 1.4.1(4).** The `η(K)`-translates of `κ₃(E) ∈ H⁶(X × X̂, ℚ)`, together with `h³`,
 span the `3`-dimensional subspace `ℚ h³ ⊕ ĤW` of `H⁶(X × X̂, ℚ)`. -/
 theorem theorem1_4_1_4 (d : ℕ) (hd : 3 ≤ d) (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 3)))
     (hη : η (Kd.sqrtNeg d) = fX 3 d) :

@@ -12,7 +12,7 @@ introduction `ρ'_g` is *defined* by the explicit formula `exp(½[c₁(𝒫) - �
 (`rhoPrimeFormula`); §6.1 defines it as `φ (m_g ⊗ m†_g) φ⁻¹` (6.1.4) and proves the formula
 (Prop. 6.1.2).
 
-**Correction of a misprint** (agreed with the project owner; REPORT.md). As printed, the
+**Correction of an error** (agreed with the project owner; REPORT.md, E2). As printed, the
 introduction makes `φ ∘ (id ⊗ τ)` equivariant from `m ⊗ m†` (Prop. 1.3.1, the lower square of
 (1.3.1)) and `φ̃` (1.3.2) equivariant from `m ⊗ m†`. This is false (`n = 1`, `g = 1 + e₁e₂`,
 `y = 1 ⊗ 1`). What holds, and what §6.1 ((6.1.4) with Prop. 6.1.2), §6.4 and the proof of
@@ -50,7 +50,7 @@ the domain is the representation `m ⊗ m` and the codomain is `ρ'`
 (`ρ'_g = exp(½[c₁(𝒫) - ρ_g(c₁(𝒫))]) ∪ ρ_g`, the introduction's definition); equivalently, `φ` is
 equivariant from `m ⊗ m†`. This is also the commutativity of the lower square of Diagram (1.3.1).
 
-Correction of a misprint (REPORT.md): the paper prints the domain representation `m ⊗ m†` for
+Correction of an error (REPORT.md, E2): the paper prints the domain representation `m ⊗ m†` for
 `φ ∘ (id ⊗ τ)`, which is false (`n = 1`, `g = 1 + e₁e₂`, `y = 1 ⊗ 1`); `m ⊗ m` agrees with (6.1.4),
 §6.4 and the proof of Corollary 1.3.2. -/
 theorem proposition1_3_1_equivariant (g : Spin F n) (y : S F n ⊗[F] S F n) :
@@ -84,7 +84,7 @@ theorem diagram1_3_1_upper (g : Spin F n) (x : ExtV F n) :
 
 /-- **(1.3.2)** (`eq-tilde-phi`): `φ̃ = exp(-c₁(𝒫)/2) ∪ φ ∘ (id ⊗ τ)` is `Spin(V)`-equivariant, where
 the domain is the representation `m ⊗ m` and the codomain is `ρ` (the outer square of Diagram
-(1.3.1)). Correction of a misprint: the paper prints `m ⊗ m†` (see `proposition1_3_1_equivariant`). -/
+(1.3.1)). Correction of an error: the paper prints `m ⊗ m†` (see `proposition1_3_1_equivariant`). -/
 theorem equation1_3_2_equivariant (g : Spin F n) (y : S F n ⊗[F] S F n) :
     phiTildeIntro F n (TensorProduct.map (m F n (g : C F n)) (m F n (g : C F n)) y) =
       rhoExt F n g (phiTildeIntro F n y) := by

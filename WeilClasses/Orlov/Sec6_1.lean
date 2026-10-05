@@ -40,7 +40,7 @@ intertwining of the actions of `Aut(Dᵇ(X))` ([Huybrechts, Cor. 9.37]), the ide
 with the Chern character of Orlov's kernel (GRR), the existence of the line bundles `N_g` (only
 their classes `c₁(N_g) ∈ H²(X × X̂)` appear), the identity `φ_{𝒢^∨[n]} = τ φ_𝒢 τ`, the group
 cohomology interpretation of (6.1.9), and the reduction of Proposition 6.1.2 to abelian surfaces
-(its proof; replaced by an algebraic proof, see `notes/design.md`).
+(its proof; replaced by an algebraic proof, see REPORT.md, Section 7).
 
 **Proofs.** Lemma 6.1.1 is the paper's (Lemma 6.3.1 and `φ_𝒫 ∘ ψ_{𝒫⁻¹[n]} = id`; stated and proved
 in `WeilClasses.Orlov.Sec6_3`). Proposition 6.1.2 is proved by the authorized algebraic argument
@@ -288,7 +288,7 @@ Reading: the paper states this for `g` in the integral group `Spin(V)` but appli
 with the sign convention of `c1P`;
 it fails for the opposite sign.)
 
-Departure from the paper (authorized by the project owner; `notes/proof-plans.md`): the paper
+Departure from the paper (reason 2; authorized by the project owner, REPORT.md Section 7): the paper
 reduces the statement to abelian surfaces (Lemma 6.2.5, via Orlov's Th. 2.10, Verbitsky's Zariski
 density and Obata's Th. B), which needs sheaves and algebraic groups not available here. The proof
 (`s61_proposition6_1_2`) is the algebraic argument through the symmetric Chevalley isomorphism of

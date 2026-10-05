@@ -826,11 +826,11 @@ Proof (the paper's): by [Igusa, Lemma 1], `Spin(V_K)_{ℓ₁,ℓ₂}/{±1}` embe
 (`range_restrictW₁`, `igusa_lemma1_range`), which contain `SL(W₁)`; `det₁ = χ₁²` (`χ₁_sq`); and
 `-1 ∉ Spin(V_K)_P`.
 
-Gap in the paper (filled): the proof says "`Spin(V_K)_P` is the kernel of `det₁` in
-`Spin(V_K)_{ℓ₁,ℓ₂}`", but `-1 ∈ ker det₁ ∖ Spin(V_K)_P`. Here: `χ₁ χ₂ = 1` (`s22a_χ₁_mul_χ₂`), so
-`Spin(V_K)_P` is the kernel of `χ₁`, and the kernel of `det₁ = χ₁²` is `{±1} · Spin(V_K)_P`; as
-`-1 ∉ Spin(V_K)_P`, `Spin(V_K)_P` maps isomorphically onto the image `SL(W₁)` of `ker det₁`
-(`s22a_exists_spinPK`). -/
+Misprint in the proof (REPORT.md, E28): the proof says "`Spin(V_K)_P` is the kernel of `det₁` in
+`Spin(V_K)_{ℓ₁,ℓ₂}`", but `-1 ∈ ker det₁ ∖ Spin(V_K)_P`; read `χ₁`. Here: `χ₁ χ₂ = 1`
+(`s22a_χ₁_mul_χ₂`), so `Spin(V_K)_P` is the kernel of `χ₁`, and the kernel of `det₁ = χ₁²` is
+`{±1} · Spin(V_K)_P`; as `-1 ∉ Spin(V_K)_P`, `Spin(V_K)_P` maps isomorphically onto the image
+`SL(W₁)` of `ker det₁` (`s22a_exists_spinPK`). -/
 theorem _root_.WeilClasses.lemma2_2_2_restrict (hW : P.W₁ ⊓ P.W₂ = ⊥) :
     Function.Injective P.restrictW₁P ∧
       P.restrictW₁P.range = specialLinearUnits (Kd d) P.W₁ :=

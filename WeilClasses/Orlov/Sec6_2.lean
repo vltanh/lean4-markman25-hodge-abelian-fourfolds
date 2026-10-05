@@ -56,7 +56,7 @@ decomposition `H² = H²_P + ℚ Ξ_P` uses an invariant pairing of `H²`
 (`KSecant.exteriorPower_two_eq`); hard Lefschetz for `Ξ_P` is replaced by the algebraic Lefschetz
 property of the nondegenerate `2`-form `Ξ_P` (`lemma6_2_3_injective`). The `(1,1)`-type of `ℓ`,
 which the paper does not prove, is obtained from Proposition 6.1.2 (gap filled). Lemma 6.2.5 and
-(6.2.5) are the case `n = 2` of Proposition 6.1.2 (authorized departure, `notes/design.md`).
+(6.2.5) are the case `n = 2` of Proposition 6.1.2 (authorized departure, REPORT.md Section 7).
 
 ## Left out (sheaf-theoretic)
 
@@ -65,7 +65,7 @@ the morphism `ι_F` (6.2.2) and the moduli discussion before it, Definition 6.2.
 their classes are `secantSqClass`), the line bundles `N_g` themselves (only `c₁(N_g)` appears), and in
 the proof of Lemma 6.2.5 the Chern character of `Rπ_{23,*}(π₁^*F₁^∨ ⊗ 𝓕₂)` for ideal sheaves of points
 ([Markman, generalized Kummers, Prop. 11.2]) and the Zariski-density argument ([Verbitsky, Th. 2.1]);
-Lemma 6.2.5 is proved instead from Proposition 6.1.2 (authorized departure, `notes/design.md`).
+Lemma 6.2.5 is proved instead from Proposition 6.1.2 (authorized departure, REPORT.md Section 7).
 -/
 
 @[expose] public section
@@ -1955,12 +1955,12 @@ theorem H2P_inf_invQ (hd : 0 < d) (hP : ¬ P.IsIsotropic) : P.H2P ⊓ P.invQ 2 =
 regarded as the class `h = Ξ_P^♯ ∈ ⋀² V_ℚ` (`hClass`). Needs `n ≥ 2` (the paper's standing
 assumption): for `n = 1` the invariants of `⋀² V_ℚ` form the three-dimensional middle degree.
 
-Departure from the paper: the paper's `H²_P` is the sum of the non-trivial irreducible
-subrepresentations, so the decomposition rests on complete reducibility, which is not available for
-the arithmetic group `Spin(V)_P`; with `H²_P` the span of the `ρ_g x - x`, the codimension of `H²_P`
-is bounded by the dimension of the invariants using the `Spin(V)`-invariant nondegenerate pairing of
-`⋀² V` (`s62_finrank_le_span_add_inv`), and `H²_P ∩ ℚ Ξ_P = 0` (`H2P_inf_invQ`); then Lemma 2.2.7
-(`dim H²^{Spin(V)_P} = 1`) as in the paper. -/
+Departure from the paper (reason 2: density): the paper's `H²_P` is the sum of the non-trivial
+irreducible subrepresentations, so the decomposition rests on complete reducibility, which is not
+available for the arithmetic group `Spin(V)_P`; with `H²_P` the span of the `ρ_g x - x`, the
+codimension of `H²_P` is bounded by the dimension of the invariants using the `Spin(V)`-invariant
+nondegenerate pairing of `⋀² V` (`s62_finrank_le_span_add_inv`), and `H²_P ∩ ℚ Ξ_P = 0`
+(`H2P_inf_invQ`); then Lemma 2.2.7 (`dim H²^{Spin(V)_P} = 1`) as in the paper. -/
 theorem exteriorPower_two_eq (J : Module.End ℝ (H1 ℝ n)) (hP : Assumption2_4_1 P J) (hn : 2 ≤ n) :
     ⋀[ℚ]^2 (V ℚ n) = P.H2P ⊔ Submodule.span ℚ {P.hClass hP.isCompl} := by
   have : Module.Finite ℚ (ExtV ℚ n) := Module.Finite.of_basis (basisExt ℚ n)
@@ -2641,7 +2641,7 @@ variable (F : Type*) [Field F] [CharZero F]
 /-- **Lemma 6.2.5** (`example-conjecture-holds-for-abelian-surfaces`). Proposition 6.1.2 holds in case
 `X` is an abelian surface (`n = 2`): `ρ'_g = exp(½[c₁(𝒫) - ρ_g(c₁(𝒫))]) ∪ ρ_g`.
 
-Departure from the paper (reason 2; authorized with Proposition 6.1.2, `notes/design.md`): the
+Departure from the paper (reason 2; authorized with Proposition 6.1.2, REPORT.md Section 7): the
 paper's proof (TeX lines 2537–2575) takes for `F₁, F₂` ideal sheaves of length-`n` subschemes of `X`
 (Chern character `w_n = (1, 0, -n)`), computes the first graded summands of the Chern character of
 `E = Rπ_{23,*}(π₁^*F₁^∨ ⊗ 𝓕₂)` by the proof of [Markman, generalized Kummers, Prop. 11.2],

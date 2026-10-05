@@ -48,7 +48,7 @@ theorem rank_chE (d : ℚ) : ExteriorAlgebra.algebraMapInv (chE d) = 8 * d :=
 
 /-! ### Theorem 1.4.1 -/
 
-/-- **Theorem 1.4.1 (3).** Let `X` be a principally polarized abelian threefold (in the paper the
+/-- **Theorem 1.4.1(3).** Let `X` be a principally polarized abelian threefold (in the paper the
 Jacobian of a non-hyperelliptic curve of genus `3`) and `d ≥ 3`. Every graded summand `κ_k(E)` of
 `κ(E)` is of Hodge type on every deformation of `(X × X̂, η, h)` as a polarized abelian sixfold of
 Weil type. -/
@@ -60,7 +60,7 @@ theorem theorem1_4_1_3 (d : ℕ) (hd : 3 ≤ d) (J : Module.End ℝ (H1 ℝ 3))
     (k : ℕ) : kappaX k d ∈ hodgeClassesX (2 * 3) (Matrix.toLin' M) k :=
   WeilClasses.theorem1_4_1_3_model d hd J hJ hΘ η hη M hM k
 
-/-- **Theorem 1.4.1 (4).** The `η(K)`-translates of `κ₃(E) ∈ H⁶(X × X̂, ℚ)`, together with `h³`,
+/-- **Theorem 1.4.1(4).** The `η(K)`-translates of `κ₃(E) ∈ H⁶(X × X̂, ℚ)`, together with `h³`,
 span the `3`-dimensional subspace `ℚ h³ ⊕ ĤW` of `H⁶(X × X̂, ℚ)`. -/
 theorem theorem1_4_1_4 (d : ℕ) (hd : 3 ≤ d) (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 3)))
     (hη : η (Kd.sqrtNeg d) = fX 3 d) :

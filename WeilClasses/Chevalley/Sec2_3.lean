@@ -1335,7 +1335,7 @@ identity `e₁e₂f₂f₁ = f₁f₂e₂e₁ + [e₁f₁ + e₂f₂] - 1` and t
 commutator lies in `C(V)_{4n-2}`, and its image in `C(V)_{4n-2}/C(V)_{4n-3} ≅ ⋀^{4n-2}V` is a
 nonzero sum of `2n` terms; `ψ(C(V)_k) ⊆ F^k` and the injectivity of `ψ̄_{4n-2}` conclude.
 
-**Departure from the paper (correction of one step).** The paper asserts that this image is
+**Departure from the paper (reason 1: the step is wrong).** The paper asserts that this image is
 `2 Σ_k ⋀_{j≠k}(f_{2j-1} ∧ f_{2j} ∧ e_{2j} ∧ e_{2j-1}) ∧ [e_{2k-1} ∧ f_{2k-1} + e_{2k} ∧ f_{2k}]`;
 the
 factor `2` is wrong (for `n = 1` the commutator is `1 - e₁f₁ - e₂f₂`, with image

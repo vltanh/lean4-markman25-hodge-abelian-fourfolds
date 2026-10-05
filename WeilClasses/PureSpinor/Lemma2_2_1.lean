@@ -1518,14 +1518,14 @@ Proof (the paper's): `(λᵢ, λᵢ)_S = 0` and `(λ₁, λ₂)_S = 0 ↔ W₁ �
 from `(λ₁, λ₂)_S`, in the rational basis `p₁ = λ₁ + λ₂`, `p₂ = √-d (λ₁ - λ₂)` of `P` (the paper's
 `λ₁ = a + ib` with `i = √-d`, `a = p₁/2`, `b = -p₂/(2d)`).
 
-Gap in the paper (filled): the displayed computation `(λ₁, λ₁) = (a, a) - (b, b) + 2i(a, b)`,
-`(λ₁, λ₂) = (a, a) + (b, b)` and the conclusion "`(a, a) = 0` iff `W₁ ∩ W₂ ≠ 0`" use a symmetric
-pairing. For odd `n` the pairing is alternating on `S⁺` (`(t, s)_S = (-1)ⁿ (s, t)_S`,
-`mukai_swap_of_mem_Splus`): then `(λ₁, λ₂) = -2i (a, b)_S`, `(a, a) = 0` always, and the stated
-conclusion fails, although the first sentence is still true. Here the Gram matrix of `P`
-(`s22a_gram`) keeps `c = (λ₁, λ₂)_S` and
-`c' = (λ₂, λ₁)_S = (-1)ⁿ c` apart: `(p₁, p₁) = c + c'` and `(p₁, p₂) = √-d (c' - c)`, so `P` is
-isotropic iff `c + c' = c' - c = 0` iff `c = 0`, for both parities. -/
+Departure from the paper (reason 1: the step is wrong for odd `n`; REPORT.md, E5): the displayed
+computation `(λ₁, λ₁) = (a, a) - (b, b) + 2i(a, b)`, `(λ₁, λ₂) = (a, a) + (b, b)` and the conclusion
+"`(a, a) = 0` iff `W₁ ∩ W₂ ≠ 0`" use a symmetric pairing. For odd `n` the pairing is alternating on
+`S⁺` (`(t, s)_S = (-1)ⁿ (s, t)_S`, `mukai_swap_of_mem_Splus`): then `(λ₁, λ₂) = -2i (a, b)_S`,
+`(a, a) = 0` always, and the stated conclusion fails, although the first sentence is still true.
+Here the Gram matrix of `P` (`s22a_gram`) keeps `c = (λ₁, λ₂)_S` and `c' = (λ₂, λ₁)_S = (-1)ⁿ c`
+apart: `(p₁, p₁) = c + c'` and `(p₁, p₂) = √-d (c' - c)`, so `P` is isotropic iff
+`c + c' = c' - c = 0` iff `c = 0`, for both parities. -/
 theorem _root_.WeilClasses.lemma2_2_1 (hd : 0 < d) : P.IsIsotropic ↔ P.W₁ ⊓ P.W₂ ≠ ⊥ := by
   -- The paper's proof: `(λᵢ, λᵢ) = 0` and `(λ₁, λ₂) = 0 ↔ W₁ ∩ W₂ ≠ 0` [Chevalley, III.2.4], and the
   -- pairing on `P` is computed from `(λ₁, λ₂)` (`s22a_gram`).
