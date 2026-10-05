@@ -89,6 +89,11 @@ source (or of the paper's Sections 7–9); nothing here constructs a `CycleClass
 
 @[expose] public section
 
+-- The library is compiled with the lakefile's option `maxSynthPendingDepth = 3`, but Palomar compiles
+-- this file without the lakefile; with a different depth, instance synthesis can produce different
+-- auxiliary proofs in the shared definitions, which Comparator then rejects. So it is set here too.
+set_option maxSynthPendingDepth 3
+
 -- BEGIN SHARED DEFINITIONS
 namespace WeilClasses
 
