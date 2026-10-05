@@ -80,10 +80,10 @@ one agent (its claims spot-checked by the main session), and then carried out th
   standard [`PushforwardClosed`](Challenge.lean#L404)) and `IgusaProp3NormalForm`, narrowed [`IgusaProp3OrbitSubfield`](WeilClasses/External/Igusa/Sec10.lean#L2026), rebuilt, reran the
   checks and updated the documents.
 
-Figures for this round, from {ROUND_START} to the commit that completed it ({ROUND_END}):
+Figures for this round, from 4 October 2026, 22:31 CDT to the commit that completed it (5 October 2026, 01:37 CDT):
 
-- elapsed time: {R_ELAPSED};
-- sub-agents: {R_NAGENTS}, at most {R_MAXAGENTS} running at once, {R_AGENTHOURS} of working time in all;
-- tool calls: {R_TOOLCALLS};
-- model calls: {R_MODELCALLS}, all to `claude-opus-5-5`.
+- elapsed time: 3 h 6 min;
+- sub-agents: 4, at most 3 running at once, 3.9 h of working time in all;
+- tool calls: 775 (614 by sub-agents, 161 by the main session);
+- model calls: 743 (165 by the main session, 578 by sub-agents), all to `claude-opus-5-5`.
 
