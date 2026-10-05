@@ -2396,7 +2396,6 @@ claim of the proof of Lemma 6.2.5, `ell_eq_proj_c1P`.) Proposition 6.1.2 is prov
 Lemma 6.2.3 (authorized departure, `proposition6_1_2`), so this is not circular; it is used only for
 the type of `ℓ`. -/
 theorem lemma6_2_3 (hP : Assumption2_4_1 P J)
-    (hample : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl (productStructure n J) x x)
     (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) (k : ℕ)
     (hk : IsLeast {j : ℕ | projDeg ℚ n (2 * j) (secantSqClass ℚ n w₂ w₁) ≠ 0} k) (hkn : k < n) :
     ∃! ℓ : ExtV ℚ n, ℓ ∈ hodgeClassesV n (productStructure n J) 1 ∧ ℓ ∈ P.H2P ∧
@@ -2485,7 +2484,6 @@ two pairs of classes in `P` satisfying the hypothesis of the lemma, and `ℓ, �
 `exp(ℓ) φ(w₂ ⊗ τ w₁)` and `exp(ℓ') φ(w₂' ⊗ τ w₁')` invariant, then `ℓ = ℓ'`. (With
 `(w₁', w₂') = (w₁, w₂)`, this is the uniqueness of `ℓ` in `H²_P` proved in the paper.) -/
 theorem lemma6_2_3_unique (hP : Assumption2_4_1 P J)
-    (hample : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl (productStructure n J) x x)
     (w₁ w₂ w₁' w₂' : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) (hw₁' : w₁' ∈ P.Pℚ)
     (hw₂' : w₂' ∈ P.Pℚ) (k k' : ℕ)
     (hk : IsLeast {j : ℕ | projDeg ℚ n (2 * j) (secantSqClass ℚ n w₂ w₁) ≠ 0} k) (hkn : k < n)
@@ -2536,7 +2534,7 @@ theorem remark6_2_4 (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n)) (hP : Assu
     show projDeg ℚ n (2 * 0) (secantSqClass ℚ n w₂ w₁) ≠ 0
     rw [mul_zero, s62_projDeg_zero]
     exact (map_ne_zero _).mpr hr
-  obtain ⟨ℓ, ⟨-, hℓ, hα⟩, -⟩ := lemma6_2_3 P J hP hample w₁ w₂ hw₁ hw₂ 0 hk0 (by omega)
+  obtain ⟨ℓ, ⟨-, hℓ, hα⟩, -⟩ := lemma6_2_3 P J hP w₁ w₂ hw₁ hw₂ 0 hk0 (by omega)
   have hℓ2 := P.H2P_le hℓ
   -- its degree-`2` part `β₁ + r ℓ` is invariant, hence a multiple `t Ξ_P` (Lemma 2.2.7)
   have hdeg2 : projDeg ℚ n 2 (IsNilpotent.exp ℓ * secantSqClass ℚ n w₂ w₁) =
