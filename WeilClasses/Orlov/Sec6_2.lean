@@ -2335,7 +2335,6 @@ theorem s62_c1N (hP : Assumption2_4_1 P J)
 
 /-- The uniqueness of `ℓ` in Lemma 6.2.3 (`lemma6_2_3_unique`). -/
 theorem s62_unique (hP : Assumption2_4_1 P J)
-    (hample : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl (productStructure n J) x x)
     (w₁ w₂ w₁' w₂' : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) (hw₁' : w₁' ∈ P.Pℚ)
     (hw₂' : w₂' ∈ P.Pℚ) (k k' : ℕ)
     (hk : IsLeast {j : ℕ | projDeg ℚ n (2 * j) (secantSqClass ℚ n w₂ w₁) ≠ 0} k) (hkn : k < n)
@@ -2457,7 +2456,7 @@ theorem lemma6_2_3 (hP : Assumption2_4_1 P J)
       ← s62_exp_add ℚ n (s62_rhoExt_mem ℚ n g hℓ2) (neg_mem hcg2), hcℓ,
       show rhoExt ℚ n g ℓ + -(rhoExt ℚ n g ℓ - ℓ) = ℓ by abel]
   refine ⟨ℓ, ⟨?_, hℓ, hα⟩, fun ℓ' ⟨_, hℓ', hα'⟩ =>
-    s62_unique P J hP hample w₁ w₂ w₁ w₂ hw₁ hw₂ hw₁ hw₂ k k hk hkn hk hkn ℓ' ℓ hℓ' hℓ
+    s62_unique P J hP w₁ w₂ w₁ w₂ hw₁ hw₂ hw₁ hw₂ k k hk hkn hk hkn ℓ' ℓ hℓ' hℓ
       hα' hα⟩
   -- gap in the paper (filled): `ℓ` is of type `(1,1)`. By Proposition 6.1.2,
   -- `½[c₁(𝒫) - ρ_g(c₁(𝒫))]` satisfies (6.1.8), so it is `ρ_g(ℓ) - ℓ`: `ℓ + ½c₁(𝒫)` is invariant,
@@ -2495,13 +2494,12 @@ theorem lemma6_2_3_unique (hP : Assumption2_4_1 P J)
     (hα : IsNilpotent.exp ℓ * secantSqClass ℚ n w₂ w₁ ∈ invariantsExt ℚ n P.spinPZ)
     (hα' : IsNilpotent.exp ℓ' * secantSqClass ℚ n w₂' w₁' ∈ invariantsExt ℚ n P.spinPZ) :
     ℓ = ℓ' :=
-  s62_unique P J hP hample w₁ w₂ w₁' w₂' hw₁ hw₂ hw₁' hw₂' k k' hk hkn hk' hkn' ℓ ℓ' hℓ hℓ' hα hα'
+  s62_unique P J hP w₁ w₂ w₁' w₂' hw₁ hw₂ hw₁' hw₂' k k' hk hkn hk' hkn' ℓ ℓ' hℓ hℓ' hα hα'
 
 /-- (Proof of Lemma 6.2.3, TeX lines 2478–2481) `c₁(N_g) = ρ_g(ℓ) - ℓ` for all `g ∈ Spin(V)_P`, where
 `ℓ` is the class of Lemma 6.2.3 and `c₁(N_g) = c` is the class of (6.1.8)
 (`ρ'_g = exp(c) ∪ ρ_g`). -/
 theorem lemma6_2_3_c1N (hP : Assumption2_4_1 P J)
-    (hample : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl (productStructure n J) x x)
     (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) (k : ℕ)
     (hk : IsLeast {j : ℕ | projDeg ℚ n (2 * j) (secantSqClass ℚ n w₂ w₁) ≠ 0} k) (hkn : k < n)
     (ℓ : ExtV ℚ n) (hℓ : ℓ ∈ P.H2P)

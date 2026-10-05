@@ -751,7 +751,7 @@ theorem s22a_restrict_aux (hW : P.W₁ ⊓ P.W₂ = ⊥) :
       exact ⟨g, Units.ext hg⟩
 
 /-- `det(ρ(g)|_{W₁}) = 1` for `g ∈ Spin(V_K)_P` (`lemma2_2_2_restrict`). -/
-theorem s22a_det_restrictW₁P (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinPK) :
+theorem s22a_det_restrictW₁P (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinPK) :
     LinearMap.det ((P.restrictW₁P g : (Module.End (Kd d) P.W₁)ˣ) : Module.End (Kd d) P.W₁) = 1 := by
   have hmem : P.restrictW₁P g ∈ specialLinearUnits (Kd d) P.W₁ :=
     (P.s22a_restrict_aux hW).2 ▸ ⟨g, rfl⟩
@@ -765,7 +765,7 @@ noncomputable def s22a_toSL (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥)
     P.spinPK →* Matrix.SpecialLinearGroup (Fin (2 * n)) (Kd d) where
   toFun g := ⟨LinearMap.toMatrix B B
       ((P.restrictW₁P g : (Module.End (Kd d) P.W₁)ˣ) : Module.End (Kd d) P.W₁),
-    by rw [LinearMap.det_toMatrix, P.s22a_det_restrictW₁P hd hW]⟩
+    by rw [LinearMap.det_toMatrix, P.s22a_det_restrictW₁P hW]⟩
   map_one' := by
     apply Subtype.ext
     show LinearMap.toMatrix B B ((P.restrictW₁P 1 : (Module.End (Kd d) P.W₁)ˣ) :
@@ -826,7 +826,7 @@ Gap in the paper (filled): the proof says "`Spin(V_K)_P` is the kernel of `det�
 `Spin(V_K)_P` is the kernel of `χ₁`, and the kernel of `det₁ = χ₁²` is `{±1} · Spin(V_K)_P`; as
 `-1 ∉ Spin(V_K)_P`, `Spin(V_K)_P` maps isomorphically onto the image `SL(W₁)` of `ker det₁`
 (`s22a_exists_spinPK`). -/
-theorem _root_.WeilClasses.lemma2_2_2_restrict (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
+theorem _root_.WeilClasses.lemma2_2_2_restrict (hW : P.W₁ ⊓ P.W₂ = ⊥) :
     Function.Injective P.restrictW₁P ∧
       P.restrictW₁P.range = specialLinearUnits (Kd d) P.W₁ :=
   P.s22a_restrict_aux hW

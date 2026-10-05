@@ -2860,7 +2860,7 @@ noncomputable def s22b_combo (hW : IsCompl P.W₁ P.W₂) (cL cR : Kd d) (c : �
   cL • (P.s22b_bV hW).ExteriorAlgebra s22b_allL + cR • (P.s22b_bV hW).ExteriorAlgebra s22b_allR +
     ∑ a ∈ Finset.range (2 * n + 1), c a • s22b_omega hW ^ a
 
-theorem s22b_combo_inv (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) (cL cR : Kd d) (c : ℕ → Kd d)
+theorem s22b_combo_inv (hW : IsCompl P.W₁ P.W₂) (cL cR : Kd d) (c : ℕ → Kd d)
     (g : Spin ℚ n) (hg : g ∈ P.spinPZ) :
     rhoExt (Kd d) n (bcSpin ℚ (Kd d) n g) (s22b_combo hW cL cR c) = s22b_combo hW cL cR c := by
   unfold s22b_combo
@@ -2923,7 +2923,7 @@ theorem s22b_inv_decomp (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
       (P.s22b_bV hW).ExteriorAlgebra.repr (s22b_omega hW ^ a) (s22b_Dset (Isel a)), ?_⟩
   rw [← sub_eq_zero]
   refine s22b_inv_eq_zero' hd hW _ (fun g hg => by
-    rw [map_sub, hz g hg, s22b_combo_inv hd hW _ _ _ g hg]) Isel hIsel (fun b hb => ?_) ?_ ?_
+    rw [map_sub, hz g hg, s22b_combo_inv hW _ _ _ g hg]) Isel hIsel (fun b hb => ?_) ?_ ?_
   · have hr := s22b_omega_pow_repr_ne hd hW b hb (Isel b) (hIsel b hb)
     rw [map_sub, Finsupp.sub_apply, s22b_combo_repr_Dset hW _ _ _ _ (by rw [hIsel b hb]; exact hb),
       hIsel b hb]
