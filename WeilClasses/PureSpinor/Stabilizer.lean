@@ -783,7 +783,7 @@ noncomputable def s22a_toSL (hW : P.W₁ ⊓ P.W₂ = ⊥)
     rw [MonoidHom.map_mul, Units.val_mul, LinearMap.toMatrix_mul]
 
 /-- `s22a_toSL` is bijective (`lemma2_2_2_restrict` and `LinearMap.toMatrix`). -/
-theorem s22a_toSL_bijective (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥)
+theorem s22a_toSL_bijective (hW : P.W₁ ⊓ P.W₂ = ⊥)
     (B : Module.Basis (Fin (2 * n)) (Kd d) P.W₁) : Function.Bijective (P.s22a_toSL hW B) := by
   refine ⟨fun g h hgh => (P.s22a_restrict_aux hW).1 ?_, fun M => ?_⟩
   · apply Units.ext
@@ -811,7 +811,7 @@ theorem _root_.WeilClasses.lemma2_2_2 (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥
     Nonempty (P.spinPK ≃* Matrix.SpecialLinearGroup (Fin (2 * n)) (Kd d)) := by
   obtain ⟨B⟩ : Nonempty (Module.Basis (Fin (2 * n)) (Kd d) P.W₁) :=
     ⟨Module.finBasisOfFinrankEq (Kd d) P.W₁ P.isPure.2.2⟩
-  exact ⟨MulEquiv.ofBijective (P.s22a_toSL hW B) (P.s22a_toSL_bijective hd hW B)⟩
+  exact ⟨MulEquiv.ofBijective (P.s22a_toSL hW B) (P.s22a_toSL_bijective hW B)⟩
 
 /-- **Lemma 2.2.2** (`lemma-Spin-V-K-is-SL-n-K`), misprint `SL_n(K)` corrected to `SL_{2n}(K)`,
 in the form of its proof: `g ↦ ρ(g)|_{W₁}` maps `Spin(V_K)_P` isomorphically onto `SL(W₁)`.

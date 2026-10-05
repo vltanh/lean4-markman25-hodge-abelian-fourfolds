@@ -946,7 +946,7 @@ theorem theorem1_4_1_3 (hJ : IsComplexStructure J) (hΘ : IsAmple 3 J (ThetaStd 
     rw [← hsec]; exact lemma8_3_1_rank d hd
   -- Lemma 6.2.3 for `k = 0` (Remark 6.2.4): `κ(Φ(F₂ ⊠ F₁))` is `Spin(V)_P`-invariant, hence of
   -- Hodge type on `Ω_P` (Corollary 4.0.4)
-  have hinv := (remark6_2_4 _ J hP hample (by norm_num) (tau ℚ 3 (chF1 d)) (chF1 d) hτw hw hr).1
+  have hinv := (remark6_2_4 _ J hP (by norm_num) (tau ℚ 3 (chF1 d)) (chF1 d) hτw hw hr).1
   have hhodge := corollary4_0_4 _ J hP _ hinv I hI
   -- `κ(E) = κ(τ ch Φ(F₂ ⊠ F₁)) = τ κ(Φ(F₂ ⊠ F₁))`
   rw [chE, main_kappa_reverse, hsec]

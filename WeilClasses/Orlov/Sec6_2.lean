@@ -2520,7 +2520,7 @@ there is a unique scalar `t` such that `(t Ξ_P - β₁)/r` belongs to `H²(X ×
 Model: `β = φ(w₂ ⊗ τ w₁)`, `r = rankExt β`, `β₁ = projDeg 2 β`, `Ξ_P = hClass`; setting of §6.2.
 The existence of `t` uses `H² = H²_P + ℚ Ξ_P`, hence the standing assumption `n ≥ 2`. -/
 theorem remark6_2_4 (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n)) (hP : Assumption2_4_1 P J)
-    (hample : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl (productStructure n J) x x) (hn : 2 ≤ n)
+    (hn : 2 ≤ n)
     (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ)
     (hr : rankExt ℚ n (secantSqClass ℚ n w₂ w₁) ≠ 0) :
     kappa ℚ n (secantSqClass ℚ n w₂ w₁) ∈ invariantsExt ℚ n P.spinPZ ∧
