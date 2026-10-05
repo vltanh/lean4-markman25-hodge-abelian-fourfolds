@@ -204,14 +204,14 @@ automation:
   methods:
     - method: "agent"
       models: ["claude-opus-5-5"]
-      framework: "Claude Code {CCVERSION} (VS Code extension, Claude Agent SDK)"
+      framework: "Claude Code 2.1.288 (VS Code extension, Claude Agent SDK)"
       tool_setup: >-
         The formalize-math-paper skill, version 2.1.0 (https://github.com/vltanh/formalize-math-paper, commit
-        397f71c): one main session with {NAGENTS} sub-agents (at most {MAXAGENTS} at once) for the library survey,
+        397f71c): one main session with 52 sub-agents (at most 10 at once) for the library survey,
         statements, statement review, proofs, cited results, refactors, proof review, fixes and the audit's
         verification; Lean v4.35.0-rc3, Mathlib, Tau Ceti.
       cost:
-        wall_time: "{ELAPSED} elapsed; {AGENTHOURS} of sub-agent work"
+        wall_time: "14 h 25 min elapsed; 58.2 h of sub-agent work"
         spend_usd: "not tracked"
         hardware: "local machine (Linux, 62 GB RAM)"
       prompting_notes: >-

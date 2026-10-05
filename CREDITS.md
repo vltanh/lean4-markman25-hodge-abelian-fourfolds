@@ -10,10 +10,10 @@ How this formalization was made, from the session transcript and the run log.
   decided every change of a statement of the paper (Section 6 of [`REPORT.md`](REPORT.md)), the two authorized
   departures from the paper's proofs (Proposition 6.1.2, Lemma 4.0.2), and that two parts of Igusa's Proposition 3
   stay hypotheses.
-- **Formalization:** Claude Opus 5.5 (Anthropic, model `claude-opus-5-5`), in Claude Code {CCVERSION} (VS Code
-  extension), in one session with sub-agents.
-- **Procedure:** the skill [formalize-math-paper](https://github.com/vltanh/formalize-math-paper), version 2.1.0
-  (commit `397f71c`).
+- **Tool:** Claude Opus 5.5 (Anthropic, model `claude-opus-5-5`), run as an agent in Claude Code 2.1.288 (VS Code
+  extension), in one session with sub-agents. It wrote the Lean code and the documents under the direction of the
+  maintainer.
+- **Procedure:** the skill [formalize-math-paper](https://github.com/vltanh/formalize-math-paper), version 2.1.0 (commit `397f71c`).
 - **Review:** no person has reviewed the proofs. Independent AI agents reviewed the statements against the TeX source
   before any proof was written, compared every formal proof with the paper's proof afterwards, and verified the
   audit's findings and its literature survey, as described below.
@@ -50,13 +50,15 @@ How it was made:
   wrote the documents.
 
 Figures, from the start (4 October 2026, 07:51 CDT) to the commit that completed [`REPORT.md`](REPORT.md)
-({ENDTIME} CDT):
+(22:16 CDT):
 
-- elapsed time: {ELAPSED};
-- sub-agents: {NAGENTS}, at most {MAXAGENTS} running at once, {AGENTHOURS} of working time in all;
-- tool calls: {TOOLCALLS};
-- tokens: {TOKENS};
-- model calls: {MODELCALLS}, all to `claude-opus-5-5`.
+- elapsed time: 14 h 25 min;
+- sub-agents: 52 (45 launched by the main session, 7 by other sub-agents), at most 10 running at once, 58.2 h of
+  working time in all;
+- tool calls: 9,829 (8,943 by sub-agents, 886 by the main session);
+- tokens: 18.88 M output, 54.76 M input (uncached input and cache writes) and 3,834 M cache reads
+  (sub-agents: 17.39 M, 50.95 M and 3,385 M; main session: 1.49 M, 3.81 M and 449 M);
+- model calls: 9,236 (868 by the main session, 8,368 by sub-agents), all to `claude-opus-5-5`.
 
 The figures are those that the session transcripts record. They leave out the time the owner spent answering
 questions, which is included in the elapsed time, and the builds run by background commands, which are not agent
