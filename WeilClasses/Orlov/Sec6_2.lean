@@ -32,8 +32,11 @@ of the Chern characters `wᵢ = ch(Fᵢ)` (see `WeilClasses.Secant.Defs`).
 * §6.2 fixes a `K`-secant `P` satisfying Assumption 2.4.1 (`Assumption2_4_1 P J`) and objects
   `F₁, F₂` with `ch(Fᵢ) = wᵢ ∈ P` "such that the `2`-form `Ξ_P` in Corollary 3.2.3 is ample". In the
   model "`Ξ_P` is ample" is the hypothesis of Corollary 3.2.3 for the complex structure
-  `I = I_{V_ℝ}` (`productStructure n J`) of `X × X̂`: `g_I(x, x) = Ξ_P(x, I x) > 0` for `x ≠ 0`
-  (`hample`), which is the Kähler condition for `Ξ_P` (Corollary 3.2.3, `corollary3_2_3_kahler`).
+  `I = I_{V_ℝ}` (`productStructure n J`) of `X × X̂`: `g_I(x, x) = Ξ_P(x, I x) > 0` for `x ≠ 0`,
+  which is the Kähler condition for `Ξ_P` (Corollary 3.2.3, `corollary3_2_3_kahler`). The
+  proofs here use ampleness only through the Lefschetz property of `Ξ_P`, which holds for the
+  nondegenerate `2`-form `Ξ_P` without it (`lemma6_2_3_injective`), so the results of §6.2 do not
+  take this hypothesis: they hold for every `K`-secant `P` satisfying Assumption 2.4.1.
 * `Spin(V)_P` is the integral group of (2.2.2) (`P.spinPZ`), acting on `⋀• V_ℚ` by `ρ`
   (`rhoExt`) or `ρ'` (`rhoPrime`, (6.1.4)); `Spin(V)_P`-invariance by `ρ` is membership in
   `invariantsExt ℚ n P.spinPZ`.
@@ -2096,7 +2099,7 @@ class `Ξ_P` (Hodge theory, not available in Lean). Here `β_k = c Ξ_P^k` (`c �
 algebraic Lefschetz property of the nondegenerate `2`-form `Ξ_P`: the operator `Λ` of the
 `sl₂`-triple of `h = Ξ_P^♯` (`s62_lam`, `[Λ, L_h] = 2p - 4n` on `⋀^p V`, from `f² = -d` and
 `(f x, y) = -(x, f y)`).
-Ampleness (`hample`) is not used. -/
+The ampleness of `Ξ_P` is not needed, and not assumed. -/
 theorem lemma6_2_3_injective (hP : Assumption2_4_1 P J)
     (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) (k : ℕ)
     (hk : IsLeast {j : ℕ | projDeg ℚ n (2 * j) (secantSqClass ℚ n w₂ w₁) ≠ 0} k) (hkn : k < n)
@@ -2362,8 +2365,8 @@ exists a unique class `ℓ` of type `(1,1)` in `H²(X × X̂, ℚ)_P` such that 
 
 Model: `ch(Φ(F₂ ⊠ F₁^∨)) = φ(w₂ ⊗ τ w₁)` (`secantSqClass ℚ n w₂ w₁`) with `wᵢ = ch(Fᵢ) ∈ P`; `k` the
 least `j` with `ch_j ≠ 0`; invariance for the `ρ`-action of the integral group `Spin(V)_P`; "type
-`(1,1)`" for the complex structure of `X × X̂`. Setting of §6.2: Assumption 2.4.1 and `Ξ_P` ample
-(`hample`, see the module docstring). Reading: "unique class `ℓ` of type `(1,1)` in `H²_P`" is read
+`(1,1)`" for the complex structure of `X × X̂`. Setting of §6.2: Assumption 2.4.1 (the ampleness of
+`Ξ_P` assumed in §6.2 is not needed; see the module docstring). Reading: "unique class `ℓ` of type `(1,1)` in `H²_P`" is read
 literally (uniqueness among the `(1,1)`-classes of `H²_P`); the proof gives uniqueness in all of
 `H²_P` (`lemma6_2_3_unique`).
 

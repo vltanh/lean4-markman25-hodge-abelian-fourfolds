@@ -807,7 +807,7 @@ isomorphic to `SL_{2n}(K)`. The paper prints `SL_n(K)`; this is an obvious mispr
 dimension `2n` and the text just before says `GL(W₁) ≅ GL_{2n}(K)`. Standing hypothesis:
 `W₁ ∩ W₂ = 0`. See `lemma2_2_2_restrict` for the isomorphism itself and the proof (here composed
 with the matrix in a basis of `W₁`). -/
-theorem _root_.WeilClasses.lemma2_2_2 (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
+theorem _root_.WeilClasses.lemma2_2_2 (hW : P.W₁ ⊓ P.W₂ = ⊥) :
     Nonempty (P.spinPK ≃* Matrix.SpecialLinearGroup (Fin (2 * n)) (Kd d)) := by
   obtain ⟨B⟩ : Nonempty (Module.Basis (Fin (2 * n)) (Kd d) P.W₁) :=
     ⟨Module.finBasisOfFinrankEq (Kd d) P.W₁ P.isPure.2.2⟩

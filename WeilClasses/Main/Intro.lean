@@ -930,12 +930,6 @@ theorem theorem1_4_1_3 (hJ : IsComplexStructure J) (hΘ : IsAmple 3 J (ThetaStd 
     kappa ℚ 3 (chE d) ∈ hodgeRingV 3 I := by
   have hd := pos_of_three_le hd3
   have hP := PJac_assumption2_4_1 d hJ hΘ hd
-  -- `Ξ_P` is ample for `X × X̂`: `g_I = -g_P > 0` for `I = I_{V_ℝ}` (Proposition 2.4.4)
-  have hample : ∀ x : V ℝ 3, x ≠ 0 →
-      0 < (PJac d hΘ hd).gI hP.isCompl (productStructure 3 J) x x := by
-    intro x hx
-    rw [KSecant.gI_productStructure _ J hP, LinearMap.neg_apply, LinearMap.neg_apply]
-    exact neg_pos.mpr (proposition2_4_4 3 d hd (by norm_num) J hJ (ThetaStd ℚ 3) hΘ x hx)
   -- `ch(Φ(F₂ ⊠ F₁)) = φ(w ⊗ w) = φ(w ⊗ τ(τ w))` with `w = ch F₂`, `τ w = ch F₁^∨` in `P`
   -- (Lemma 8.2.1)
   obtain ⟨-, hw, hτw⟩ := lemma8_2_1 d hΘ hd

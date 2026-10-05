@@ -1973,8 +1973,6 @@ theorem s10_singular (u : S ℂ 3) (hu : IsEvenPureSpinor ℂ 3 u) :
           m ℂ 3 (g : C ℂ 3) (c • (1 + (t / c) • y)) := by
         rw [map_smul, map_add, map_smul, hy, s10_m_m_inv, smul_add, smul_smul,
           mul_div_cancel₀ t hc]
-      have hmem : c • (1 + (t / c) • y) ∈ Splus ℂ 3 :=
-        Submodule.smul_mem _ _ (add_mem (s10_one_mem_Splus ℂ 3) (Submodule.smul_mem _ _ hyS))
       rw [h1, h2, igusa_prop3_invariant ℂ g _, J_smul, s10_J_one_add_smul]
       field_simp
   refine ⟨?_, fun x => ?_⟩
