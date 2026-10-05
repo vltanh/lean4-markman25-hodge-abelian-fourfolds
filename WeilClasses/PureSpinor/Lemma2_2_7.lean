@@ -2485,15 +2485,14 @@ theorem s22b_det₂_eq_one (g : Spin ℚ n)
   rw [← P.χ₂_sq, s22b_χ₂_eq_one g hg, one_pow]
 
 /-- `⋀^{2n} W₁` is fixed by `Spin(V)_P`. -/
-theorem s22b_top₁_inv (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
-    {x : ExteriorAlgebra (Kd d) (V (Kd d) n)} (hx : x ∈ pqPiece P.W₁ P.W₂ (2 * n) 0)
+theorem s22b_top₁_inv     {x : ExteriorAlgebra (Kd d) (V (Kd d) n)} (hx : x ∈ pqPiece P.W₁ P.W₂ (2 * n) 0)
     (g : Spin ℚ n) (hg : g ∈ P.spinPZ) : rhoExt (Kd d) n (bcSpin ℚ (Kd d) n g) x = x := by
   have hg' := s22b_mem_spinPℚ_of_mem_spinPZ hg
   have h := s22b_rhoExt_top₁ ⟨_, P.s22b_bcSpin_mem_spinL₁L₂ g hg'⟩ x hx
   rwa [s22b_det₁_eq_one g hg', one_smul] at h
 
 /-- `⋀^{2n} W₂` is fixed by `Spin(V)_P`. -/
-theorem s22b_top₂_inv (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
+theorem s22b_top₂_inv (hW : IsCompl P.W₁ P.W₂)
     {x : ExteriorAlgebra (Kd d) (V (Kd d) n)} (hx : x ∈ pqPiece P.W₁ P.W₂ 0 (2 * n))
     (g : Spin ℚ n) (hg : g ∈ P.spinPZ) : rhoExt (Kd d) n (bcSpin ℚ (Kd d) n g) x = x := by
   have hg' := s22b_mem_spinPℚ_of_mem_spinPZ hg
@@ -2723,7 +2722,7 @@ theorem s22b_residual_mem (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
       (P.s22b_bV hW).ExteriorAlgebra.repr z s22b_allR • (P.s22b_bV hW).ExteriorAlgebra s22b_allR) := by
     intro g hg
     rw [map_sub, map_sub, map_smul, map_smul, hz g hg,
-      s22b_top₁_inv hd hW (s22b_eL_mem hW) g hg, s22b_top₂_inv hd hW (s22b_eR_mem hW) g hg]
+      s22b_top₁_inv (s22b_eL_mem hW) g hg, s22b_top₂_inv hW (s22b_eR_mem hW) g hg]
   have hk : z - (P.s22b_bV hW).ExteriorAlgebra.repr z s22b_allL •
       (P.s22b_bV hW).ExteriorAlgebra s22b_allL -
       (P.s22b_bV hW).ExteriorAlgebra.repr z s22b_allR • (P.s22b_bV hW).ExteriorAlgebra s22b_allR ∈
@@ -2754,8 +2753,8 @@ theorem s22b_invK_middle (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) :
       (Submodule.mem_sup_right hw)
   · refine sup_le (sup_le ?_ ?_) ?_ <;>
       rw [Submodule.span_le, Set.singleton_subset_iff, SetLike.mem_coe, s22b_mem_invK_iff]
-    · exact ⟨s22b_eL_mem_wedge hW, fun g hg => s22b_top₁_inv hd hW (s22b_eL_mem hW) g hg⟩
-    · exact ⟨s22b_eR_mem_wedge hW, fun g hg => s22b_top₂_inv hd hW (s22b_eR_mem hW) g hg⟩
+    · exact ⟨s22b_eL_mem_wedge hW, fun g hg => s22b_top₁_inv (s22b_eL_mem hW) g hg⟩
+    · exact ⟨s22b_eR_mem_wedge hW, fun g hg => s22b_top₂_inv hW (s22b_eR_mem hW) g hg⟩
     · exact ⟨s22b_omega_pow_mem_wedge hW n, s22b_omega_pow_inv hW n⟩
 
 theorem s22b_invK_inf_pq (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) :
@@ -2865,8 +2864,8 @@ theorem s22b_combo_inv (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) (cL cR : Kd d) 
     (g : Spin ℚ n) (hg : g ∈ P.spinPZ) :
     rhoExt (Kd d) n (bcSpin ℚ (Kd d) n g) (s22b_combo hW cL cR c) = s22b_combo hW cL cR c := by
   unfold s22b_combo
-  rw [map_add, map_add, map_smul, map_smul, map_sum, s22b_top₁_inv hd hW (s22b_eL_mem hW) g hg,
-    s22b_top₂_inv hd hW (s22b_eR_mem hW) g hg]
+  rw [map_add, map_add, map_smul, map_smul, map_sum, s22b_top₁_inv (s22b_eL_mem hW) g hg,
+    s22b_top₂_inv hW (s22b_eR_mem hW) g hg]
   congr 1
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [map_smul, s22b_omega_pow_inv hW a g hg]
@@ -2933,7 +2932,7 @@ theorem s22b_inv_decomp (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
   · rw [map_sub, Finsupp.sub_apply, s22b_combo_repr_allR, sub_self]
 
 /-- An element of `Spin(V_K)_{ℓ₁,ℓ₂}` acting on `W₁` by `2`, so that `det₁ ≠ 1 ≠ det₂`. -/
-theorem s22b_exists_det_ne_one (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) :
+theorem s22b_exists_det_ne_one (hW : IsCompl P.W₁ P.W₂) :
     ∃ g : P.spinL₁L₂, P.det₁ g ≠ 1 ∧ P.det₂ g ≠ 1 := by
   have hn := P.s22b_n_pos
   have : SMulCommClass (Kd d) (Kd d) P.W₁ := smulCommClass_self _ _
@@ -2968,7 +2967,7 @@ theorem s22b_inv_spinL₁L₂ (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
     ∃ c : ℕ → Kd d, x = ∑ a ∈ Finset.range (2 * n + 1), c a • s22b_omega hW ^ a := by
   obtain ⟨cL, cR, c, hxc⟩ := s22b_inv_decomp hd hW x (fun g hg =>
     hx ⟨_, P.s22b_bcSpin_mem_spinL₁L₂ g (s22b_mem_spinPℚ_of_mem_spinPZ hg)⟩)
-  obtain ⟨g₀, h1, h2⟩ := s22b_exists_det_ne_one hd hW
+  obtain ⟨g₀, h1, h2⟩ := s22b_exists_det_ne_one hW
   have hgx := hx g₀
   rw [hxc, s22b_combo_rhoExt] at hgx
   have hL := congrArg (fun y => (P.s22b_bV hW).ExteriorAlgebra.repr y s22b_allL) hgx

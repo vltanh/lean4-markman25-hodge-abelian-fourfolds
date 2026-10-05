@@ -2316,7 +2316,6 @@ theorem s62_c1N_of_gamma (hP : Assumption2_4_1 P J)
 
 /-- `c₁(N_g) = ρ_g(ℓ) - ℓ` (proof of Lemma 6.2.3; `lemma6_2_3_c1N`). -/
 theorem s62_c1N (hP : Assumption2_4_1 P J)
-    (hample : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl (productStructure n J) x x)
     (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) (k : ℕ)
     (hk : IsLeast {j : ℕ | projDeg ℚ n (2 * j) (secantSqClass ℚ n w₂ w₁) ≠ 0} k) (hkn : k < n)
     (ℓ : ExtV ℚ n) (hℓ : ℓ ∈ P.H2P)
@@ -2351,8 +2350,8 @@ theorem s62_unique (hP : Assumption2_4_1 P J)
     refine ⟨Submodule.sub_mem _ hℓ hℓ', Submodule.sub_mem _ (P.H2P_le hℓ) (P.H2P_le hℓ'),
       fun g hg => ?_⟩
     obtain ⟨c, hc2, hc⟩ := equation6_1_8 ℚ n g
-    have h1 := s62_c1N P J hP hample w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ hα g hg c hc2 hc
-    have h2 := s62_c1N P J hP hample w₁' w₂' hw₁' hw₂' k' hk' hkn' ℓ' hℓ' hα' g hg c hc2 hc
+    have h1 := s62_c1N P J hP w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ hα g hg c hc2 hc
+    have h2 := s62_c1N P J hP w₁' w₂' hw₁' hw₂' k' hk' hkn' ℓ' hℓ' hα' g hg c hc2 hc
     rw [map_sub, sub_eq_iff_eq_add.mp h1.symm, sub_eq_iff_eq_add.mp h2.symm]
     abel
   rw [P.H2P_inf_invQ hP.pos hP.nonIsotropic, Submodule.mem_bot, sub_eq_zero] at hdiff
@@ -2510,7 +2509,7 @@ theorem lemma6_2_3_c1N (hP : Assumption2_4_1 P J)
     (g : Spin ℚ n) (hg : g ∈ P.spinPZ) (c : ExtV ℚ n) (hc2 : c ∈ ⋀[ℚ]^2 (V ℚ n))
     (hc : ∀ x : ExtV ℚ n, rhoPrime ℚ n g x = IsNilpotent.exp c * rhoExt ℚ n g x) :
     c = rhoExt ℚ n g ℓ - ℓ :=
-  s62_c1N P J hP hample w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ hα g hg c hc2 hc
+  s62_c1N P J hP w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ hα g hg c hc2 hc
 
 end Lemma623
 

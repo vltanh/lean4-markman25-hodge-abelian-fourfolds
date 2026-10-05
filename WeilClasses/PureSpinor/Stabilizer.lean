@@ -706,7 +706,7 @@ theorem s22a_exists_spinPK (hW : P.W₁ ⊓ P.W₂ = ⊥) (A : Module.End (Kd d)
     · rw [P.s22a_m_negOne_mul, P.s22a_χ₂_spec, h', neg_one_smul, neg_neg]
 
 /-- The proof of Lemma 2.2.2 (see `WeilClasses.lemma2_2_2_restrict`). -/
-theorem s22a_restrict_aux (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
+theorem s22a_restrict_aux (hW : P.W₁ ⊓ P.W₂ = ⊥) :
     Function.Injective P.restrictW₁P ∧
       P.restrictW₁P.range = specialLinearUnits (Kd d) P.W₁ := by
   -- The proof of the paper: `Spin(V_K)_{ℓ₁,ℓ₂}/{±1}` is identified with a subgroup of `GL(W₁)`
@@ -754,7 +754,7 @@ theorem s22a_restrict_aux (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
 theorem s22a_det_restrictW₁P (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinPK) :
     LinearMap.det ((P.restrictW₁P g : (Module.End (Kd d) P.W₁)ˣ) : Module.End (Kd d) P.W₁) = 1 := by
   have hmem : P.restrictW₁P g ∈ specialLinearUnits (Kd d) P.W₁ :=
-    (P.s22a_restrict_aux hd hW).2 ▸ ⟨g, rfl⟩
+    (P.s22a_restrict_aux hW).2 ▸ ⟨g, rfl⟩
   have := congrArg Units.val (MonoidHom.mem_ker.mp hmem)
   simpa using this
 
@@ -785,7 +785,7 @@ noncomputable def s22a_toSL (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥)
 /-- `s22a_toSL` is bijective (`lemma2_2_2_restrict` and `LinearMap.toMatrix`). -/
 theorem s22a_toSL_bijective (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥)
     (B : Module.Basis (Fin (2 * n)) (Kd d) P.W₁) : Function.Bijective (P.s22a_toSL hd hW B) := by
-  refine ⟨fun g h hgh => (P.s22a_restrict_aux hd hW).1 ?_, fun M => ?_⟩
+  refine ⟨fun g h hgh => (P.s22a_restrict_aux hW).1 ?_, fun M => ?_⟩
   · apply Units.ext
     have h1 := congrArg (fun A : Matrix.SpecialLinearGroup (Fin (2 * n)) (Kd d) =>
       (A : Matrix (Fin (2 * n)) (Fin (2 * n)) (Kd d))) hgh
@@ -829,7 +829,7 @@ Gap in the paper (filled): the proof says "`Spin(V_K)_P` is the kernel of `det�
 theorem _root_.WeilClasses.lemma2_2_2_restrict (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
     Function.Injective P.restrictW₁P ∧
       P.restrictW₁P.range = specialLinearUnits (Kd d) P.W₁ :=
-  P.s22a_restrict_aux hd hW
+  P.s22a_restrict_aux hW
 
 /-! ## Remark 2.2.3 -/
 
