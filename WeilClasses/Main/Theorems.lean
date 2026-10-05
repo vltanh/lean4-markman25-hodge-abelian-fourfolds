@@ -3,6 +3,7 @@ module
 public import WeilClasses.Main.Compare
 public import WeilClasses.Main.Intro
 public import WeilClasses.AbelianVariety.Lemmas
+public import WeilClasses.Main.Moduli
 
 /-!
 # The main results in the model (Theorems 1.4.1 (3), (4), 1.5.1, Corollary 1.6.1)
@@ -22,8 +23,8 @@ structure `J₀` of `WeilClasses.Secant.Defs` (`s8_J0`, for which `ThetaStd` is 
   `κ₃(E)` algebraic near `X × X̂` (`SecantSheafDeformation`), its `η(K)`-translates algebraic
   (`PullbackClosed`), `h³` algebraic (`LefschetzOneOne`, `SubalgebraClosed`), hence `ĤW` algebraic
   near `X × X̂` (Theorem 1.4.1(4)), on the whole connected component (`VoisinLocus`), and on every
-  polarized abelian sixfold of Weil type with discriminant `-1` (`VanGeemenModuli`,
-  `PullbackClosed`).
+  polarized abelian sixfold of Weil type with discriminant `-1` ([van Geemen, Th. 5.2(3)] in the case
+  used, `vanGeemen_moduli_XXhat`, proved through Landherr's theorem; `PullbackClosed`).
   For `d ∈ {1, 2}` (a gap in the paper's proof, filled with its own footnote) the proof uses
   `ℚ(√-4d) = ℚ(√-d)`.
 * Corollary 1.6.1 follows its proof (§1.6), with Lefschetz (1,1) and hard Lefschetz in the degrees
@@ -414,9 +415,10 @@ Gap in the paper (filled): the proof ends with "the locus contains the whole irr
 of moduli of deformations of `(X × X̂, η, h)`" (TeX line 6847). That every polarized abelian sixfold
 of Weil type for `K` with discriminant `-1` lies, up to isogeny, in this component is
 [van Geemen, Th. 5.2(3)], which the paper states in §1.1 (TeX line 283) but does not invoke in the
-proof. Step (4) below invokes it (`VanGeemenModuli`). -/
+proof. Step (4) below invokes it, in the case proved in `WeilClasses.Main.Moduli`
+(`vanGeemen_moduli_XXhat`). -/
 theorem main_theorem1_5_1_of_three_le (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
-    [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
+    [LefschetzOneOne Z] [VoisinLocus Z] [SecantSheafDeformation Z]
     (d : ℕ) (hd : 3 ≤ d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d)
     (hdisc : X.DiscIs (-1)) : X.HW ≤ Z.alg (2 * 3) A.J := by
   have hd0 : (0 : ℚ) < d := by
@@ -432,9 +434,7 @@ theorem main_theorem1_5_1_of_three_le (Z : CycleClasses) [PullbackClosed Z] [Sub
   let X₀ : PolarizedWeilType A₀ d :=
     { η := η₀, isHodge := hJX.2.1, weil₁ := hJX.2.2.1, weil₂ := hJX.2.2.2.1, h := hX 3 d,
       ample := hJX.2.2.2.2.1, norm := hJX.2.2.2.2.2 }
-  have hdisc₀ : X₀.DiscIs (-1) := by
-    have h := discIs_XXhat 3 d hd0 A₀ X₀ hη₀ rfl
-    rwa [show ((-1 : ℚ)) ^ 3 = -1 by norm_num] at h
+  have hdisc₀ : X₀.DiscIs ((-1) ^ 3) := discIs_XXhat 3 d hd0 A₀ X₀ hη₀ rfl
   -- `C`: the connected component of `X × X̂` in its Weil-type period domain (the irreducible
   -- component of moduli of deformations of `(X × X̂, η, h)`); its points are of Weil type.
   set C := connectedComponentIn (WeilDomainMat η₀ (hX 3 d)) (LinearMap.toMatrix' (JX 3 J))
@@ -486,7 +486,9 @@ theorem main_theorem1_5_1_of_three_le (Z : CycleClasses) [PullbackClosed Z] [Sub
       Set.inter_subset_right ⟨_, hu_mem, hx₀C⟩ hopen (fun J'' hJ'' => hHWu J'' hJ'' hα) J' hJ'
   -- (4) [van Geemen, Th. 5.2(3)]: `A` is isogenous, by `ψ`, to the deformation
   -- `A' = (ψ A ψ⁻¹)` of `X × X̂` in `C`; transport the Hodge–Weil classes back along `ψ⁻¹`.
-  obtain ⟨ψ, hψη, -, hψC⟩ := VanGeemenModuli.moduli hd0 A A₀ X X₀ (-1) hdisc hdisc₀
+  have hdisc' : X.DiscIs ((-1) ^ 3) := by rwa [show ((-1 : ℚ)) ^ 3 = -1 by norm_num]
+  obtain ⟨ψ, hψη, -, hψC⟩ :=
+    vanGeemen_moduli_XXhat (by norm_num) hd0 A X hdisc' A₀ X₀ hη₀ rfl hdisc₀
   set J' := bcMap ℚ ℝ ψ.toLinearMap ∘ₗ A.J ∘ₗ bcMap ℚ ℝ ψ.symm.toLinearMap with hJ'_def
   have hW := hCW J' hψC
   let A' : AbVar (2 * 3) := ⟨J', hW.1, ⟨hX 3 d, hW.2.2.2.2.1⟩⟩
@@ -513,10 +515,11 @@ Gaps in the paper (filled), in the proof (§9.3, TeX lines 6841–6849):
   `ℚ(√-d)` is one for `ℚ(√-4d)`, with the same Hodge–Weil classes and discriminant
   (`main_exists_four_mul`), to which the case `d ≥ 3` (`main_theorem1_5_1_of_three_le`) applies.
 * The passage from the component of moduli of `X × X̂` to every sixfold of Weil type for `K` with
-  discriminant `-1` is [van Geemen, Th. 5.2(3)] (`VanGeemenModuli`), stated in §1.1 (TeX line 283)
+  discriminant `-1` is [van Geemen, Th. 5.2(3)] (proved here in that case, `vanGeemen_moduli_XXhat`),
+  stated in §1.1 (TeX line 283)
   but not invoked in the proof; see `main_theorem1_5_1_of_three_le`. -/
 theorem theorem1_5_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
-    [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
+    [LefschetzOneOne Z] [VoisinLocus Z] [SecantSheafDeformation Z]
     (d : ℕ) (hd : 0 < d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d) (hdisc : X.DiscIs (-1)) :
     X.HW ≤ Z.alg (2 * 3) A.J := by
   by_cases hd3 : 3 ≤ d
@@ -550,7 +553,7 @@ theorem main_isHodgeSub_sup {g : ℕ} (A : AbVar g) {U U' : Submodule ℚ (H1 �
 /-- **Corollary 1.6.1** (no label). The Hodge conjecture holds for abelian fourfolds: every Hodge
 class is algebraic. -/
 theorem corollary1_6_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
-    [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
+    [LefschetzOneOne Z] [VoisinLocus Z] [SecantSheafDeformation Z]
     [SchoenDegeneration Z] [MoonenZarhinSimple] [RamonMariProducts Z] [MoonenZarhinLowDim]
     (A : AbVar (2 * 2)) (p : ℕ) : A.hodge p ≤ Z.alg (2 * 2) A.J := by
   -- An ample class `h`, algebraic by the Lefschetz (1,1) theorem.

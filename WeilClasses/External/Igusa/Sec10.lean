@@ -20,23 +20,23 @@ in §10 (an abelian threefold, `dim V = 12`, the `32`-dimensional half-spin repr
 the invariant quartic `J` of (10.1.1), `WeilClasses.J`).
 
 * `igusa_prop3_invariant`: `J` is `Spin(V_F)`-invariant (proved).
-* `igusa_prop3_orbit_complex`: for `c ≠ 0`, `J⁻¹(c) ⊆ S⁺_ℂ` is one `Spin(V_ℂ)`-orbit (proof of
-  Lemma 10.1.1, l. 9702); proved from the normal form.
-* `igusa_prop3_orbit_subfield`: the same for `J⁻¹(d) ⊆ S⁺_F`, `F ⊆ ℂ` a subfield, `d ∈ F`, `d ≠ 0`
-  (Remark 10.1.2(1), l. 9752, which prints `d ∈ F`; see `remark10_1_2_orbit`). **Assumed**
-  (`IgusaProp3OrbitSubfield`).
-* `igusa_prop3_normalForm`, `igusa_prop3_normalForm_of_sq`: the normal form `1 + 2√-d [pt_X]` over
-  a field `F ⊆ ℂ` containing `√-d` (last paragraph of the proof of Prop. 3; proof of Lemma 10.2.1,
-  l. 9792). **Assumed** (`IgusaProp3NormalForm`, for the fields embedded in `ℂ`, where the paper
-  quotes Prop. 3).
+* `igusa_prop3_orbit_subfield`: for `J⁻¹(d) ⊆ S⁺_F`, `F ⊆ ℂ` a subfield, `d ∈ F`, `d ≠ 0`, one
+  `Spin(V_F)`-orbit (Remark 10.1.2(1), l. 9752, which prints `d ∈ F`; see `remark10_1_2_orbit`).
+  **Assumed** (`IgusaProp3OrbitSubfield`) when `-d` is not a square in `F`; the square case follows
+  from the normal form.
+
+The normal form of the last paragraph of the proof of Prop. 3 (`1 + 2s [pt_X]` for `s² = -J(w)`,
+proof of Lemma 10.2.1, l. 9792) and the orbits over `ℂ` (proof of Lemma 10.1.1, l. 9702) are proved
+in `WeilClasses.External.Igusa.NormalForm` (`igusa_prop3_normalForm_general`,
+`igusa_prop3_orbit_complex`, `igusa_prop3_normalForm`).
 * `igusa_lemma2`: the stabilizer of `1 + c [pt_X]`, `c ≠ 0`, maps under `ρ` onto the image of the
   embedding `e : SL(W₁) → SO(V_ℂ)` (10.1.2) for `W₁ = H¹(X̂)`, `W₂ = H¹(X)` (proof of
   Lemma 10.1.1, l. 9709) (proved).
 
-The two assumed parts of Prop. 3 are named hypotheses (`IgusaProp3NormalForm`,
-`IgusaProp3OrbitSubfield`) of the results of §10 whose proofs use them: their proofs need Igusa's
-classification of the generic orbit of `Spin(12)` on the half-spin representation (and, over a
-subfield, a Galois-cohomology argument), which is beyond this project. The paper does not use §10
+The assumed part of Prop. 3 is a named hypothesis (`IgusaProp3OrbitSubfield`) of
+Remark 10.1.2(1), the only result whose proof uses it: over a subfield in which `-d` is not a
+square, its proof needs a Galois-cohomology argument for a special unitary group, which is beyond
+this project. The paper does not use §10
 for its main theorems. Not stated, because no proof uses them: that the `Spin(V)`-invariant
 polynomials on `S⁺_ℚ` are the polynomials in `J` (§10.1, l. 9642, context only), and the
 tangential-variety description of `V(J)` ([Abuaf, Rem. 2.1.1], §10.1, l. 9643).
@@ -1976,7 +1976,7 @@ Lemma 10.2.1, l. 9795 (`J(h(α + 2β[pt_X])) = J(α + 2β[pt_X]) ≤ 0` for `h �
 `WeilClasses.s10_not_fixed_lines`), and the claim of Remark 10.1.2(2), l. 9755, that the even spinor
 variety lies in the singular locus of `V(J)` (`WeilClasses.s10_singular`). (The reduction to one
 element per fiber of `J` in the proof of Lemma 10.1.1, l. 9702, and the normal form in the proof of
-Lemma 10.2.1, l. 9792, go through `IgusaProp3NormalForm` instead.) -/
+Lemma 10.2.1, l. 9792, go through the normal form instead, `igusa_prop3_normalForm_general`.) -/
 theorem igusa_prop3_invariant (F : Type*) [Field F] [CharZero F] (g : Spin F 3) (x : S F 3)
     : J F (m F 3 (g : C F 3) x) = J F x := by
   -- the elements of `Spin(V_F)` preserving `J` form a subgroup, which contains the generators
@@ -2014,64 +2014,18 @@ theorem igusa_prop3_invariant (F : Type*) [Field F] [CharZero F] (g : Spin F 3) 
   rw [sc_closure_genSet_eq_top (by norm_num)] at hle
   exact hle (Subgroup.mem_top g) x
 
-/-- **[Igusa, Prop. 3], last paragraph of the proof** (the normal form), as a proposition: over
-every field `F` of characteristic zero embedded in `ℂ` (`[Algebra F ℂ]`), if `w ∈ S⁺_F` and `s ∈ F`,
-`s ≠ 0`, satisfy `s² = -J(w)`, then some `g ∈ Spin(V_F)` maps `w` to `1 + 2s [pt_X]` (note
-`J(1 + 2s [pt_X]) = -s² = J(w)`).
-
-Scope: the paper quotes [Igusa, Prop. 3] over `ℂ` (orbits, l. 9702), over `K = ℚ(√-d)` (the normal
-form, l. 9792) and over subfields of `ℂ` (orbits, l. 9752); the fields are therefore restricted to
-fields embedded in `ℂ`. The proofs use it over `ℂ` (`igusa_prop3_orbit_complex`), over `K`
-(`igusa_prop3_normalForm`) and over the algebraic closure of `ℚ` in `ℂ`
-(`WeilClasses.lemma10_1_1_rational`). On subfields of `ℂ` it follows from the quoted l. 9752
-(`IgusaProp3OrbitSubfield`), since `J(1 + 2s [pt_X]) = -s² = J(w) ≠ 0`
-(`WeilClasses.s10_normalForm_of_orbitSubfield`).
-
-**Assumed** (a named hypothesis of the results of §10 whose proofs use it; decided with the
-project owner): its proof needs Igusa's classification of the generic `Spin(12)`-orbit on the
-half-spin representation, which this project does not formalize (see `README.md`; estimated
-1500–3000 lines). The paper does not use §10 for its main theorems. -/
-def IgusaProp3NormalForm : Prop :=
-  ∀ (F : Type) [Field F] [CharZero F] [Algebra F ℂ] (w : S F 3), w ∈ Splus F 3 → ∀ s : F, s ≠ 0 →
-    s ^ 2 = -J F w → ∃ g : Spin F 3, m F 3 (g : C F 3) w = 1 + (2 * s) • pt F 3
-
-/-- **[Igusa, Prop. 3], last paragraph of the proof** (normal form), over any field `F` of
-characteristic zero embedded in `ℂ`, from the assumed `IgusaProp3NormalForm`. The special case used
-in the proof of Lemma 10.2.1 is `igusa_prop3_normalForm`. -/
-theorem igusa_prop3_normalForm_of_sq (hIgusa : IgusaProp3NormalForm) (F : Type) [Field F]
-    [CharZero F] [Algebra F ℂ] (w : S F 3) (hw : w ∈ Splus F 3) (s : F) (hs : s ≠ 0)
-    (hsJ : s ^ 2 = -J F w) :
-    ∃ g : Spin F 3, m F 3 (g : C F 3) w = 1 + (2 * s) • pt F 3 :=
-  hIgusa F w hw s hs hsJ
-
-/-- **[Igusa, Prop. 3]** (orbits over `ℂ`): for `c ≠ 0` the fiber `J⁻¹(c) ⊆ S⁺_ℂ` is a single
-`Spin(V_ℂ)`-orbit. Used in the proof of Lemma 10.1.1 (l. 9702: "the complement
-`S⁺_ℂ ∖ Ṽ(J)` intersects each fiber of `J : S⁺_ℂ → ℂ` in a single `Spin(V_ℂ)`-orbit"). -/
-theorem igusa_prop3_orbit_complex (hIgusa : IgusaProp3NormalForm) (x y : S ℂ 3)
-    (hx : x ∈ Splus ℂ 3) (hy : y ∈ Splus ℂ 3) (hxy : J ℂ x = J ℂ y) (hx0 : J ℂ x ≠ 0) :
-    ∃ g : Spin ℂ 3, m ℂ 3 (g : C ℂ 3) x = y := by
-  -- both are in the orbit of the normal form `1 + 2s [pt_X]`, `s² = -J(x)`
-  obtain ⟨s, hs⟩ := IsAlgClosed.exists_eq_mul_self (-J ℂ x)
-  have hs0 : s ≠ 0 := by
-    rintro rfl
-    rw [mul_zero, neg_eq_zero] at hs
-    exact hx0 hs
-  obtain ⟨gx, hgx⟩ := igusa_prop3_normalForm_of_sq hIgusa ℂ x hx s hs0 (by rw [hs, sq])
-  obtain ⟨gy, hgy⟩ := igusa_prop3_normalForm_of_sq hIgusa ℂ y hy s hs0 (by rw [← hxy, hs, sq])
-  refine ⟨gy⁻¹ * gx, ?_⟩
-  rw [sc_m_mul, hgx, ← hgy, fnd_m_inv_m]
-
-/-- **[Igusa, Prop. 3]** (rational orbits), as a proposition: for every subfield `F ⊆ ℂ` and every
-`d ∈ F`, `d ≠ 0`, the level set `J⁻¹(d) ⊆ S⁺_F` is a single `Spin(V_F)`-orbit.
+/-- **[Igusa, Prop. 3]** (rational orbits), as a proposition, in the case not covered by the normal
+form: for every subfield `F ⊆ ℂ` and every `d ∈ F` with `d ≠ 0` and `-d` not a square in `F`, the
+level set `J⁻¹(d) ⊆ S⁺_F` is a single `Spin(V_F)`-orbit.
 
 **Assumed** (a named hypothesis of `remark10_1_2_orbit`, the only result that uses it; see
-`README.md`): when `-d` is a square in `F` it follows from the normal form
-(`IgusaProp3NormalForm`); otherwise the stabilizer is the special unitary group of a hermitian form
-over `F(√-d)` and the proof needs the vanishing of a Galois-cohomology obstruction (Jacobson), which
-Mathlib does not have. -/
+`README.md`). When `-d` is a square the orbit statement follows from the normal form, which is
+proved (`WeilClasses.remark10_1_2_orbit`). Otherwise the stabilizer is the special unitary group of
+a hermitian form over `F(√-d)`, and the proof needs the vanishing of a Galois-cohomology
+obstruction (Jacobson), which Mathlib does not have. -/
 def IgusaProp3OrbitSubfield : Prop :=
-  ∀ (F : Subfield ℂ) (d : F), d ≠ 0 → ∀ x y : S F 3, x ∈ Splus F 3 → y ∈ Splus F 3 →
-    J F x = d → J F y = d → ∃ g : Spin F 3, m F 3 (g : C F 3) x = y
+  ∀ (F : Subfield ℂ) (d : F), d ≠ 0 → ¬ IsSquare (-d) → ∀ x y : S F 3, x ∈ Splus F 3 →
+    y ∈ Splus F 3 → J F x = d → J F y = d → ∃ g : Spin F 3, m F 3 (g : C F 3) x = y
 
 /-- **[Igusa, Prop. 3]** (rational orbits), as quoted in Remark 10.1.2(1) (l. 9751–9752): for every
 subfield `F ⊆ ℂ` and every `d ∈ F` with `d ≠ 0`, the level set `J⁻¹(d) ⊆ S⁺_F` is a single
@@ -2080,35 +2034,12 @@ Reading: over a non-closed `F` this combines Igusa's description of the orbit ov
 normal form of his last paragraph: the stabilizer of a point of `J⁻¹(d)` is `SL₆` when `-d` is a
 square in `F`, and otherwise the special unitary group of a hermitian form over `F(√-d)` whose
 trace form is `(V_F, (·,·)_V)`, so the Galois-cohomological obstruction vanishes (Jacobson). Not
-used in any other proof. -/
-theorem igusa_prop3_orbit_subfield (hIgusa : IgusaProp3OrbitSubfield) (F : Subfield ℂ) (d : F)
-    (hd : d ≠ 0) (x y : S F 3) (hx : x ∈ Splus F 3) (hy : y ∈ Splus F 3) (hxd : J F x = d)
-    (hyd : J F y = d) : ∃ g : Spin F 3, m F 3 (g : C F 3) x = y :=
-  hIgusa F d hd x y hx hy hxd hyd
-
-/-- **[Igusa, Prop. 3], last paragraph of the proof**, in the case used in the proof of
-Lemma 10.2.1 (l. 9792): for `w ∈ S⁺_ℚ` with `d := J(w) > 0` and `K = ℚ(√-d)` there is
-`g ∈ Spin(V_K)` with `g(w) = 1 + 2√-d [pt_X]` (with the paper's `√-d = i√d`,
-`WeilClasses.Kd.sqrtNeg`). -/
-theorem igusa_prop3_normalForm (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
-    (hd : 0 < J ℚ w) :
-    ∃ g : Spin (Kd (J ℚ w)) 3,
-      m (Kd (J ℚ w)) 3 (g : C (Kd (J ℚ w)) 3) (bcS ℚ (Kd (J ℚ w)) 3 w) =
-        1 + (2 * Kd.sqrtNeg (J ℚ w)) • pt (Kd (J ℚ w)) 3 := by
-  -- `(√-d)² = -d = -J(w)` in `K`, and `w ∈ S⁺_K`; apply the normal form over `K`
-  have hsq : Kd.sqrtNeg (J ℚ w) ^ 2 = -J (Kd (J ℚ w)) (bcS ℚ (Kd (J ℚ w)) 3 w) := by
-    rw [J_bcS]
-    apply Subtype.ext
-    have hq : ((algebraMap ℚ (Kd (J ℚ w)) (J ℚ w) : Kd (J ℚ w)) : ℂ) = ((J ℚ w : ℚ) : ℂ) := by
-      rw [eq_ratCast (algebraMap ℚ (Kd (J ℚ w))) (J ℚ w), SubfieldClass.coe_ratCast]
-    rw [Subfield.coe_neg, hq, SubmonoidClass.coe_pow]
-    exact sqrtNeg_sq hd.le
-  have hs0 : Kd.sqrtNeg (J ℚ w) ≠ 0 := by
-    intro h
-    rw [h, zero_pow two_ne_zero, J_bcS, eq_comm, neg_eq_zero, map_eq_zero] at hsq
-    exact hd.ne' hsq
-  exact igusa_prop3_normalForm_of_sq hIgusa (Kd (J ℚ w)) (bcS ℚ (Kd (J ℚ w)) 3 w)
-    (sc_bcS_Splus ℚ (Kd (J ℚ w)) w hw) _ hs0 hsq
+used in any other proof. Stated here for `-d` not a square in `F`, the case that the normal form
+does not cover (see `IgusaProp3OrbitSubfield`). -/
+theorem igusa_prop3_orbit_subfield (hOrbit : IgusaProp3OrbitSubfield) (F : Subfield ℂ) (d : F)
+    (hd : d ≠ 0) (hsq : ¬ IsSquare (-d)) (x y : S F 3) (hx : x ∈ Splus F 3) (hy : y ∈ Splus F 3)
+    (hxd : J F x = d) (hyd : J F y = d) : ∃ g : Spin F 3, m F 3 (g : C F 3) x = y :=
+  hOrbit F d hd hsq x y hx hy hxd hyd
 
 /-- **[Igusa, Lemma 2]**, in the case used in the proof of Lemma 10.1.1 (l. 9708–9709): for
 `c ∈ ℂ`, `c ≠ 0`, the homomorphism `ρ` maps the stabilizer `Spin(V_ℂ)_w` of `w = 1 + c [pt_X]`

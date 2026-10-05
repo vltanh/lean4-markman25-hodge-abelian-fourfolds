@@ -34,9 +34,9 @@ the paper's `√-d = i√d`); `-d` is then not a rational square.
 The sheaf-theoretic content of the examples (Gulbrandsen's moduli spaces, Chern characters of
 vector bundles and ideal sheaves) is not formalized; only the cohomological identities are.
 
-**Conditional results.** The proof of Lemma 10.2.1 starts from the normal form of [Igusa, Prop. 3]
-over `K`; `lemma10_2_1`, `lemma10_2_1_centralizer` and `lemma10_2_1_secant` take the named hypothesis
-`IgusaProp3NormalForm` (see `WeilClasses/External/Igusa/README.md`). The examples are unconditional.
+**Igusa's Proposition 3.** The proof of Lemma 10.2.1 starts from the normal form of
+[Igusa, Prop. 3] over `K` (`igusa_prop3_normalForm`, proved in
+`WeilClasses.External.Igusa.NormalForm`).
 -/
 
 @[expose] public section
@@ -575,7 +575,7 @@ pure spinor lines `ℓ̃₁ = K g⁻¹[pt_X]` and `ℓ̃₂ = K g⁻¹ 1` of the
 `W₁ = ker m_{g⁻¹[pt_X]}` and `W₂ = ker m_{g⁻¹ 1}`). By Remark 10.1.2(2) for complex conjugation
 (`remark10_1_2_rational`, which cites "`P_w` is defined over `ℚ`" of Lemma 10.1.1). Step 1 of
 `s10_cm_secant`, where the order of the steps is discussed. -/
-theorem s10_lines_σ (hIgusa : IgusaProp3NormalForm) {d : ℚ} (hdJ : J ℚ w = d) (hw : w ∈ Splus ℚ 3) (hd : 0 < d)
+theorem s10_lines_σ {d : ℚ} (hdJ : J ℚ w = d) (hw : w ∈ Splus ℚ 3) (hd : 0 < d)
     (g : Spin (Kd d) 3)
     (hg : m (Kd d) 3 (g : C (Kd d) 3) (bcS ℚ (Kd d) 3 w) = 1 + (2 * Kd.sqrtNeg d) • pt (Kd d) 3) :
     (σS 3 d (m (Kd d) 3 ((g⁻¹ : Spin (Kd d) 3) : C (Kd d) 3) (pt (Kd d) 3)) ∈
@@ -608,7 +608,7 @@ theorem s10_lines_σ (hIgusa : IgusaProp3NormalForm) {d : ℚ} (hdJ : J ℚ w = 
     congr 1
     rw [map_add, map_one, map_smul, show bcS (Kd d) ℂ 3 (pt (Kd d) 3) = pt ℂ 3 from
       s10_bcS_basisS _ _ _ _, algebraMap_smul]
-  have hrat := remark10_1_2_rational hIgusa w hw (by rw [hdJ]; exact hd.ne') _ _ _ hPc hwP s10_cc
+  have hrat := remark10_1_2_rational w hw (by rw [hdJ]; exact hd.ne') _ _ _ hPc hwP s10_cc
   rw [s10_cc_bcS, s10_cc_bcS] at hrat
   have hli := (s10_isTransversalSecant_conj s10_cc hPc).2.1
   rw [s10_cc_bcS, s10_cc_bcS] at hli
@@ -857,7 +857,7 @@ the claim that `W₁` and `W₂` are not defined over `ℚ` (l. 9795), but the a
 needs it: the `J`-argument of l. 9795 applies when `W₁` and `W₂` are both defined over `ℚ`, and `W₂`
 is defined over `ℚ` when `W₁` is only because `σ` permutes the pair. Here the `σ`-invariance is
 proved first; the rest is in the paper's order. -/
-theorem s10_cm_secant (hIgusa : IgusaProp3NormalForm) {d : ℚ} (hdJ : J ℚ w = d)
+theorem s10_cm_secant {d : ℚ} (hdJ : J ℚ w = d)
     (hw : w ∈ Splus ℚ 3) (hd : 0 < d) :
     ∃ g : Spin (Kd d) 3,
       m (Kd d) 3 (g : C (Kd d) 3) (bcS ℚ (Kd d) 3 w) = 1 + (2 * Kd.sqrtNeg d) • pt (Kd d) 3 ∧
@@ -870,9 +870,9 @@ theorem s10_cm_secant (hIgusa : IgusaProp3NormalForm) {d : ℚ} (hdJ : J ℚ w =
           c • m (Kd d) 3 ((g⁻¹ : Spin (Kd d) 3) : C (Kd d) 3) 1 := by
   subst hdJ
   -- the normal form `g(w) = 1 + 2√-d [pt_X]` over `K` ([Igusa, Prop. 3], last paragraph; l. 9792)
-  obtain ⟨g, hg⟩ := igusa_prop3_normalForm hIgusa w hw hd
+  obtain ⟨g, hg⟩ := igusa_prop3_normalForm w hw hd
   -- step 1 (l. 9796, used first): `σ` permutes the lines of `W₁`, `W₂`, as `P_w` is `σ`-stable
-  have hσ := s10_lines_σ hIgusa rfl hw hd g hg
+  have hσ := s10_lines_σ rfl hw hd g hg
   -- step 2 (l. 9795): `W₁` and `W₂` are not defined over `ℚ`
   obtain ⟨hn₁, hn₂⟩ := s10_not_isDefinedOver rfl hd g hg rfl rfl hσ
   refine ⟨g, hg, hn₁, hn₂, ?_⟩
@@ -987,7 +987,7 @@ section S10Main
 `W₂ = g⁻¹(H¹(X̂))`, which are not defined over `ℚ` (`s10_cm_secant`, where `σ(W₁) = W₂` is
 proved); `V_K = W₁ ⊕ W₂`, `w ∈ P`, and `P_K ⊗ ℂ` is the transversal secant through `w` of
 Lemma 10.1.1 and the base change of `P`. -/
-theorem s10_secant_data (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
+theorem s10_secant_data (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
     (hd : 0 < J ℚ w) :
     ∃ (g : Spin (Kd (J ℚ w)) 3) (c : Kd (J ℚ w)) (P : KSecant 3 (J ℚ w)), c ≠ 0 ∧
       P.u₁ = m (Kd (J ℚ w)) 3 ((g⁻¹ : Spin (Kd (J ℚ w)) 3) : C (Kd (J ℚ w)) 3)
@@ -1001,7 +1001,7 @@ theorem s10_secant_data (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w �
       bcSubS (Kd (J ℚ w)) ℂ 3 P.PK = bcSubS ℚ ℂ 3 P.Pℚ := by
   -- the normal form `g(w) = 1 + 2√-d [pt_X]` over `K` ([Igusa, Prop. 3]); `W₁, W₂` are not defined
   -- over `ℚ`, and `σ` exchanges the lines `K g⁻¹[pt_X]`, `K g⁻¹ 1`
-  obtain ⟨g, hg, hn₁, hn₂, c, hc, hσ⟩ := s10_cm_secant hIgusa rfl hw hd
+  obtain ⟨g, hg, hn₁, hn₂, c, hc, hσ⟩ := s10_cm_secant rfl hw hd
   have hT := s10_isTransversalSecant_map g⁻¹ (isTransversalSecant_one_pt (Kd (J ℚ w)))
   have hT' := s10_isTransversalSecant_smul_right (s10_isTransversalSecant_swap hT) hc
   have hli : LinearIndependent (Kd (J ℚ w))
@@ -1053,13 +1053,13 @@ theorem s10_secant_data (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w �
     congr 1
     exact Set.image_congr fun r _ => s10_bcS_bcS r
 
-theorem s10_secant (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
+theorem s10_secant (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
     (hd : 0 < J ℚ w) :
     ∃ P : KSecant 3 (J ℚ w), IsCompl P.W₁ P.W₂ ∧ w ∈ P.Pℚ ∧
       IsTransversalSecant ℂ 3 (bcSubS (Kd (J ℚ w)) ℂ 3 P.PK)
         (bcS (Kd (J ℚ w)) ℂ 3 P.u₁) (bcS (Kd (J ℚ w)) ℂ 3 P.u₂) ∧
       bcSubS (Kd (J ℚ w)) ℂ 3 P.PK = bcSubS ℚ ℂ 3 P.Pℚ := by
-  obtain ⟨-, -, P, -, -, -, -, -, h⟩ := s10_secant_data hIgusa w hw hd
+  obtain ⟨-, -, P, -, -, -, -, -, h⟩ := s10_secant_data w hw hd
   exact ⟨P, h⟩
 
 theorem s10_spinStab_eq (w : S ℚ 3) (_hw : w ∈ Splus ℚ 3) (hd : 0 < J ℚ w)
@@ -1603,9 +1603,9 @@ and `W₂` invariant (`s10_eq_A_or_B`).
 Departure from the paper (reason 1): the `σ`-invariance of the pair `{W₁, W₂}` (l. 9796) is proved
 before the claim that `W₁, W₂` are not defined over `ℚ` (l. 9795), whose argument needs it; see
 `s10_cm_secant`.
-Conditional on [Igusa, Prop. 3] (the normal form, `IgusaProp3NormalForm`), which the proof uses and
-this project assumes (see `WeilClasses/External/Igusa/README.md`). -/
-theorem lemma10_2_1 (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
+The proof uses [Igusa, Prop. 3] (the normal form), proved in
+`WeilClasses.External.Igusa.NormalForm` (`igusa_prop3_normalForm_general`). -/
+theorem lemma10_2_1 (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
     (hd : 0 < J ℚ w) :
     ∃ W₁ W₂ : Submodule (Kd (J ℚ w)) (V (Kd (J ℚ w)) 3),
       W₁ ≠ W₂ ∧
@@ -1618,7 +1618,7 @@ theorem lemma10_2_1 (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Sp
   -- l. 9792–9796: `g(w) = 1 + 2√-d [pt_X]`, the `K`-secant `P` with `u₁ = g⁻¹[pt_X]`,
   -- `u₂ = σ(u₁) ∈ K g⁻¹ 1`, so `W₁ = g⁻¹(H¹(X))` and `W₂ = g⁻¹(H¹(X̂))`, which are not defined over
   -- `ℚ` (l. 9795) and satisfy `σ(W₁) = W₂` (l. 9796) (`s10_cm_secant` for the order of the steps)
-  obtain ⟨g, c, P, hc, hu₁, hu₂, hn₁, hn₂, hW, hwP, hT, hPK⟩ := s10_secant_data hIgusa w hw hd
+  obtain ⟨g, c, P, hc, hu₁, hu₂, hn₁, hn₂, hW, hwP, hT, hPK⟩ := s10_secant_data w hw hd
   -- l. 9798 (Remark 2.2.3): `Spin(V_ℚ)_w = Spin(V_ℚ)_P`
   have hstab := s10_spinStab_eq w hw hd P hW hwP
   set gc := bcSpin (Kd (J ℚ w)) ℂ 3 g with hgc
@@ -1738,14 +1738,14 @@ theorem lemma10_2_1 (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Sp
 sentence. For `w ∈ S⁺_ℚ` with `d := J(w) > 0` and `K = ℚ(√-d)`, the centralizer of
 `ρ(Spin(V_ℚ)_w)` in the group `Õ(V_ℚ)` of rational similarities with multiplier in `Nm(K^×)`
 (2.2.3) is isomorphic to `K^×`.
-Conditional on [Igusa, Prop. 3] (the normal form, `IgusaProp3NormalForm`), which the proof uses and
-this project assumes (see `WeilClasses/External/Igusa/README.md`). -/
-theorem lemma10_2_1_centralizer (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
+The proof uses [Igusa, Prop. 3] (the normal form), proved in
+`WeilClasses.External.Igusa.NormalForm` (`igusa_prop3_normalForm_general`). -/
+theorem lemma10_2_1_centralizer (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
     (hd : 0 < J ℚ w) :
     Nonempty (↥(Subgroup.centralizer (rho ℚ 3 '' (spinStab ℚ 3 w : Set (Spin ℚ 3))) ⊓
       Otilde 3 (J ℚ w)) ≃* (Kd (J ℚ w))ˣ) := by
   -- the centralizer is `η(K^×)` (Lemma 2.2.4, with `Spin(V_ℚ)_w = Spin(V_ℚ)_P`)
-  obtain ⟨P, hW, hwP, -, -⟩ := s10_secant hIgusa w hw hd
+  obtain ⟨P, hW, hwP, -, -⟩ := s10_secant w hw hd
   obtain ⟨hinj, hex, hiff⟩ := s10_eta_centralizer w hw hd P hW hwP
   set G := Subgroup.centralizer (rho ℚ 3 '' (spinStab ℚ 3 w : Set (Spin ℚ 3))) ⊓ Otilde 3 (J ℚ w)
   have hη : ∀ x : G, ∃ l : (Kd (J ℚ w))ˣ, ((x : V ℚ 3 ≃ₗ[ℚ] V ℚ 3) : V ℚ 3 →ₗ[ℚ] V ℚ 3) =
@@ -1781,15 +1781,15 @@ rational plane `P ⊆ S⁺_ℚ` contains `w`, such that `P_K ⊗ ℂ` is the tra
 of Lemma 10.1.1, spanned by `u₁, u₂`, and is the base change of `P` ("`P_w` is defined over
 `ℚ`"). That `u₂ = σ(u₁)` spans the second pure spinor line of `P_K` is `σ(W₁) = W₂` (l. 9796,
 `s10_cm_secant`).
-Conditional on [Igusa, Prop. 3] (the normal form, `IgusaProp3NormalForm`), which the proof uses and
-this project assumes (see `WeilClasses/External/Igusa/README.md`). -/
-theorem lemma10_2_1_secant (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
+The proof uses [Igusa, Prop. 3] (the normal form), proved in
+`WeilClasses.External.Igusa.NormalForm` (`igusa_prop3_normalForm_general`). -/
+theorem lemma10_2_1_secant (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
     (hd : 0 < J ℚ w) :
     ∃ P : KSecant 3 (J ℚ w), IsCompl P.W₁ P.W₂ ∧ w ∈ P.Pℚ ∧
       IsTransversalSecant ℂ 3 (bcSubS (Kd (J ℚ w)) ℂ 3 P.PK)
         (bcS (Kd (J ℚ w)) ℂ 3 P.u₁) (bcS (Kd (J ℚ w)) ℂ 3 P.u₂) ∧
       bcSubS (Kd (J ℚ w)) ℂ 3 P.PK = bcSubS ℚ ℂ 3 P.Pℚ := by
-  exact s10_secant hIgusa w hw hd
+  exact s10_secant w hw hd
 
 /-- (Proof of Lemma 10.2.1, l. 9798, by Remark 2.2.3 with `n = 3` odd.) For `w ∈ S⁺_ℚ` with
 `J(w) > 0` and a `K`-secant `P` with `V_K = W₁ ⊕ W₂` whose rational plane contains `w`,

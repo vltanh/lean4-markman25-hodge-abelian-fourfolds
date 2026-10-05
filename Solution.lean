@@ -76,7 +76,7 @@ theorem theorem1_4_1_4 (d : ℕ) (hd : 3 ≤ d) (η : Kd d →+* Module.End ℚ 
 polarized abelian sixfolds of Weil type with complex multiplication by `K` and with discriminant
 `-1` are algebraic. -/
 theorem theorem1_5_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
-    [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
+    [LefschetzOneOne Z] [VoisinLocus Z] [SecantSheafDeformation Z]
     (d : ℕ) (hd : 0 < d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d) (hdisc : X.DiscIs (-1)) :
     X.HW ≤ Z.alg (2 * 3) A.J :=
   WeilClasses.theorem1_5_1 Z d hd A X hdisc
@@ -84,7 +84,7 @@ theorem theorem1_5_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
 /-- **Corollary 1.6.1.** The Hodge conjecture holds for abelian fourfolds: every Hodge class is
 algebraic. -/
 theorem corollary1_6_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
-    [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
+    [LefschetzOneOne Z] [VoisinLocus Z] [SecantSheafDeformation Z]
     [SchoenDegeneration Z] [MoonenZarhinSimple] [RamonMariProducts Z] [MoonenZarhinLowDim]
     (A : AbVar (2 * 2)) (p : ℕ) : A.hodge p ≤ Z.alg (2 * 2) A.J :=
   WeilClasses.corollary1_6_1 Z A p

@@ -19,10 +19,9 @@ their hypotheses are consistent, and the objects they quantify over exist.
   (`XXhatWeil`, `XXhatWeil_discIs`); for `n = 3` this is a sixfold with discriminant `-1`, as in
   Theorem 1.5.1. `(ℝ⁸, J₀)` is an abelian fourfold, as in Corollary 1.6.1.
 
-The three hypotheses that do not involve the system of algebraic classes, `VanGeemenModuli`,
-`MoonenZarhinSimple` and `MoonenZarhinLowDim`, are published theorems ([van Geemen, Th. 5.2(3)],
-[Moonen–Zarhin 1995, Th. 2.11], [Moonen–Zarhin 1999, Prop. 3.8, Th. 0.1(i)]) about Hodge
-structures of abelian varieties. No instance of them is constructed here: that would be a proof
+The two hypotheses that do not involve the system of algebraic classes, `MoonenZarhinSimple` and
+`MoonenZarhinLowDim`, are published theorems ([Moonen–Zarhin 1995, Th. 2.11],
+[Moonen–Zarhin 1999, Prop. 3.8, Th. 0.1(i)]) about Hodge structures of abelian varieties. No instance of them is constructed here: that would be a proof
 of those theorems (see `REPORT.md`).
 -/
 

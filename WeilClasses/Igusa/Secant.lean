@@ -2,6 +2,7 @@ module
 
 public import WeilClasses.Igusa.Defs
 public import WeilClasses.External.Igusa.Sec10
+public import WeilClasses.External.Igusa.NormalForm
 public import Mathlib.Analysis.Calculus.Deriv.Basic
 public import WeilClasses.External.Chevalley.Sec2_2
 public import WeilClasses.External.Igusa.Sec2_2
@@ -37,13 +38,12 @@ Here `X` is an abelian threefold (`n = 3`), and `J` is the Igusa quartic (10.1.1
 
 Indices are 0-based: `eStar F 0 3` is the paper's `e₁₄^*`.
 
-**Conditional results.** The proofs of Lemma 10.1.1 and of Remark 10.1.2(2) (rationality, which
-cites Lemma 10.1.1) reduce to the normal form `1 + c [pt_X]` of [Igusa, Prop. 3], and
-Remark 10.1.2(1) quotes Igusa's orbit statement over subfields of `ℂ`. Both parts of Igusa's
-proposition are assumed, as the named hypotheses `IgusaProp3NormalForm` and
-`IgusaProp3OrbitSubfield` of the results that use them (see `WeilClasses/External/Igusa/README.md`;
-over subfields of `ℂ` the first follows from the second, `s10_normalForm_of_orbitSubfield`). The
-other results of this file are unconditional.
+**Igusa's Proposition 3.** The proofs of Lemma 10.1.1 and of Remark 10.1.2(2) (rationality, which
+cites Lemma 10.1.1) reduce to the normal form `1 + c [pt_X]` of [Igusa, Prop. 3], proved in
+`WeilClasses.External.Igusa.NormalForm`. Remark 10.1.2(1) quotes Igusa's orbit statement over
+subfields of `ℂ`: when `-d` is a square it follows from the normal form; otherwise it is assumed,
+as the named hypothesis `IgusaProp3OrbitSubfield` of `remark10_1_2_orbit` (see
+`WeilClasses/External/Igusa/README.md`). The other results of this file are unconditional.
 -/
 
 @[expose] public section
@@ -711,7 +711,7 @@ theorem s10_one_add_mem_span {F : Type*} [Field F] [CharZero F] (c : F) :
 
 /-- The reduction step of the proof of Lemma 10.1.1 (l. 9702–9705), by [Igusa, Prop. 3]: every
 `w ∈ S⁺_ℂ` with `J(w) ≠ 0` lies in the `Spin(V_ℂ)`-orbit of some `1 + c [pt_X]`, `c ≠ 0`. -/
-theorem s10_normal_form (hIgusa : IgusaProp3NormalForm) (w : S ℂ 3) (hw : w ∈ Splus ℂ 3)
+theorem s10_normal_form (w : S ℂ 3) (hw : w ∈ Splus ℂ 3)
     (hJ : J ℂ w ≠ 0) :
     ∃ g : Spin ℂ 3, ∃ c : ℂ, c ≠ 0 ∧ m ℂ 3 (g : C ℂ 3) w = 1 + c • pt ℂ 3 := by
   obtain ⟨s, hs⟩ := IsAlgClosed.exists_pow_nat_eq (-J ℂ w) (by norm_num : 0 < 2)
@@ -722,23 +722,8 @@ theorem s10_normal_form (hIgusa : IgusaProp3NormalForm) (w : S ℂ 3) (hw : w �
   have hJ0 : J ℂ (1 + (2 * s) • pt ℂ 3) = J ℂ w := by
     rw [J_one_add_smul_pt]
     linear_combination (-1 : ℂ) * hs
-  obtain ⟨g, hg⟩ := igusa_prop3_orbit_complex hIgusa w _ hw (s10_one_add_mem_Splus _) hJ0.symm hJ
+  obtain ⟨g, hg⟩ := igusa_prop3_orbit_complex w _ hw (s10_one_add_mem_Splus _) hJ0.symm hJ
   exact ⟨g, 2 * s, mul_ne_zero two_ne_zero hs0, hg⟩
-
-/-- On the two named hypotheses for [Igusa, Prop. 3] (`WeilClasses/External/Igusa/README.md`):
-over a subfield `F ⊆ ℂ`, the normal form (`IgusaProp3NormalForm`) follows from the orbit statement
-quoted in Remark 10.1.2(1) (`IgusaProp3OrbitSubfield`), since
-`J(1 + 2s [pt_X]) = -s² = J(w) ≠ 0`. -/
-theorem s10_normalForm_of_orbitSubfield (hIgusa : IgusaProp3OrbitSubfield) (F : Subfield ℂ)
-    (w : S F 3) (hw : w ∈ Splus F 3) (s : F) (hs : s ≠ 0) (hsJ : s ^ 2 = -J F w) :
-    ∃ g : Spin F 3, m F 3 (g : C F 3) w = 1 + (2 * s) • pt F 3 := by
-  have hJ : J F w ≠ 0 := by
-    intro h
-    rw [h, neg_zero] at hsJ
-    exact hs ((pow_eq_zero_iff two_ne_zero).mp hsJ)
-  refine igusa_prop3_orbit_subfield hIgusa F (J F w) hJ w _ hw (s10_one_add_mem_Splus _) rfl ?_
-  rw [J_one_add_smul_pt]
-  linear_combination (-1 : F) * hsJ
 
 /-- **"The two lines spanned by `1` and `[pt_X]` are the only pure spinor lines in `S⁺_ℂ` stabilized
 under `Spin(V_ℂ)_w`"** (proof of Lemma 10.1.1), for `w = 1 + c [pt_X]`: by [Igusa, Lemma 2] the
@@ -2274,13 +2259,13 @@ Gap in the paper (filled): the proof shows uniqueness only among the secants thr
 point of which is `Spin(V_ℂ)_w`-invariant (l. 9710–9711). That every transversal secant through `w`
 has this property is [Igusa, Lemma 2] for its own pair of pure spinors (`igusa_lemma2_stab_odd`,
 used in `s10_secant_lines`), as in Remark 2.2.3 (l. 835).
-Conditional on [Igusa, Prop. 3] (the normal form, `IgusaProp3NormalForm`), which the proof uses and
-this project assumes (see `WeilClasses/External/Igusa/README.md`). -/
-theorem lemma10_1_1 (hIgusa : IgusaProp3NormalForm) (w : S ℂ 3) (hw : w ∈ Splus ℂ 3)
+The proof uses [Igusa, Prop. 3] (the normal form), proved in
+`WeilClasses.External.Igusa.NormalForm` (`igusa_prop3_normalForm_general`). -/
+theorem lemma10_1_1 (w : S ℂ 3) (hw : w ∈ Splus ℂ 3)
     (hJ : J ℂ w ≠ 0) :
     ∃! P : Submodule ℂ (S ℂ 3), w ∈ P ∧ ∃ u₁ u₂ : S ℂ 3, IsTransversalSecant ℂ 3 P u₁ u₂ := by
   -- reduction to `w₀ = 1 + c [pt_X]` by [Igusa, Prop. 3]
-  obtain ⟨g, c, hc, hg⟩ := s10_normal_form hIgusa w hw hJ
+  obtain ⟨g, c, hc, hg⟩ := s10_normal_form w hw hJ
   have hw0 := s10_ne_zero_of_J hJ
   refine ⟨(Submodule.span ℂ {1, pt ℂ 3}).map (m ℂ 3 ((g⁻¹ : Spin ℂ 3) : C ℂ 3)),
     ⟨?_, _, _, s10_isTransversalSecant_map g⁻¹ (isTransversalSecant_one_pt ℂ)⟩, ?_⟩
@@ -2294,9 +2279,9 @@ theorem lemma10_1_1 (hIgusa : IgusaProp3NormalForm) (w : S ℂ 3) (hw : w ∈ Sp
 `W_i = ker m_{u_i}`. Then `ρ : Spin(V_ℂ) → SO(V_ℂ)` restricted to the stabilizer `Spin(V_ℂ)_w` is
 injective, and its image is the image of the embedding `e : SL(W₁) → SO(V_ℂ)` of (10.1.2), acting on
 `W₂ ≅ W₁*` (via the pairing (1.2.2)) by the inverse transpose (`WeilClasses.slImage`).
-Conditional on [Igusa, Prop. 3] (the normal form, `IgusaProp3NormalForm`), which the proof uses and
-this project assumes (see `WeilClasses/External/Igusa/README.md`). -/
-theorem lemma10_1_1_stabilizer (hIgusa : IgusaProp3NormalForm) (w : S ℂ 3) (hw : w ∈ Splus ℂ 3)
+The proof uses [Igusa, Prop. 3] (the normal form), proved in
+`WeilClasses.External.Igusa.NormalForm` (`igusa_prop3_normalForm_general`). -/
+theorem lemma10_1_1_stabilizer (w : S ℂ 3) (hw : w ∈ Splus ℂ 3)
     (hJ : J ℂ w ≠ 0)
     (P : Submodule ℂ (S ℂ 3)) (u₁ u₂ : S ℂ 3) (hP : IsTransversalSecant ℂ 3 P u₁ u₂)
     (hwP : w ∈ P) :
@@ -2305,7 +2290,7 @@ theorem lemma10_1_1_stabilizer (hIgusa : IgusaProp3NormalForm) (w : S ℂ 3) (hw
   have hw0 := s10_ne_zero_of_J hJ
   refine ⟨s10_rho_injOn (by norm_num) hw0, ?_⟩
   -- reduction to `w₀ = 1 + c [pt_X]` ([Igusa, Prop. 3]), where [Igusa, Lemma 2] applies
-  obtain ⟨g, c, hc, hg⟩ := s10_normal_form hIgusa w hw hJ
+  obtain ⟨g, c, hc, hg⟩ := s10_normal_form w hw hJ
   set σ := rho ℂ 3 g⁻¹ with hσ
   have hρmul : ∀ a b : Spin ℂ 3, rho ℂ 3 (a * b) = rho ℂ 3 a * rho ℂ 3 b := fun a b =>
     CliffordAlgebra.spinVectorAction_mul _ a b
@@ -2374,12 +2359,12 @@ of definition of algebraic subgroups are not part of the model (its groups are g
 the intermediary is `w` instead of `Spin(V_ℂ)_w`: `P_w` is determined by `w` (the uniqueness in
 `lemma10_1_1`), hence every automorphism `τ` of `ℂ` maps `P_w` to the transversal secant through
 `τ(w) = w`, i.e. to `P_w`. The descent is then explicit: the normal form over the algebraic closure
-`ℚ̄` of `ℚ` in `ℂ` (`IgusaProp3NormalForm`) gives `P_w` a basis of vectors defined over `ℚ̄`, and a
+`ℚ̄` of `ℚ` in `ℂ` (`igusa_prop3_normalForm_general`) gives `P_w` a basis of vectors defined over `ℚ̄`, and a
 plane with both properties is defined over `ℚ` (`s10_isDefinedOver_of_fixed`, with the Galois theory
 of `ℚ̄/ℚ` in `s10_rat_of_fixed`).
-Conditional on [Igusa, Prop. 3] (the normal form, `IgusaProp3NormalForm`), which the proof uses and
-this project assumes (see `WeilClasses/External/Igusa/README.md`). -/
-theorem lemma10_1_1_rational (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
+The proof uses [Igusa, Prop. 3] (the normal form), proved in
+`WeilClasses.External.Igusa.NormalForm` (`igusa_prop3_normalForm_general`). -/
+theorem lemma10_1_1_rational (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
     (hJ : J ℚ w ≠ 0)
     (P : Submodule ℂ (S ℂ 3)) (u₁ u₂ : S ℂ 3) (hP : IsTransversalSecant ℂ 3 P u₁ u₂)
     (hwP : bcS ℚ ℂ 3 w ∈ P) :
@@ -2395,7 +2380,7 @@ theorem lemma10_1_1_rational (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw :
     rintro rfl
     apply hJb
     linear_combination hs
-  obtain ⟨g, hg⟩ := igusa_prop3_normalForm_of_sq hIgusa s10_Qbar wb hwb s hs0 hs
+  obtain ⟨g, hg⟩ := igusa_prop3_normalForm_general s10_Qbar wb hwb s hs0 hs
   set a := m s10_Qbar 3 ((g⁻¹ : Spin s10_Qbar 3) : C s10_Qbar 3) 1 with ha
   set b := m s10_Qbar 3 ((g⁻¹ : Spin s10_Qbar 3) : C s10_Qbar 3) (pt s10_Qbar 3) with hb
   set gc := bcSpin s10_Qbar ℂ 3 g with hgc
@@ -2416,7 +2401,7 @@ theorem lemma10_1_1_rational (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw :
     congr 1
     rw [map_add, map_one, map_smul, hpt, algebraMap_smul]
   -- uniqueness of the secant (Lemma 10.1.1)
-  obtain ⟨P₀, -, huniq⟩ := lemma10_1_1 hIgusa (bcS ℚ ℂ 3 w) (s10_bcS_mem_Splus hw) (s10_J_bcS_ne_zero hJ)
+  obtain ⟨P₀, -, huniq⟩ := lemma10_1_1 (bcS ℚ ℂ 3 w) (s10_bcS_mem_Splus hw) (s10_J_bcS_ne_zero hJ)
   have hPP : P = (Submodule.span ℂ {1, pt ℂ 3}).map (m ℂ 3 ((gc⁻¹ : Spin ℂ 3) : C ℂ 3)) :=
     (huniq P ⟨hwP, u₁, u₂, hP⟩).trans (huniq _ ⟨hwP', _, _, hP'⟩).symm
   have hPab : P = Submodule.span ℂ {bcS s10_Qbar ℂ 3 a, bcS s10_Qbar ℂ 3 b} := by
@@ -2442,12 +2427,26 @@ Correction of a slip: the paper says `d ∈ F`. For `d = 0` the statement fails:
 spinor `1` both lie in `J⁻¹(0)`, and `m_g(0) = 0 ≠ 1` for every `g`. The only reading under which it
 holds, `d ∈ F^×`, is the one stated here (REPORT.md).
 
-Conditional on [Igusa, Prop. 3] over subfields of `ℂ` (`IgusaProp3OrbitSubfield`), which the remark
-quotes and this project assumes (see `WeilClasses/External/Igusa/README.md`). -/
-theorem remark10_1_2_orbit (hIgusa : IgusaProp3OrbitSubfield) (F : Subfield ℂ) (d : F) (hd : d ≠ 0)
+When `-d` is a square in `F`, both points are in the orbit of the normal form `1 + 2s [pt_X]`,
+`s² = -d` ([Igusa, Prop. 3], last paragraph of the proof, `igusa_prop3_normalForm_general`).
+Otherwise the proof uses [Igusa, Prop. 3] over subfields of `ℂ` (`IgusaProp3OrbitSubfield`), which
+the remark quotes and this project assumes in that case (see
+`WeilClasses/External/Igusa/README.md`). -/
+theorem remark10_1_2_orbit (hOrbit : IgusaProp3OrbitSubfield) (F : Subfield ℂ) (d : F) (hd : d ≠ 0)
     (x y : S F 3) (hx : x ∈ Splus F 3) (hy : y ∈ Splus F 3) (hxd : J F x = d) (hyd : J F y = d) :
-    ∃ g : Spin F 3, m F 3 (g : C F 3) x = y :=
-  igusa_prop3_orbit_subfield hIgusa F d hd x y hx hy hxd hyd
+    ∃ g : Spin F 3, m F 3 (g : C F 3) x = y := by
+  by_cases hsq : IsSquare (-d)
+  · -- `-d = s²`: both points are in the orbit of `1 + 2s [pt_X]`
+    obtain ⟨s, hs⟩ := hsq
+    have hs0 : s ≠ 0 := by
+      rintro rfl
+      rw [mul_zero, neg_eq_zero] at hs
+      exact hd hs
+    obtain ⟨gx, hgx⟩ := igusa_prop3_normalForm_general F x hx s hs0 (by rw [hxd, hs, sq])
+    obtain ⟨gy, hgy⟩ := igusa_prop3_normalForm_general F y hy s hs0 (by rw [hyd, hs, sq])
+    refine ⟨gy⁻¹ * gx, ?_⟩
+    rw [sc_m_mul, hgx, ← hgy, fnd_m_inv_m]
+  · exact igusa_prop3_orbit_subfield hOrbit F d hd hsq x y hx hy hxd hyd
 
 /-- **Remark 10.1.2(1)** (no label), second sentence: if `w = 1 + e₁₄^* + e₂₅^* + d e₃₆^*`,
 `d ∈ F`, then `J(w) = d` (0-based indices: `e₁₄^* = eStar F 0 3`, etc.). The paper has `F ⊆ ℂ`; the
@@ -2551,9 +2550,9 @@ the reduced subscheme of two points): every field automorphism `τ` of `ℂ`, ac
 `S_ℂ`, permutes the two lines `ℂ u₁`, `ℂ u₂`. As in the paper, the proof cites the last sentence of
 Lemma 10.1.1 (`lemma10_1_1_rational`): `τ` fixes the plane `P_w`, which is defined over `ℚ`, so it
 permutes the two pure spinor lines of `P_w`.
-Conditional on [Igusa, Prop. 3] (the normal form, `IgusaProp3NormalForm`), which the proof uses and
-this project assumes (see `WeilClasses/External/Igusa/README.md`). -/
-theorem remark10_1_2_rational (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
+The proof uses [Igusa, Prop. 3] (the normal form), proved in
+`WeilClasses.External.Igusa.NormalForm` (`igusa_prop3_normalForm_general`). -/
+theorem remark10_1_2_rational (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
     (hJ : J ℚ w ≠ 0)
     (P : Submodule ℂ (S ℂ 3)) (u₁ u₂ : S ℂ 3) (hP : IsTransversalSecant ℂ 3 P u₁ u₂)
     (hwP : bcS ℚ ℂ 3 w ∈ P) (τ : ℂ ≃+* ℂ) :
@@ -2561,7 +2560,7 @@ theorem remark10_1_2_rational (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw 
         Set (Submodule ℂ (S ℂ 3))) =
       {Submodule.span ℂ {u₁}, Submodule.span ℂ {u₂}} := by
   -- "The subspace `P_w` is defined over `ℚ`" (Lemma 10.1.1), so `τ(P_w) = P_w`
-  obtain ⟨P₀, hP₀⟩ := lemma10_1_1_rational hIgusa w hw hJ P u₁ u₂ hP hwP
+  obtain ⟨P₀, hP₀⟩ := lemma10_1_1_rational w hw hJ P u₁ u₂ hP hwP
   have hPP : P.map (s10_conjSL τ) = P := by rw [hP₀, s10_map_conjSL_bcSubS]
   -- so `τ` maps each pure spinor line of `P_w` to a pure spinor line of `P_w`
   have hτP := s10_isTransversalSecant_conj τ hP

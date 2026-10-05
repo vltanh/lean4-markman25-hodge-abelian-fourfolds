@@ -63,51 +63,53 @@ by an element of `Spin(V)_{ℓ₁,ℓ₂}` with prescribed character (`sc_exists
   `sc_J_xp_ij`, `sc_J_wp_ij`, `sc_J_xl_ij`, `sc_J_hd`, each closed by `ring`/`field_simp`).
 * `igusa_lemma2`: `ρ` maps the stabilizer of `1 + c [pt_X]` (`c ≠ 0`, over `ℂ`) onto the image of
   `e : SL(W₁) → SO(V_ℂ)`. **Proved** from `igusa_lemma2_stab_odd` and `igusa_lemma1_range`.
-* `igusa_prop3_orbit_complex`: `J⁻¹(c) ⊆ S⁺_ℂ`, `c ≠ 0`, is one orbit. **Proved from**
-  `igusa_prop3_normalForm_of_sq`, hence conditional on `IgusaProp3NormalForm`.
-* `igusa_prop3_normalForm`: the case `F = K = ℚ(√-d)` used in Lemma 10.2.1. **Proved from**
-  `igusa_prop3_normalForm_of_sq`, hence conditional on `IgusaProp3NormalForm`.
-* `igusa_prop3_normalForm_of_sq` (if `s² = -J(w) ≠ 0` then `w ~ 1 + 2s [pt_X]` over `F ⊆ ℂ`):
-  **assumed**, the named hypothesis `IgusaProp3NormalForm`.
-* `igusa_prop3_orbit_subfield` (`J⁻¹(d) ⊆ S⁺_F` one orbit for `F ⊆ ℂ`, `d ≠ 0`): **assumed**, the
-  named hypothesis `IgusaProp3OrbitSubfield`.
+* `igusa_prop3_orbit_subfield` (`J⁻¹(d) ⊆ S⁺_F` one orbit for `F ⊆ ℂ`, `d ≠ 0`, `-d` not a square
+  in `F`): **assumed**, the named hypothesis `IgusaProp3OrbitSubfield`. When `-d` is a square, the
+  orbit statement follows from the normal form (`WeilClasses.remark10_1_2_orbit`).
 
-### The two named hypotheses
+## `NormalForm.lean`: [I, Prop. 3], last paragraph of the proof (prover L1b, helper prefix `ig_`)
 
-The project owner chose (2026-10-04) to assume these two parts of [I, Prop. 3] rather than build the
-classification they need. They are `Prop`-valued definitions, not axioms or instances: every result
-that uses one takes it as an explicit argument, so a reader of the statement sees it.
+* `igusa_prop3_normalForm_general`: over every field `F` of characteristic `0`, if `w ∈ S⁺_F`,
+  `s ≠ 0` and `s² = -J(w)`, some `g ∈ Spin(V_F)` maps `w` to `1 + 2s [pt_X]`. **Proved.**
+* `igusa_prop3_orbit_complex`: `J⁻¹(c) ⊆ S⁺_ℂ`, `c ≠ 0`, is one orbit (proof of Lemma 10.1.1,
+  l. 9702). **Proved** from the normal form.
+* `igusa_prop3_normalForm`: the case `F = K = ℚ(√-d)` used in Lemma 10.2.1 (l. 9792). **Proved**.
 
-* `IgusaProp3NormalForm`: over every field `F` (in `Type`) of characteristic zero embedded in `ℂ`
-  (`[Algebra F ℂ]`), if `w ∈ S⁺_F`, `s ≠ 0` and `s² = -J(w)`, some `g ∈ Spin(V_F)` maps `w` to
-  `1 + 2s [pt_X]`. The paper attributes the normal form to the last paragraph of the proof of
-  [I, Prop. 3] (l. 9792); Igusa's paper is not in the repository, so the attribution was not
-  checked against it. Scope: the paper quotes Prop. 3 over `ℂ` (orbits, l. 9702), over
-  `K = ℚ(√-d)` (normal form, l. 9792) and over subfields of `ℂ` (orbits, l. 9752), hence the
-  restriction to fields embedded in `ℂ`; the proofs use it over `ℂ`, `K` and the algebraic closure
-  `ℚ̄` of `ℚ` in `ℂ` (`lemma10_1_1_rational`). On a subfield `F ⊆ ℂ` it follows from
-  `IgusaProp3OrbitSubfield`, since `J(1 + 2s [pt_X]) = -s² = J(w) ≠ 0` (checked in Lean:
-  `s10_normalForm_of_orbitSubfield`, `WeilClasses/Igusa/Secant.lean`). Its proof needs the
-  classification of the generic `Spin(12)`-orbit on `S⁺`: every `w` with `J(w) ≠ 0` lies on a
-  secant through two pure spinors with transversal maximal isotropic subspaces, defined over `F`
-  when `-J(w)` is a square. Estimated at 1500–3000 lines on top of the generation result above.
-* `IgusaProp3OrbitSubfield`: for a subfield `F ⊆ ℂ` and `d ∈ F`, `d ≠ 0`, the level set `J⁻¹(d) ⊆ S⁺_F`
-  is one `Spin(V_F)`-orbit. When `-d` is a square in `F` this follows from `IgusaProp3NormalForm`.
-  Otherwise the stabilizer is the special unitary group of a hermitian form over `F(√-d)`, and the
-  proof needs Galois cohomology (the injectivity of `H¹(F, SU(h)) → H¹(F, Spin(V))`, from Jacobson's
-  theorem on hermitian forms), which Mathlib does not have.
+Proof (elimination in coordinates, found first with an exact model of these conventions): Weyl
+elements make the coefficient `α` of `1` nonzero and root elements `1 + t e_i e_j` kill the degree-2
+part (`sc_exists_weyl_ne`, `sc_bigcell_aux`); then `J(w) = α N(Y) - ¼ α²β²` for the degree-4 part `Y`
+and its Pfaffian `N`. With `μ = -2α/(αβ + 2σ)`, `σ = ±s`, a root of `N μ² + αβ μ + α = 0` (whose
+discriminant is `-4J(w) = 4s²`: the only use of the square root), the fifteen contraction root
+elements `1 + t f_i f_j` (`exp(μ Ŷ ⌋)`) followed by fifteen root elements map `w` to `a + b [pt_X]`,
+by the adjoint identity `(Y^#)^# = -N Y`. Invariance of `J` gives `ab = ±2s`; Igusa's scaling
+element `s(r)` gives `1 + ab [pt_X]`, and a Weyl element `v₁ ⋯ v₆` with a second scaling fixes the
+sign. In Igusa's terms, `g⁻¹ · 1` and `g⁻¹ · [pt_X]` are two pure spinors on a secant through `w`,
+with transversal maximal isotropic subspaces, defined over `F`. Igusa's paper is not in the
+repository, so the attribution of the normal form to the last paragraph of his proof (as the paper
+quotes it) was not checked against it.
 
-Results of the paper that take a hypothesis (all in §10; the paper's main theorems do not use §10):
+### The named hypothesis
+
+The project owner chose (2026-10-04) to assume the parts of [I, Prop. 3] whose proofs were not built.
+The normal form is now proved (`NormalForm.lean`); one part remains assumed. It is a `Prop`-valued
+definition, not an axiom or an instance: the one result that uses it takes it as an explicit argument,
+so a reader of the statement sees it.
+
+* `IgusaProp3OrbitSubfield`: for a subfield `F ⊆ ℂ` and `d ∈ F`, `d ≠ 0`, with `-d` not a square in
+  `F`, the level set `J⁻¹(d) ⊆ S⁺_F` is one `Spin(V_F)`-orbit. (When `-d` is a square, the statement
+  follows from the normal form.) The stabilizer of a point is then the special unitary group of a
+  hermitian form over `F(√-d)`, and the proof needs Galois cohomology (the injectivity of
+  `H¹(F, SU(h)) → H¹(F, Spin(V))`, from Jacobson's theorem on hermitian forms), which Mathlib does
+  not have.
+
+Results of the paper that take the hypothesis (in §10; the paper's main theorems do not use §10):
 
 | Result | Lean | Hypothesis |
 | --- | --- | --- |
-| Lemma 10.1.1 (all three sentences) | `lemma10_1_1`, `lemma10_1_1_stabilizer`, `lemma10_1_1_rational` | `IgusaProp3NormalForm` |
-| Remark 10.1.2(1), first sentence | `remark10_1_2_orbit` | `IgusaProp3OrbitSubfield` |
-| Remark 10.1.2(2), rationality | `remark10_1_2_rational` | `IgusaProp3NormalForm` |
-| Lemma 10.2.1 (both sentences, and the secant of its proof) | `lemma10_2_1`, `lemma10_2_1_centralizer`, `lemma10_2_1_secant` | `IgusaProp3NormalForm` |
+| Remark 10.1.2(1), first sentence | `remark10_1_2_orbit` | `IgusaProp3OrbitSubfield`, used only when `-d` is not a square |
 
-The other results of §10 (Remark 10.1.2(1) second sentence and (2) first sentence, Examples 10.2.2,
-10.2.3, the image of `η`) are unconditional.
+The other results of §10 (Lemma 10.1.1, Remark 10.1.2(1) second sentence and (2), Lemma 10.2.1,
+Examples 10.2.2, 10.2.3, the image of `η`) are unconditional.
 
 Not stated, because no proof uses them: that the `Spin(V)`-invariant polynomials on `S⁺_ℚ` are the
 polynomials in `J` (§10.1, l. 9642, context only), and the tangential-variety description of `V(J)`

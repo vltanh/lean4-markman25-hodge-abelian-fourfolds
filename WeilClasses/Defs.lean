@@ -325,19 +325,6 @@ class VoisinLocus (Z : CycleClasses) : Prop where
     ∀ J, LinearMap.toMatrix' J ∈ connectedComponentIn (WeilDomainMat η h) (LinearMap.toMatrix' J₀) →
       α ∈ Z.alg (2 * m) J
 
-/-- **[van Geemen, Th. 5.2(3)]**: polarized abelian `2m`-folds of Weil type with the same `K` and
-discriminant lie in one connected family up to isogeny: a `K`-linear isomorphism `ψ` of their `H¹`
-maps the polarization of the first to a positive multiple of that of the second and carries the
-first complex structure into the connected component of the Weil-type period domain of the second
-that contains the second complex structure. -/
-class VanGeemenModuli : Prop where
-  moduli : ∀ {m : ℕ} {d : ℚ}, 0 < d → ∀ (A A' : AbVar (2 * m)) (X : PolarizedWeilType A d)
-    (X' : PolarizedWeilType A' d) (c : ℚ), X.DiscIs c → X'.DiscIs c →
-    ∃ ψ : H1 ℚ (2 * m) ≃ₗ[ℚ] H1 ℚ (2 * m), (∀ k, ψ.toLinearMap ∘ₗ X.η k = X'.η k ∘ₗ ψ.toLinearMap) ∧
-      (∃ c' : ℚ, 0 < c' ∧ ExteriorAlgebra.map ψ.toLinearMap X.h = c' • X'.h) ∧
-      LinearMap.toMatrix' (bcMap ℚ ℝ ψ.toLinearMap ∘ₗ A.J ∘ₗ bcMap ℚ ℝ ψ.symm.toLinearMap) ∈
-        connectedComponentIn (WeilDomainMat X'.η X'.h) (LinearMap.toMatrix' A'.J)
-
 /-- The span of the products of two rational classes of type `(1,1)`. -/
 noncomputable def AbVar.divisorProducts {g : ℕ} (A : AbVar g) : Submodule ℚ (S ℚ g) :=
   Submodule.span ℚ {x | ∃ α ∈ A.hodge 1, ∃ β ∈ A.hodge 1, x = α * β}
