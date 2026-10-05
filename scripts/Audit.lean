@@ -7,6 +7,7 @@ public meta import Lean.DocString
 --   find PaperName -name '*.lean' | sort | sed 's/\.lean$//; s#/#.#g; s/^/import all /'
 import all WeilClasses.AbelianVariety.Defs
 import all WeilClasses.AbelianVariety.Lemmas
+import all WeilClasses.AbelianVariety.Product
 import all WeilClasses.Basic.Field
 import all WeilClasses.Chevalley.Defs
 import all WeilClasses.Chevalley.Sec2_3
@@ -21,15 +22,42 @@ import all WeilClasses.External.Chevalley.Sec2_4
 import all WeilClasses.External.Chevalley.Sec3
 import all WeilClasses.External.GolyshevLuntsOrlov.Sec2_1
 import all WeilClasses.External.GolyshevLuntsOrlov.Sec6_1
+import all WeilClasses.External.HasseMinkowski
+import all WeilClasses.External.HasseMinkowski.Basic
+import all WeilClasses.External.HasseMinkowski.HasseInvariant
+import all WeilClasses.External.HasseMinkowski.HighRank
+import all WeilClasses.External.HasseMinkowski.HilbertSymbol.Defs
+import all WeilClasses.External.HasseMinkowski.HilbertSymbol.Existence
+import all WeilClasses.External.HasseMinkowski.HilbertSymbol.Local
+import all WeilClasses.External.HasseMinkowski.HilbertSymbol.Norm
+import all WeilClasses.External.HasseMinkowski.HilbertSymbol.Padic
+import all WeilClasses.External.HasseMinkowski.HilbertSymbol.Real
+import all WeilClasses.External.HasseMinkowski.HilbertSymbol.Reciprocity
+import all WeilClasses.External.HasseMinkowski.HilbertSymbol.Two
+import all WeilClasses.External.HasseMinkowski.Legendre
+import all WeilClasses.External.HasseMinkowski.Locally
+import all WeilClasses.External.HasseMinkowski.Main
+import all WeilClasses.External.HasseMinkowski.Padics.Squares
+import all WeilClasses.External.HasseMinkowski.Prod
+import all WeilClasses.External.HasseMinkowski.RankCriteria
+import all WeilClasses.External.HasseMinkowski.RankFour
+import all WeilClasses.External.HasseMinkowski.RankThree
+import all WeilClasses.External.HasseMinkowski.RankTwo
+import all WeilClasses.External.HasseMinkowski.RatApproximation
+import all WeilClasses.External.HasseMinkowski.RatSquares
 import all WeilClasses.External.Huybrechts.Sec6_1
 import all WeilClasses.External.Huybrechts.Sec6_3
+import all WeilClasses.External.Igusa.NormalForm
 import all WeilClasses.External.Igusa.Sec10
 import all WeilClasses.External.Igusa.Sec2_2
 import all WeilClasses.External.Igusa.Sec2_4
 import all WeilClasses.External.Markman.Sec8_2
 import all WeilClasses.External.Orlov.Sec6_1
 import all WeilClasses.External.Trautman.Sec2_3
+import all WeilClasses.External.VanGeemen.Landherr
+import all WeilClasses.External.VanGeemen.Moduli
 import all WeilClasses.External.VanGeemen.Sec3
+import all WeilClasses.External.Voisin.Lemma2_9
 import all WeilClasses.Hermitian.ComplexStructures
 import all WeilClasses.Hermitian.Defs
 import all WeilClasses.Hodge.Ample
@@ -116,9 +144,8 @@ meta def externalResults : List (String × Name) :=
   [("hypothesis", ``WeilClasses.PullbackClosed),
    ("hypothesis", ``WeilClasses.SubalgebraClosed),
    ("hypothesis", ``WeilClasses.LefschetzOneOne),
+   ("hypothesis", ``WeilClasses.PushforwardClosed),
    ("hypothesis", ``WeilClasses.VoisinLocus),
-   ("hypothesis", ``WeilClasses.VanGeemenModuli),
-   ("hypothesis", ``WeilClasses.SchoenDegeneration),
    ("hypothesis", ``WeilClasses.MoonenZarhinSimple),
    ("hypothesis", ``WeilClasses.RamonMariProducts),
    ("hypothesis", ``WeilClasses.MoonenZarhinLowDim),
@@ -147,17 +174,18 @@ meta def externalResults : List (String × Name) :=
    ("GolyshevLuntsOrlov", ``WeilClasses.glo_prop3_2_1_e_field),
    ("GolyshevLuntsOrlov", ``WeilClasses.glo_prop3_2_1_e_integral),
    ("GolyshevLuntsOrlov", ``WeilClasses.glo_prop4_3_7),
+   ("HasseMinkowski", ``HasseMinkowski.hasseMinkowski),
+   ("HasseMinkowski", ``HasseMinkowski.meyer),
    ("Huybrechts", ``WeilClasses.huybrechts_ex9_41),
    ("Huybrechts", ``WeilClasses.huybrechts_lemma9_23_X),
    ("Huybrechts", ``WeilClasses.huybrechts_lemma9_23_Xhat),
    ("Huybrechts", ``WeilClasses.huybrechts_cor9_24),
-   ("Igusa", ``WeilClasses.igusa_prop3_invariant),
-   ("Igusa (hypothesis)", ``WeilClasses.IgusaProp3NormalForm),
-   ("Igusa", ``WeilClasses.igusa_prop3_normalForm_of_sq),
+   ("Igusa", ``WeilClasses.igusa_prop3_normalForm_general),
    ("Igusa", ``WeilClasses.igusa_prop3_orbit_complex),
+   ("Igusa", ``WeilClasses.igusa_prop3_normalForm),
+   ("Igusa", ``WeilClasses.igusa_prop3_invariant),
    ("Igusa (hypothesis)", ``WeilClasses.IgusaProp3OrbitSubfield),
    ("Igusa", ``WeilClasses.igusa_prop3_orbit_subfield),
-   ("Igusa", ``WeilClasses.igusa_prop3_normalForm),
    ("Igusa", ``WeilClasses.igusa_lemma2),
    ("Igusa", ``WeilClasses.igusa_lemma1_ker),
    ("Igusa", ``WeilClasses.igusa_lemma1_range),
@@ -170,7 +198,11 @@ meta def externalResults : List (String × Name) :=
    ("Markman", ``WeilClasses.markmanM2_prop1_7),
    ("Orlov", ``WeilClasses.orlov_theorem2_10),
    ("Trautman", ``WeilClasses.trautman_theorem1_i),
-   ("VanGeemen", ``WeilClasses.vanGeemen_def4_9)]
+   ("VanGeemen (hypothesis)", ``WeilClasses.vg_HermSpace.PosBound),
+   ("VanGeemen (hypothesis)", ``WeilClasses.vg_HermSpace.NegBound),
+   ("VanGeemen", ``WeilClasses.vanGeemen_moduli_XXhat),
+   ("VanGeemen", ``WeilClasses.vanGeemen_def4_9),
+   ("Voisin", ``WeilClasses.schoenDegeneration_of_pushforward)]
 
 /-- The numbered results of the paper, in the order of the paper. -/
 meta def paperResults : List (String × Name) :=

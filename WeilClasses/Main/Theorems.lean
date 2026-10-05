@@ -3,7 +3,8 @@ module
 public import WeilClasses.Main.Compare
 public import WeilClasses.Main.Intro
 public import WeilClasses.AbelianVariety.Lemmas
-public import WeilClasses.Main.Moduli
+public import WeilClasses.External.VanGeemen.Moduli
+public import WeilClasses.External.Voisin.Lemma2_9
 
 /-!
 # The main results in the model (Theorems 1.4.1 (3), (4), 1.5.1, Corollary 1.6.1)
@@ -415,7 +416,7 @@ Gap in the paper (filled): the proof ends with "the locus contains the whole irr
 of moduli of deformations of `(X × X̂, η, h)`" (TeX line 6847). That every polarized abelian sixfold
 of Weil type for `K` with discriminant `-1` lies, up to isogeny, in this component is
 [van Geemen, Th. 5.2(3)], which the paper states in §1.1 (TeX line 283) but does not invoke in the
-proof. Step (4) below invokes it, in the case proved in `WeilClasses.Main.Moduli`
+proof. Step (4) below invokes it, in the case proved in `WeilClasses.External.VanGeemen.Moduli`
 (`vanGeemen_moduli_XXhat`). -/
 theorem main_theorem1_5_1_of_three_le (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
     [LefschetzOneOne Z] [VoisinLocus Z] [SecantSheafDeformation Z]
@@ -551,11 +552,17 @@ theorem main_isHodgeSub_sup {g : ℕ} (A : AbVar g) {U U' : Submodule ℚ (H1 �
   exact Submodule.add_mem_sup (hU y hy) (hU' z hz)
 
 /-- **Corollary 1.6.1** (no label). The Hodge conjecture holds for abelian fourfolds: every Hodge
-class is algebraic. -/
+class is algebraic.
+
+The proof is the paper's (§1.6). Its step through [Schoen, Prop. 10] uses that statement in the form
+`SchoenDegeneration`, which is proved from push-forward along a projection (`PushforwardClosed`,
+with `PullbackClosed`, `SubalgebraClosed`, `LefschetzOneOne`) by Voisin's argument
+(`schoenDegeneration_of_pushforward`, Séminaire Bourbaki 1248, Lemme 2.9). -/
 theorem corollary1_6_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
     [LefschetzOneOne Z] [VoisinLocus Z] [SecantSheafDeformation Z]
-    [SchoenDegeneration Z] [MoonenZarhinSimple] [RamonMariProducts Z] [MoonenZarhinLowDim]
+    [PushforwardClosed Z] [MoonenZarhinSimple] [RamonMariProducts Z] [MoonenZarhinLowDim]
     (A : AbVar (2 * 2)) (p : ℕ) : A.hodge p ≤ Z.alg (2 * 2) A.J := by
+  have := schoenDegeneration_of_pushforward Z
   -- An ample class `h`, algebraic by the Lefschetz (1,1) theorem.
   obtain ⟨h, hh⟩ := A.polarizable
   have hh1 : h ∈ Z.alg (2 * 2) A.J := LefschetzOneOne.le A hh.1

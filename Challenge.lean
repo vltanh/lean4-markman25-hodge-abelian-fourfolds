@@ -64,7 +64,7 @@ rank `8d` of `E`, the fact that `X × X̂` is a point of its own period domain, 
 
 ## The results are conditional
 
-Theorems 1.4.1 (3), (4) are unconditional. Theorem 1.5.1 and Corollary 1.6.1 assume, as classes
+Theorems 1.4.1(3), (4) are unconditional. Theorem 1.5.1 and Corollary 1.6.1 assume, as classes
 in their signatures, the results that their proofs take from algebraic geometry:
 
 * `PullbackClosed Z`: pullback of cycles along homomorphisms of abelian varieties;
@@ -77,12 +77,14 @@ in their signatures, the results that their proofs take from algebraic geometry:
   sheaves, [Buchweitz–Flenner, Th. 5.1]), in cohomological form: near `X × X̂` in its period
   domain, `κ₃(E)` is algebraic wherever every `κ_k(E)` is of Hodge type (that they are of Hodge
   type there is the paper's Corollary 1.3.2, which is proved, not assumed);
-* for Corollary 1.6.1 also `SchoenDegeneration Z` [Schoen, Prop. 10], `MoonenZarhinSimple`
-  [Moonen–Zarhin 1995, Th. 2.11], `RamonMariProducts Z` [Ramón-Marí, Th. 4.11] and
-  `MoonenZarhinLowDim` [Moonen–Zarhin 1999, Prop. 3.8, Th. 0.1(i)].
+* for Corollary 1.6.1 also `PushforwardClosed Z` (push-forward of cycles along a projection
+  `A₁ × A₂ → A₂`; with the classes above it gives [Schoen, Prop. 10] by Voisin's argument,
+  Séminaire Bourbaki 1248, Lemme 2.9), `MoonenZarhinSimple` [Moonen–Zarhin 1995, Th. 2.11],
+  `RamonMariProducts Z` [Ramón-Marí, Th. 4.11] and `MoonenZarhinLowDim` [Moonen–Zarhin 1999,
+  Prop. 3.8, Th. 0.1(i)].
 
-For actual algebraic cycles each class is a theorem of the cited source (or of the paper's
-Sections 7–9); nothing here constructs a `CycleClasses` from cycles.
+For actual algebraic cycles each class is a standard property of cycles or a theorem of the cited
+source (or of the paper's Sections 7–9); nothing here constructs a `CycleClasses` from cycles.
 -/
 
 @[expose] public section
@@ -362,6 +364,47 @@ class SubalgebraClosed (Z : CycleClasses) : Prop where
 class LefschetzOneOne (Z : CycleClasses) : Prop where
   le : ∀ {g : ℕ} (A : AbVar g), A.hodge 1 ≤ Z.alg g A.J
 
+/-! ### Products of abelian varieties and push-forward along a projection -/
+
+section Product
+
+variable (F : Type*) [Field F] (g₁ g₂ : ℕ)
+
+/-- **The coordinates of `H¹(A₁ × A₂, F) = H¹(A₁, F) ⊕ H¹(A₂, F)`**: the first `2 g₁` coordinates of
+`F^{2(g₁ + g₂)}` are those of `A₁`, the last `2 g₂` those of `A₂`
+(`Fin (2 g₁) ⊕ Fin (2 g₂) ≃ Fin (2 (g₁ + g₂))`). -/
+noncomputable def prodEquiv : H1 F (g₁ + g₂) ≃ₗ[F] H1 F g₁ × H1 F g₂ :=
+  (LinearEquiv.funCongrLeft F F (finSumFinEquiv.trans (finCongr (Nat.mul_add 2 g₁ g₂).symm))).trans
+    (LinearEquiv.sumArrowLequivProdArrow _ _ F F)
+
+/-- The restriction `H¹(A₁ × A₂) → H¹(A₁)` to the factor `A₁ × 0`. -/
+noncomputable def prodFst : H1 F (g₁ + g₂) →ₗ[F] H1 F g₁ :=
+  LinearMap.fst F (H1 F g₁) (H1 F g₂) ∘ₗ (prodEquiv F g₁ g₂).toLinearMap
+
+/-- The restriction `H¹(A₁ × A₂) → H¹(A₂)` to the factor `0 × A₂`. -/
+noncomputable def prodSnd : H1 F (g₁ + g₂) →ₗ[F] H1 F g₂ :=
+  LinearMap.snd F (H1 F g₁) (H1 F g₂) ∘ₗ (prodEquiv F g₁ g₂).toLinearMap
+
+end Product
+
+/-- **The complex structure `J₁ × J₂`** of `H¹(A₁ × A₂, ℝ)`. -/
+noncomputable def prodJ {g₁ g₂ : ℕ} (J₁ : Module.End ℝ (H1 ℝ g₁)) (J₂ : Module.End ℝ (H1 ℝ g₂)) :
+    Module.End ℝ (H1 ℝ (g₁ + g₂)) :=
+  (prodEquiv ℝ g₁ g₂).symm.conj (J₁.prodMap J₂)
+
+/-- **Push-forward along the second projection** `pr₂ : A₁ × A₂ → A₂` (integration over the fibre
+`A₁`): contraction with the dual basis `f₁, …, f_{2g₁}` of `H¹(A₁)` pulled back to `H¹(A₁ × A₂)`
+(`f₁` first), then restriction to the factor `0 × A₂`. By the projection formula
+(`pushSnd_prodInl_mul_prodInr`), `pr₂,*(pr₁^* a ∪ pr₂^* b) = (∫_{A₁} a) b`. -/
+noncomputable def pushSnd (F : Type*) [Field F] (g₁ g₂ : ℕ) : S F (g₁ + g₂) →ₗ[F] S F g₂ :=
+  (ExteriorAlgebra.map (prodSnd F g₁ g₂)).toLinearMap ∘ₗ
+    (List.ofFn fun i : Fin (2 * g₁) => D F (g₁ + g₂) (f F g₁ i.rev ∘ₗ prodFst F g₁ g₂)).prod
+
+/-- **Push-forward of algebraic cycles** along the projection `A₁ × A₂ → A₂`. -/
+class PushforwardClosed (Z : CycleClasses) : Prop where
+  mem : ∀ {g₁ g₂ : ℕ} (A₁ : AbVar g₁) (A₂ : AbVar g₂) (α : S ℚ (g₁ + g₂)),
+    α ∈ Z.alg (g₁ + g₂) (prodJ A₁.J A₂.J) → pushSnd ℚ g₁ g₂ α ∈ Z.alg g₂ A₂.J
+
 /-- **The Weil-type period domain** of `(η, h)` on `H¹ = ℚ^{4m}`: the complex structures `J` of
 `H¹(A, ℝ)` for which `(J, η, h)` is a polarized abelian `2m`-fold of Weil type. -/
 def WeilDomain {m : ℕ} {d : ℚ} (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * m))) (h : S ℚ (2 * m)) :
@@ -402,14 +445,6 @@ noncomputable def AbVar.divisorProducts {g : ℕ} (A : AbVar g) : Submodule ℚ 
 `d` a positive integer). -/
 noncomputable def AbVar.allHW {m : ℕ} (A : AbVar (2 * m)) : Submodule ℚ (S ℚ (2 * m)) :=
   ⨆ (d : ℕ) (_ : 0 < d) (X : WeilType A d), X.HW
-
-/-- **[Schoen, Prop. 10]**: if the Hodge–Weil classes of all polarized abelian sixfolds of Weil type
-for `K` with discriminant `-1` are algebraic, so are those of all abelian fourfolds of Weil type for
-`K`. -/
-class SchoenDegeneration (Z : CycleClasses) : Prop where
-  imp : ∀ d : ℕ, 0 < d →
-    (∀ (A : AbVar (2 * 3)) (X : PolarizedWeilType A d), X.DiscIs (-1) → X.HW ≤ Z.alg (2 * 3) A.J) →
-    ∀ (A : AbVar (2 * 2)) (X : WeilType A d), X.HW ≤ Z.alg (2 * 2) A.J
 
 /-- **[Moonen–Zarhin 1995, Th. 2.11]**: for a simple abelian fourfold, `H^{2,2}(A, ℚ)` is spanned by
 products of divisor classes and Hodge–Weil classes. -/
@@ -725,7 +760,7 @@ theorem theorem1_5_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
 algebraic. -/
 theorem corollary1_6_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
     [LefschetzOneOne Z] [VoisinLocus Z] [SecantSheafDeformation Z]
-    [SchoenDegeneration Z] [MoonenZarhinSimple] [RamonMariProducts Z] [MoonenZarhinLowDim]
+    [PushforwardClosed Z] [MoonenZarhinSimple] [RamonMariProducts Z] [MoonenZarhinLowDim]
     (A : AbVar (2 * 2)) (p : ℕ) : A.hodge p ≤ Z.alg (2 * 2) A.J := by
   sorry
 

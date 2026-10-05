@@ -1,9 +1,9 @@
 # Roadmap: from a conditional to a complete formalization
 
-Theorem 1.5.1 and Corollary 1.6.1 are proved here from named hypotheses ([REPORT.md, Section 2](REPORT.md#assumed)), and three results of
-§10 from two parts of Igusa's Proposition 3. This roadmap says how to remove those hypotheses and formalize what is
-still missing ([REPORT.md, Section 9](REPORT.md#9-not-formalized)). The work is planned in layers. Each layer replaces some hypotheses by
-constructions and proofs from more basic ones, and ends in a state that can be released.
+Theorem 1.5.1 and Corollary 1.6.1 are proved here from named hypotheses ([REPORT.md, Section 2](REPORT.md#assumed)), and
+Remark 10.1.2(1), in one case, from part of Igusa's Proposition 3. This roadmap says how to remove those hypotheses
+and formalize what is still missing ([REPORT.md, Section 9](REPORT.md#9-not-formalized)). The work is planned in layers. Each layer replaces some
+hypotheses by constructions and proofs from more basic ones, and ends in a state that can be released.
 
 Sizes are rough, in lines of Lean, calibrated on this project (about 63,500 lines): **S** under 1,000; **M**
 1,000–5,000; **L** 5,000–20,000; **XL** more, or foundations that Lean does not have yet. "Pinned Mathlib" is the
@@ -13,29 +13,39 @@ Mathlib commit of this project (`ec6a61c`); "elsewhere" is the wider Lean ecosys
 
 | Missing piece | Source | Used by | What it needs | Available now | Size | Layer |
 |---|---|---|---|---|---|---|
-| [`VanGeemenModuli`](Challenge.lean#L405) | [van Geemen, Th. 5.2(3)] | Theorem 1.5.1 | Landherr's classification of Hermitian forms over `K = ℚ(√-d)` by rank, discriminant and signature, through Jacobson's trace-form theorem and Hasse–Minkowski over `ℚ`; connectedness of the Weil-type period domain of every form of signature `(m, m)` (proved here for the domains `Ω_P` of §4, Lemma 4.0.2, which include that of `X × X̂`, [`weilDomain_eq_image_OmegaP`](WeilClasses/Main/Compare.lean#L1945)) | Pinned Mathlib: quadratic forms and their isometries; no Hasse–Minkowski, no Hilbert symbols. Elsewhere: Hasse–Minkowski over `ℚ` in the isotropy form ([jayyswan/hasse-minkowski](https://github.com/jayyswan/hasse-minkowski), also in [Vilin97/lean-pool](https://github.com/Vilin97/lean-pool) on this project's toolchain); the classification of quadratic forms over `ℚ_p` and Witt cancellation in Tau Ceti. Nowhere: Hermitian forms over quadratic extensions, Jacobson's or Landherr's theorem. | M–L | 1 |
-| [`IgusaProp3NormalForm`](WeilClasses/External/Igusa/Sec10.lean#L2034) | [Igusa, Prop. 3] | Lemma 10.1.1, Remark 10.1.2(2), Lemma 10.2.1 | The generic `Spin(12)`-orbit on `S⁺`: every `w` with `J(w) ≠ 0` lies on a secant through two pure spinors with transversal maximal isotropic subspaces, defined over `F` when `-J(w)` is a square | This project: generators of `Spin(V_F)` and the invariance of `J` ([`WeilClasses/External/Igusa/README.md`](WeilClasses/External/Igusa/README.md)); Clifford algebras in Mathlib, spin groups in Tau Ceti. Elsewhere: nothing on Igusa's classification or on pure spinors. | M | 1 |
-| [`IgusaProp3OrbitSubfield`](WeilClasses/External/Igusa/Sec10.lean#L2072) | [Igusa, Prop. 3] | Remark 10.1.2(1) | When `-d` is not a square in `F`: the stabilizer is `SU(h)` for a Hermitian form `h` over `F(√-d)`, and `H¹(F, SU(h)) → H¹(F, Spin(V))` is injective (Jacobson) | Pinned Mathlib: group cohomology and Hilbert 90; no Galois cohomology of algebraic groups. Tau Ceti: Galois cohomology, Hilbert 90 for infinite Galois extensions, Galois descent (the input to `H¹(G, GLₙ) = 1`). Nowhere: `H¹(k, SU(h))`. | M–L | 1 |
-| [`SchoenDegeneration`](Challenge.lean#L425) | [Schoen, Prop. 10] | Corollary 1.6.1 | Schoen's degeneration argument; or, replacing it, Voisin's Lemma 2.9 (Bourbaki exposé 1248): Künneth and Weil surfaces of every discriminant in the model, Lefschetz (1,1), and push-forward of algebraic classes along projections, a new but standard hypothesis | Voisin's route needs nothing beyond the model except push-forward | M (Voisin's route) | 1 |
-| [`MoonenZarhinSimple`](Challenge.lean#L432) | [Moonen–Zarhin 1995, Th. 2.11] | Corollary 1.6.1 | Albert's classification of the endomorphism algebras of simple abelian fourfolds; their Hodge (Mumford–Tate) groups and the invariants of these groups, case by case | Pinned Mathlib: central simple algebras, the start of Brauer groups; no algebraic groups, Mumford–Tate groups or Albert classification. Tau Ceti: Hodge structures, polarizations, semisimplicity of polarizable rational Hodge structures; reductive classical groups over fields. Nowhere: Mumford–Tate groups. | XL | 1 |
-| [`MoonenZarhinLowDim`](Challenge.lean#L454) | [Moonen–Zarhin 1999, Prop. 3.8, Th. 0.1(i)] | Corollary 1.6.1 | The same for `A` isogenous to `B × E`, `B` a simple threefold | As above | L–XL | 1 |
-| Abelian varieties and their algebraic classes | — | Every statement about [`CycleClasses`](Challenge.lean#L347) | Complex abelian varieties (complex tori with a Riemann form, projective by the Lefschetz embedding theorem); Riemann's theorem identifying them up to isogeny with polarizable rational Hodge structures of weight one ([`AbVar`](Challenge.lean#L257)); `H*(A, ℚ) = ⋀•H¹(A, ℚ)` with its Hodge decomposition; algebraic classes and the instance of [`CycleClasses`](Challenge.lean#L347) they form | Pinned Mathlib: algebraic cycles on schemes (the definition), commutativity of proper group schemes over a field, singular homology (basics), sheaf cohomology on sites, smooth vector bundles; no complex tori, cycle class map, Chern classes or Hodge decomposition. Elsewhere: [Paul-Lez/HodgeConjecture](https://github.com/Paul-Lez/HodgeConjecture) defines smooth projective complex varieties, the rational cohomology of `X(ℂ)`, cycle classes and Hodge classes, and states the Hodge conjecture for abelian varieties (draft PR #231: Chow groups). Tau Ceti: abelian varieties as group schemes, weight-one Hodge structures as complex structures, Riemann forms as polarizations, singular cohomology with cup product. lean-pool: complex tori as compact complex Lie groups. Nowhere: `H*(A, ℚ) = ⋀•H¹(A, ℚ)` as rings, Appell–Humbert, the Lefschetz embedding theorem. | XL | 2 |
-| [`PullbackClosed`](Challenge.lean#L353) | standard | Theorem 1.5.1, Corollary 1.6.1 | Pullback of cycles along homomorphisms, compatible with cycle classes; every rational Hodge map between the `H¹` comes from a homomorphism up to isogeny (Riemann) | — | L | 3 |
-| [`SubalgebraClosed`](Challenge.lean#L359) | standard | Theorem 1.5.1, Corollary 1.6.1 | Intersection products compatible with the cup product; formal if algebraic classes are defined by Chern characters (Layer 2) | — | L–XL | 3 |
-| [`LefschetzOneOne`](Challenge.lean#L365) | the Lefschetz (1,1) theorem | Theorem 1.5.1, Corollary 1.6.1 | For abelian varieties: the Appell–Humbert theorem (line bundles on complex tori), algebraicity of line bundles (theta functions, the Lefschetz embedding theorem, GAGA for line bundles), `c₁` as the class of a divisor | Pinned Mathlib: Jacobi's theta function in one variable. Elsewhere: Paul-Lez/HodgeConjecture PR #228 (open) proves rational Lefschetz (1,1) for smooth projective complex varieties, through GAGA from [chrisflav/oka](https://github.com/chrisflav/oka); here it still needs Layer 2. | L | 3 |
-| [`VoisinLocus`](Challenge.lean#L390) | [Voisin, §4.2] | Theorem 1.5.1 | Relative Hilbert schemes (or Chow varieties) of the universal family over the period domain: countably many components, each proper over the base; Baire's theorem and the identity theorem then give the form assumed | Pinned Mathlib: Baire spaces, the identity theorem for analytic functions; no Hilbert schemes. Nowhere: Hilbert or Quot schemes. | XL | 3 |
-| [`RamonMariProducts`](Challenge.lean#L447) | [Ramón-Marí, Th. 4.11] | Corollary 1.6.1 | The Hodge conjecture for products of two abelian surfaces: their Hodge classes, and cycles representing them | — | XL | 3 |
-| [`SecantSheafDeformation`](Challenge.lean#L660) | the paper, §§7–9; [Buchweitz–Flenner, Th. 5.1] | Theorem 1.5.1 | Coherent sheaves on abelian varieties; Orlov's equivalence and Fourier–Mukai transforms; the secant sheaves of §8 (ideal sheaves of Abel–Jacobi curves); the reflexive sheaf `E` and its semiregularity (§9); twisted sheaves and the descent to `Y`; the semiregularity theorem for families of abelian varieties (§7.4) | Pinned Mathlib: abstract derived categories, sheaves of modules and ideal sheaves on schemes; no coherent cohomology of projective schemes, Fourier–Mukai transforms or deformation theory. Elsewhere: [chris-dare-dev/derived-alg-geo-lean](https://github.com/chris-dare-dev/derived-alg-geo-lean) has `Dᵇ(Coh X)` and Fourier–Mukai kernels, with base change and the projection formula as hypotheses; chrisflav/oka has coherent analytic sheaves and GAGA. Nowhere: Atiyah classes, the semiregularity map, twisted sheaves. | XL | 4 |
-| The rest of the paper | the paper, §§5.1, 6.2, 7–9, 11 | (through [`SecantSheafDeformation`](Challenge.lean#L660)) | Lemma 6.2.1 and Definition 6.2.2, §5.1, the constructions of §8 beyond Lemma 8.3.1, §9, the Appendix; the integral claim E1 | As above | XL | 4 |
+| [`IgusaProp3OrbitSubfield`](WeilClasses/External/Igusa/Sec10.lean#L2026) | [Igusa, Prop. 3] | Remark 10.1.2(1), when `-d` is not a square in `F` (the square case follows from the normal form) | The stabilizer is `SU(h)` for a Hermitian form `h` over `F(√-d)`, and `H¹(F, SU(h)) → H¹(F, Spin(V))` is injective (Jacobson) | Pinned Mathlib: group cohomology and Hilbert 90; no Galois cohomology of algebraic groups. Tau Ceti: Galois cohomology, Hilbert 90 for infinite Galois extensions, Galois descent (the input to `H¹(G, GLₙ) = 1`). Nowhere: `H¹(k, SU(h))`. | M–L | 1 |
+| [`MoonenZarhinSimple`](Challenge.lean#L451) | [Moonen–Zarhin 1995, Th. 2.11] | Corollary 1.6.1 | Albert's classification of the endomorphism algebras of simple abelian fourfolds; their Hodge (Mumford–Tate) groups and the invariants of these groups, case by case | Pinned Mathlib: central simple algebras, the start of Brauer groups; no algebraic groups, Mumford–Tate groups or Albert classification. Tau Ceti: Hodge structures, polarizations, semisimplicity of polarizable rational Hodge structures; reductive classical groups over fields. Nowhere: Mumford–Tate groups. | XL | 1 |
+| [`MoonenZarhinLowDim`](Challenge.lean#L473) | [Moonen–Zarhin 1999, Prop. 3.8, Th. 0.1(i)] | Corollary 1.6.1 | The same for `A` isogenous to `B × E`, `B` a simple threefold | As above | L–XL | 1 |
+| Abelian varieties and their algebraic classes | — | Every statement about [`CycleClasses`](Challenge.lean#L346) | Complex abelian varieties (complex tori with a Riemann form, projective by the Lefschetz embedding theorem); Riemann's theorem identifying them up to isogeny with polarizable rational Hodge structures of weight one ([`AbVar`](Challenge.lean#L256)); `H*(A, ℚ) = ⋀•H¹(A, ℚ)` with its Hodge decomposition; algebraic classes and the instance of [`CycleClasses`](Challenge.lean#L346) they form | Pinned Mathlib: algebraic cycles on schemes (the definition), commutativity of proper group schemes over a field, singular homology (basics), sheaf cohomology on sites, smooth vector bundles; no complex tori, cycle class map, Chern classes or Hodge decomposition. Elsewhere: [Paul-Lez/HodgeConjecture](https://github.com/Paul-Lez/HodgeConjecture) defines smooth projective complex varieties, the rational cohomology of `X(ℂ)`, cycle classes and Hodge classes, and states the Hodge conjecture for abelian varieties (draft PR #231: Chow groups). Tau Ceti: abelian varieties as group schemes, weight-one Hodge structures as complex structures, Riemann forms as polarizations, singular cohomology with cup product. lean-pool: complex tori as compact complex Lie groups. Nowhere: `H*(A, ℚ) = ⋀•H¹(A, ℚ)` as rings, Appell–Humbert, the Lefschetz embedding theorem. | XL | 2 |
+| [`PullbackClosed`](Challenge.lean#L352) | standard | Theorem 1.5.1, Corollary 1.6.1 | Pullback of cycles along homomorphisms, compatible with cycle classes; every rational Hodge map between the `H¹` comes from a homomorphism up to isogeny (Riemann) | — | L | 3 |
+| [`PushforwardClosed`](Challenge.lean#L404) | standard | Corollary 1.6.1, through [Schoen, Prop. 10] | Proper push-forward of cycles along a projection, compatible with the cycle class map | — | L | 3 |
+| [`SubalgebraClosed`](Challenge.lean#L358) | standard | Theorem 1.5.1, Corollary 1.6.1 | Intersection products compatible with the cup product; formal if algebraic classes are defined by Chern characters (Layer 2) | — | L–XL | 3 |
+| [`LefschetzOneOne`](Challenge.lean#L364) | the Lefschetz (1,1) theorem | Theorem 1.5.1, Corollary 1.6.1 | For abelian varieties: the Appell–Humbert theorem (line bundles on complex tori), algebraicity of line bundles (theta functions, the Lefschetz embedding theorem, GAGA for line bundles), `c₁` as the class of a divisor | Pinned Mathlib: Jacobi's theta function in one variable. Elsewhere: Paul-Lez/HodgeConjecture PR #228 (open) proves rational Lefschetz (1,1) for smooth projective complex varieties, through GAGA from [chrisflav/oka](https://github.com/chrisflav/oka); here it still needs Layer 2. | L | 3 |
+| [`VoisinLocus`](Challenge.lean#L430) | [Voisin, §4.2] | Theorem 1.5.1 | Relative Hilbert schemes (or Chow varieties) of the universal family over the period domain: countably many components, each proper over the base; Baire's theorem and the identity theorem then give the form assumed | Pinned Mathlib: Baire spaces, the identity theorem for analytic functions; no Hilbert schemes. Nowhere: Hilbert or Quot schemes. | XL | 3 |
+| [`RamonMariProducts`](Challenge.lean#L466) | [Ramón-Marí, Th. 4.11] | Corollary 1.6.1 | The Hodge conjecture for products of two abelian surfaces: their Hodge classes, and cycles representing them | — | XL | 3 |
+| [`SecantSheafDeformation`](Challenge.lean#L679) | the paper, §§7–9; [Buchweitz–Flenner, Th. 5.1] | Theorem 1.5.1 | Coherent sheaves on abelian varieties; Orlov's equivalence and Fourier–Mukai transforms; the secant sheaves of §8 (ideal sheaves of Abel–Jacobi curves); the reflexive sheaf `E` and its semiregularity (§9); twisted sheaves and the descent to `Y`; the semiregularity theorem for families of abelian varieties (§7.4) | Pinned Mathlib: abstract derived categories, sheaves of modules and ideal sheaves on schemes; no coherent cohomology of projective schemes, Fourier–Mukai transforms or deformation theory. Elsewhere: [chris-dare-dev/derived-alg-geo-lean](https://github.com/chris-dare-dev/derived-alg-geo-lean) has `Dᵇ(Coh X)` and Fourier–Mukai kernels, with base change and the projection formula as hypotheses; chrisflav/oka has coherent analytic sheaves and GAGA. Nowhere: Atiyah classes, the semiregularity map, twisted sheaves. | XL | 4 |
+| The rest of the paper | the paper, §§5.1, 6.2, 7–9, 11 | (through [`SecantSheafDeformation`](Challenge.lean#L679)) | Lemma 6.2.1 and Definition 6.2.2, §5.1, the constructions of §8 beyond Lemma 8.3.1, §9, the Appendix; the integral claim E1 | As above | XL | 4 |
+
+## Done
+
+Proved on 5 October 2026 (Layer 1, items 1a–1c below); the hypotheses they replace are gone from the statements.
+
+| Result | Was assumed as | Lean | How |
+|---|---|---|---|
+| [van Geemen, Th. 5.2(3)], in the case used: a sixfold of discriminant `-1` against `X × X̂` | `VanGeemenModuli` | [`vanGeemen_moduli_XXhat`](WeilClasses/External/VanGeemen/Moduli.lean#L612), [`weilDomainMat_isPreconnected`](WeilClasses/External/VanGeemen/Moduli.lean#L564) ([`WeilClasses/External/VanGeemen/Moduli.lean`](WeilClasses/External/VanGeemen/Moduli.lean)) | Landherr's theorem in the split case ([`WeilClasses/External/VanGeemen/Landherr.lean`](WeilClasses/External/VanGeemen/Landherr.lean)), from Meyer's theorem (a copy of jayyswan/hasse-minkowski, [`WeilClasses/External/HasseMinkowski/`](WeilClasses/External/HasseMinkowski)); the connectedness of `Ω_P` (Lemma 4.0.2) |
+| [Igusa, Prop. 3], the normal form `1 + 2s [pt_X]` and the orbits over `ℂ` | `IgusaProp3NormalForm` | [`igusa_prop3_normalForm_general`](WeilClasses/External/Igusa/NormalForm.lean#L1101) ([`WeilClasses/External/Igusa/NormalForm.lean`](WeilClasses/External/Igusa/NormalForm.lean)) | Elimination in coordinates with root, contraction-root, Weyl and Igusa elements |
+| [Schoen, Prop. 10] | [`SchoenDegeneration`](WeilClasses/External/Voisin/Lemma2_9.lean#L2221) | [`schoenDegeneration_of_pushforward`](WeilClasses/External/Voisin/Lemma2_9.lean#L2235) ([`WeilClasses/External/Voisin/Lemma2_9.lean`](WeilClasses/External/Voisin/Lemma2_9.lean)) | Voisin's Lemma 2.9 (a Weil surface times the fourfold), from push-forward along a projection, now the hypothesis [`PushforwardClosed`](Challenge.lean#L404) |
+
+[`IgusaProp3OrbitSubfield`](WeilClasses/External/Igusa/Sec10.lean#L2026) was narrowed to the case that the normal form does not cover (`-d` not a square).
 
 ## The layers
 
 ### Layer 0: the present state
 
 Theorem 1.5.1 and Corollary 1.6.1 are proved for every system of algebraic classes `Z` that satisfies the hypotheses
-about cycles, assuming also the hypotheses about Hodge structures; §10 is proved under two parts of [Igusa, Prop. 3].
-Everything else that the paper proves about cohomology classes, Clifford algebras, spin representations, Hodge
-structures and period domains is proved.
+about cycles, assuming also, for Corollary 1.6.1, the two Moonen–Zarhin results about Hodge structures; §10 is proved,
+with Remark 10.1.2(1) under part of [Igusa, Prop. 3] when `-d` is not a square. Everything else that the paper proves
+about cohomology classes, Clifford algebras, spin representations, Hodge structures and period domains is proved.
 
 ### Layer 1: the hypotheses about Hodge structures
 
@@ -43,49 +53,52 @@ These are statements about rational Hodge structures and spin representations, w
 be proved in the present model, with number theory, linear algebra and some Lie theory, and each can be done on its
 own.
 
-- **1a. [`VanGeemenModuli`](Challenge.lean#L405).** The Hermitian form of a polarized abelian `2m`-fold of Weil type has signature
+- **1a. `VanGeemenModuli` (done).** The Hermitian form of a polarized abelian `2m`-fold of Weil type has signature
   `(m, m)` (Lemma 3.1.2 proves it for the secants of §3); Landherr's theorem makes two such forms with the same
   discriminant isometric; the isometry carries one Weil-type period domain onto the other, and the domain is
   connected (generalize the Cartan-involution argument of Lemma 4.0.2 from `Ω_P` to every form of signature
   `(m, m)`). Hasse–Minkowski over `ℚ` exists outside Mathlib (in the isotropy form; the isometry form follows with
   Witt cancellation, which Tau Ceti has); what is missing is the theory of Hermitian forms over `K` and Jacobson's
   reduction to their trace forms.
-- **1b. Igusa's Proposition 3.** The normal form ([`IgusaProp3NormalForm`](WeilClasses/External/Igusa/Sec10.lean#L2034)) completes Igusa's classification of the
-  generic orbit, on top of the generation of `Spin(V_F)` and the invariance of `J` proved in
-  [`WeilClasses/External/Igusa/`](WeilClasses/External/Igusa) (estimated there at 1,500–3,000 lines). The orbits over subfields of `ℂ`
-  ([`IgusaProp3OrbitSubfield`](WeilClasses/External/Igusa/Sec10.lean#L2072)) add a Galois-cohomology argument for `SU(h)`. With both, §10 is unconditional.
-- **1c. [`SchoenDegeneration`](Challenge.lean#L425) traded for push-forward.** Voisin's Lemma 2.9 (Séminaire Bourbaki, exposé 1248)
+- **1b. Igusa's Proposition 3 (the normal form is done; the orbits over subfields remain).** The normal form
+  (`IgusaProp3NormalForm`) completes Igusa's classification of the generic orbit, on top of the generation of
+  `Spin(V_F)` and the invariance of `J` proved in [`WeilClasses/External/Igusa/`](WeilClasses/External/Igusa) (estimated there at 1,500–3,000
+  lines). The orbits over subfields of `ℂ` ([`IgusaProp3OrbitSubfield`](WeilClasses/External/Igusa/Sec10.lean#L2026)) add a Galois-cohomology argument for `SU(h)`.
+  With both, §10 is unconditional.
+- **1c. [`SchoenDegeneration`](WeilClasses/External/Voisin/Lemma2_9.lean#L2221) traded for push-forward (done).** Voisin's Lemma 2.9 (Séminaire Bourbaki, exposé 1248)
   proves the Hodge conjecture for the Weil classes of `A₂` from that of `A₁` and `A₁ × A₂`, through
   `w₂ = pr₂,*(pr₁^* w₁ ∪ w)`; with `A₁` a Weil surface (whose Weil classes are algebraic by Lefschetz (1,1)) of a
   suitable discriminant, it gives the fourfolds from the sixfolds of discriminant `-1`. In the model this needs
   products of abelian varieties (Künneth), Weil surfaces of every discriminant, and a new hypothesis that push-forward
   along projections preserves algebraic classes, which is standard and is proved in Layer 3 with the others. It
-  replaces the paper's use of [Schoen, Prop. 10] in Corollary 1.6.1, a departure from the paper's proof (reason 2),
-  to be agreed with the owner.
-- **1d. Moonen–Zarhin.** [`MoonenZarhinSimple`](Challenge.lean#L432) and [`MoonenZarhinLowDim`](Challenge.lean#L454) need Albert's classification of endomorphism
+  proves the statement of [Schoen, Prop. 10] that Corollary 1.6.1 uses, so the paper's proof of the corollary is
+  unchanged; the departure is in the proof of the cited result (Schoen's degeneration replaced by Voisin's
+  correspondence, reason 2).
+- **1d. Moonen–Zarhin.** [`MoonenZarhinSimple`](Challenge.lean#L451) and [`MoonenZarhinLowDim`](Challenge.lean#L473) need Albert's classification of endomorphism
   algebras and the Hodge (Mumford–Tate) groups of abelian fourfolds. This is the largest part of Layer 1, and it only
   serves Corollary 1.6.1.
 
-**Release after 1a–1c:** Theorem 1.5.1 under [`PullbackClosed`](Challenge.lean#L353), [`SubalgebraClosed`](Challenge.lean#L359), [`LefschetzOneOne`](Challenge.lean#L365), [`VoisinLocus`](Challenge.lean#L390)
-and [`SecantSheafDeformation`](Challenge.lean#L660), all about algebraic cycles or the paper's own §§7–9; §10 unconditional; Corollary 1.6.1
-under these, push-forward, [`RamonMariProducts`](Challenge.lean#L447) and the two Moonen–Zarhin results until 1d is done.
+**Released after 1a–1c (5 October 2026):** Theorem 1.5.1 under [`PullbackClosed`](Challenge.lean#L352), [`SubalgebraClosed`](Challenge.lean#L358),
+[`LefschetzOneOne`](Challenge.lean#L364), [`VoisinLocus`](Challenge.lean#L430) and [`SecantSheafDeformation`](Challenge.lean#L679), all about algebraic cycles or the paper's own §§7–9;
+§10 unconditional; Corollary 1.6.1 under these, push-forward, [`RamonMariProducts`](Challenge.lean#L466) and the two Moonen–Zarhin results
+until 1d is done; §10 unconditional except Remark 10.1.2(1) when `-d` is not a square.
 
 ### Layer 2: actual abelian varieties and their algebraic classes
 
-In the model, [`AbVar`](Challenge.lean#L257) stands for a complex abelian variety up to isogeny and [`CycleClasses`](Challenge.lean#L347) for its algebraic
+In the model, [`AbVar`](Challenge.lean#L256) stands for a complex abelian variety up to isogeny and [`CycleClasses`](Challenge.lean#L346) for its algebraic
 classes, but nothing ties them to geometry. Layer 2 builds that tie:
 
 - complex abelian varieties: complex tori with a Riemann form, projective by the Lefschetz embedding theorem; and
   Riemann's theorem that, up to isogeny, they are the polarizable rational Hodge structures of weight one, which is
-  what [`AbVar`](Challenge.lean#L257) encodes;
+  what [`AbVar`](Challenge.lean#L256) encodes;
 - `H*(A, ℚ) = ⋀•H¹(A, ℚ)`, with the Hodge decomposition (for a torus, by translation-invariant forms);
 - algebraic classes, by one of two equivalent definitions on smooth projective varieties: the classes of algebraic
   cycles (the standard one, through a cycle class map), or the `ℚ`-span of the homogeneous components of Chern
   characters of algebraic vector bundles (equivalent by Grothendieck–Riemann–Roch). The second is closer to the
-  paper, whose classes are Chern characters of sheaves, and makes [`SubalgebraClosed`](Challenge.lean#L359) and [`PullbackClosed`](Challenge.lean#L353)
+  paper, whose classes are Chern characters of sheaves, and makes [`SubalgebraClosed`](Challenge.lean#L358) and [`PullbackClosed`](Challenge.lean#L352)
   consequences of the multiplicativity and naturality of the Chern character. The choice decides much of the cost of
   Layer 3;
-- the instance of [`CycleClasses`](Challenge.lean#L347) given by algebraic classes, and the main theorems restated for it.
+- the instance of [`CycleClasses`](Challenge.lean#L346) given by algebraic classes, and the main theorems restated for it.
 
 Two existing projects shape the choices. [Paul-Lez/HodgeConjecture](https://github.com/Paul-Lez/HodgeConjecture) states the Hodge conjecture for smooth projective
 complex varieties, with cycle classes in the rational cohomology of `X(ℂ)`, and a variant for abelian varieties; using
@@ -101,16 +114,16 @@ statements of record.
 
 ### Layer 3: the hypotheses about algebraic cycles
 
-With Layer 2: [`PullbackClosed`](Challenge.lean#L353) and [`SubalgebraClosed`](Challenge.lean#L359) (functoriality of cycle classes, or of the Chern character);
-[`LefschetzOneOne`](Challenge.lean#L365) (from Paul-Lez/HodgeConjecture's PR #228 for all smooth projective varieties, or for abelian
+With Layer 2: [`PullbackClosed`](Challenge.lean#L352) and [`SubalgebraClosed`](Challenge.lean#L358) (functoriality of cycle classes, or of the Chern character);
+[`LefschetzOneOne`](Challenge.lean#L364) (from Paul-Lez/HodgeConjecture's PR #228 for all smooth projective varieties, or for abelian
 varieties from Appell–Humbert and the algebraicity of line bundles); push-forward along projections, if 1c replaced
-Schoen's degeneration; then [`VoisinLocus`](Challenge.lean#L390), which needs relative Hilbert schemes, and [`RamonMariProducts`](Challenge.lean#L447).
+Schoen's degeneration; then [`VoisinLocus`](Challenge.lean#L430), which needs relative Hilbert schemes, and [`RamonMariProducts`](Challenge.lean#L466).
 
-**Release:** Theorem 1.5.1 under [`SecantSheafDeformation`](Challenge.lean#L660) alone (and [`VoisinLocus`](Challenge.lean#L390) until it is done).
+**Release:** Theorem 1.5.1 under [`SecantSheafDeformation`](Challenge.lean#L679) alone (and [`VoisinLocus`](Challenge.lean#L430) until it is done).
 
 ### Layer 4: the paper's sheaf theory
 
-[`SecantSheafDeformation`](Challenge.lean#L660) is the paper's own §§7–9: Orlov's equivalence on `X × X̂`, the secant sheaves of §8, the
+[`SecantSheafDeformation`](Challenge.lean#L679) is the paper's own §§7–9: Orlov's equivalence on `X × X̂`, the secant sheaves of §8, the
 reflexive sheaf `E` and its semiregularity, twisted sheaves and the descent to `Y`, and the semiregularity theorem for
 families of abelian varieties (§7.4, after [Buchweitz–Flenner]). With them come the parts of §§5.1, 6.2, 8 and 11 that
 are not formalized ([REPORT.md, Section 9](REPORT.md#9-not-formalized)). A. Perry's equivariant semiregularity theorem (arXiv:2604.00511,
@@ -122,8 +135,8 @@ preprint), if confirmed, would remove the reflexive sheaf and the descent of §9
 ### Order
 
 ```text
-Layer 1   1a van Geemen   1b Igusa   1c Voisin's Lemma 2.9   (independent; release after the three)
-          1d Moonen–Zarhin                                     (long; any time)
+Layer 1   1a van Geemen   1b Igusa (normal form)   1c Voisin's Lemma 2.9    (done, 5 October 2026)
+          1b' Igusa (orbits over subfields)   1d Moonen–Zarhin          (remaining)
 Layer 2   abelian varieties, H*(A, Q), algebraic classes       (in Mathlib)
 Layer 3   the hypotheses about cycles                          (needs Layer 2)
 Layer 4   §§7–9: sheaves, Fourier–Mukai, semiregularity        (needs Layer 2)
@@ -134,10 +147,10 @@ theory can start independently of Layer 2.
 
 ## How to remove a hypothesis
 
-1. **Narrow it first.** Several hypotheses are stated more generally than the proofs use them: [`VanGeemenModuli`](Challenge.lean#L405)
-   for every `m` (only `m = 3` is used), [`IgusaProp3NormalForm`](WeilClasses/External/Igusa/Sec10.lean#L2034) for every field embedded in `ℂ` (only `ℂ`, `K` and
-   the algebraic closure of `ℚ` in `ℂ` are used). Restricting a hypothesis to what is used makes the theorems
-   stronger and the later proof shorter.
+1. **Narrow it first.** A hypothesis may be stated more generally than the proofs use it. Restricting it to what
+   is used makes the theorems stronger and the later proof shorter: `VanGeemenModuli` was proved only for the case
+   that Theorem 1.5.1 uses, and [`IgusaProp3OrbitSubfield`](WeilClasses/External/Igusa/Sec10.lean#L2026) was narrowed to the case that the normal form does not
+   cover.
 2. **State the source's result precisely**, in `WeilClasses/External/<Source>/` with a README entry, as close to
    the source as the model allows, and have it reviewed against the source before proving it, as the paper's
    statements were. The hypothesis classes are this project's formulations; the theorem that replaces one must
@@ -157,7 +170,7 @@ Surveyed on 4 October 2026; check again before starting a layer, since these pro
 | Project | Status | Provides | Layer |
 |---|---|---|---|
 | [Tau Ceti](https://github.com/TauCetiProject/TauCeti) (pinned here) | active; this project's toolchain | Hodge structures (weight one as complex structures, Riemann forms as polarizations, semisimplicity, mixed Hodge structures); spin groups, spinor norms, half-spin representations; quadratic forms over `ℚ_p`, Hilbert symbols, Witt cancellation; classical algebraic groups over fields; Galois cohomology and descent; singular cohomology with cup product; abelian varieties as group schemes | 1, 2 |
-| [jayyswan/hasse-minkowski](https://github.com/jayyswan/hasse-minkowski), also in [Vilin97/lean-pool](https://github.com/Vilin97/lean-pool) | complete, no `sorry`; lean-pool's copy builds on this project's toolchain | Hasse–Minkowski over `ℚ` (isotropy form), Meyer's theorem, Hilbert symbols and reciprocity | 1a |
+| [jayyswan/hasse-minkowski](https://github.com/jayyswan/hasse-minkowski), also in [Vilin97/lean-pool](https://github.com/Vilin97/lean-pool) | complete, no `sorry`; lean-pool's copy is included here ([`WeilClasses/External/HasseMinkowski/`](WeilClasses/External/HasseMinkowski)) | Hasse–Minkowski over `ℚ` (isotropy form), Meyer's theorem, Hilbert symbols and reciprocity | 1a (used) |
 | [Paul-Lez/HodgeConjecture](https://github.com/Paul-Lez/HodgeConjecture) | active, work in progress; Lean `v4.33.1` | Smooth projective complex varieties, rational cohomology of `X(ℂ)`, cycle classes, Hodge classes, the statement of the Hodge conjecture and of its variant for abelian varieties; PR #228 (open): rational Lefschetz (1,1); PR #231 (draft): Chow groups | 2, 3 |
 | [chrisflav/oka](https://github.com/chrisflav/oka) | active; Lean `v4.32.0` | Complex analytic spaces, coherent analytic sheaves, analytification, GAGA for proper schemes | 2, 3, 4 |
 | lean-pool `JacobianDiffgeo` (in [Vilin97/lean-pool](https://github.com/Vilin97/lean-pool)) | builds on this project's toolchain | Complex tori `V/L` as compact complex Lie groups; Jacobians of compact Riemann surfaces | 2 |

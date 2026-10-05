@@ -25,7 +25,7 @@ Theorem 1.5.1 uses [Th. 5.2(3)] (polarized abelian `2n`-folds of Weil type with 
 discriminant form one connected family up to isogeny) once, at the end of its proof (TeX line 6847,
 E3): for a sixfold `A` of discriminant `-1` against the sixfold `X × X̂` of discriminant `-1`.
 
-* `vanGeemen_moduli_XXhat` (`WeilClasses/Main/Moduli.lean`): for every `n > 0` and every polarized
+* `vanGeemen_moduli_XXhat` (`WeilClasses/External/VanGeemen/Moduli.lean`): for every `n > 0` and every polarized
   abelian `2n`-fold of Weil type `A` of discriminant `(-1)ⁿ`, a `K`-linear isomorphism `ψ` of `H¹`
   maps the polarization of `A` to that of `X × X̂` and carries the complex structure of `A` into the
   connected component of `X × X̂` in its Weil-type period domain. **Proved.**

@@ -21,52 +21,54 @@ proved by other arguments with the owner's approval). Theorem 1.5.1 and Corollar
 hypotheses, each a class in their statements ([REPORT.md, Section 2](REPORT.md#assumed)):
 
 - the paper's own sheaf-theoretic Sections 7–9, in the form "the class `κ₃(E)` is algebraic near `X × X̂` wherever
-  `κ(E)` is of Hodge type" ([`SecantSheafDeformation`](Challenge.lean#L660)); that `κ(E)` is of Hodge type there is the paper's
+  `κ(E)` is of Hodge type" ([`SecantSheafDeformation`](Challenge.lean#L679)); that `κ(E)` is of Hodge type there is the paper's
   Corollary 1.3.2, which is proved;
-- results from algebraic geometry not yet available in Lean. About algebraic cycles: pullbacks and products of
-  algebraic classes, the Lefschetz (1,1) theorem, Voisin's algebraicity loci, Schoen's degeneration, and Ramón-Marí's
-  theorem on products of surfaces. About Hodge structures: van Geemen's moduli of Weil-type abelian varieties and two
-  theorems of Moonen–Zarhin on Hodge rings of fourfolds.
+- results from algebraic geometry not yet available in Lean. About algebraic cycles: pullbacks, push-forwards along
+  projections and products of algebraic classes, the Lefschetz (1,1) theorem, Voisin's algebraicity loci, and
+  Ramón-Marí's theorem on products of surfaces. About Hodge structures: two theorems of Moonen–Zarhin on Hodge rings of
+  fourfolds.
 
-Three results of the paper's §10 (not used for the main theorems) assume two parts of Igusa's Proposition 3.
+One result of the paper's §10 (Remark 10.1.2(1), not used for the main theorems) assumes, when `-d` is not a square,
+part of Igusa's Proposition 3.
 
 ## What is proved
 
 - **The paper's own results about cohomology classes, Clifford algebras, spin representations, Hodge structures and
-  period domains**, in §§1–6, §8 and §10 (three of §10 under two parts of Igusa's Proposition 3), by the paper's
+  period domains**, in §§1–6, §8 and §10 (Remark 10.1.2(1) in part under Igusa's Proposition 3), by the paper's
   arguments, except where the paper's argument is wrong or has a gap, needs mathematics Lean lacks, or has no meaning
   in the model, each case documented ([REPORT.md, Section 7](REPORT.md#7-departures-from-the-papers-proofs)). Highlights: Theorem 1.4.1(3) and (4) (the classes
   `κ_k(E)` stay of Hodge type on the Weil-type deformations, and the `η(K)`-translates of `κ₃(E)` with `h³` span
   `ℚh³ ⊕ ĤW`), Corollary 1.3.2, Proposition 6.1.2 (Orlov's equivalence is `Spin(V)`-equivariant up to a class
   `exp(½[c₁(𝒫) - ρ_g c₁(𝒫)])`), Lemma 6.2.3, and the structure of the period domain `Ω_P` (§4).
 - **The results the paper cites**, in [`WeilClasses/External/`](WeilClasses/External): Chevalley's theory of pure spinors, Igusa's Lemmas 1
-  and 2, §2 and the invariance of the quartic in Proposition 3, results of Golyshev–Lunts–Orlov, Orlov, Huybrechts,
-  Trautman, van Geemen (Def. 4.9) and Markman (2023), each in the case the paper uses ([REPORT.md, Section 2](REPORT.md#proved-in-external)).
+  and 2, §2, and Proposition 3 (the invariant quartic and the normal form), results of Golyshev–Lunts–Orlov, Orlov,
+  Huybrechts, Trautman, van Geemen (Def. 4.9, and Th. 5.2(3) through Landherr's theorem) and Markman (2023), and
+  Schoen's Prop. 10 from push-forward (Voisin's argument), each in the case the paper uses ([REPORT.md, Section 2](REPORT.md#proved-in-external)).
 - **No `sorry` outside [`Challenge.lean`](Challenge.lean), no `axiom`.** [`scripts/Audit.lean`](scripts/Audit.lean) checks that every declaration depends only
   on [`propext`](https://leanprover-community.github.io/mathlib4_docs/Init/Core.html#propext), [`Classical.choice`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Classical.choice) and [`Quot.sound`](https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Quot.sound), and lists the results from prior work each paper result uses.
 - **The seven hypotheses on algebraic classes can be met**: they hold for the system in which every class is
   algebraic, and `X × X̂` is a polarized abelian `2n`-fold of Weil type with discriminant `(-1)ⁿ`
-  ([`WeilClasses/Main/Instances.lean`](WeilClasses/Main/Instances.lean)). The hypotheses about Hodge structures and the two parts of Igusa's
-  Proposition 3 are published results with no instance in Lean.
+  ([`WeilClasses/Main/Instances.lean`](WeilClasses/Main/Instances.lean)). The hypotheses about Hodge structures (two theorems of Moonen–Zarhin) and the
+  part of Igusa's Proposition 3 are published results with no instance in Lean.
 
 ## The main results
 
 [`Challenge.lean`](Challenge.lean) states, using only Mathlib, with the definitions written out between two marker
 comments (a copy of [`WeilClasses/Defs.lean`](WeilClasses/Defs.lean)):
 
-- [`Challenge.theorem1_4_1_3`](Challenge.lean#L711): for a principally polarized abelian threefold `X` and `d ≥ 3`, every graded summand of
+- [`Challenge.theorem1_4_1_3`](Challenge.lean#L730): for a principally polarized abelian threefold `X` and `d ≥ 3`, every graded summand of
   `κ(E)`, the characteristic class of the sheaf of Theorem 1.4.1, is a Hodge class on every polarized abelian sixfold
   of Weil type in the connected component of `X × X̂` in its period domain.
-- [`Challenge.theorem1_4_1_4`](Challenge.lean#L721): the `η(K)`-translates of `κ₃(E)`, together with `h³`, span the `3`-dimensional space
+- [`Challenge.theorem1_4_1_4`](Challenge.lean#L740): the `η(K)`-translates of `κ₃(E)`, together with `h³`, span the `3`-dimensional space
   `ℚh³ ⊕ ĤW` of `H⁶(X × X̂, ℚ)`.
-- [`Challenge.theorem1_5_1`](Challenge.lean#L734): under the hypotheses above, the Hodge–Weil classes of every polarized abelian sixfold of
+- [`Challenge.theorem1_5_1`](Challenge.lean#L753): under the hypotheses above, the Hodge–Weil classes of every polarized abelian sixfold of
   Weil type for `ℚ(√-d)` with discriminant `-1` are algebraic.
-- [`Challenge.corollary1_6_1`](Challenge.lean#L742): under the hypotheses above, every Hodge class on an abelian fourfold is algebraic.
+- [`Challenge.corollary1_6_1`](Challenge.lean#L761): under the hypotheses above, every Hodge class on an abelian fourfold is algebraic.
 - Five compared theorems check the definitions against the paper: `Nm(a + b√-d) = a² + db²`, `f² = -d`, `X × X̂` lies
   in its own period domain, its discriminant is `(-1)ⁿ`, and the sheaf `E` has rank `8d`.
 
 Abelian varieties are polarizable rational Hodge structures of weight one; "algebraic" refers to an abstract system
-of subspaces [`CycleClasses`](Challenge.lean#L347) with the hypotheses as classes ([REPORT.md, Section 6](REPORT.md#6-how-the-formalization-reads-the-paper)).
+of subspaces [`CycleClasses`](Challenge.lean#L346) with the hypotheses as classes ([REPORT.md, Section 6](REPORT.md#6-how-the-formalization-reads-the-paper)).
 
 ## Palomar
 
@@ -111,10 +113,10 @@ Palomar's preflight on demand.
 
 - Author and maintainer: The-Anh Vu-Le, who chose the scope and decided every change of a statement.
 - Tool: the Lean code and these documents were produced with Claude Opus 5.5 (Anthropic), run as an agent with
-  sub-agents in Claude Code, following the [`formalize-math-paper`](https://github.com/vltanh/formalize-math-paper) skill, version 2.1.0.
+  sub-agents in Claude Code, following the `formalize-math-paper` skill, version 2.1.0.
 - The statements, the proofs and the audit were each reviewed by independent agents against the TeX source. No person
   has reviewed the proofs yet.
-- Made on 4 October 2026. [`CREDITS.md`](CREDITS.md) gives the procedure, the agents and the figures.
+- Made on 4–5 October 2026. [`CREDITS.md`](CREDITS.md) gives the procedure, the agents and the figures.
 
 ## Related work
 
@@ -127,15 +129,18 @@ Palomar's preflight on demand.
   `HodgeConjectureForAbelianVarietiesInDimensionLE` cites this paper; the statement in LeanMillenniumPrizeProblems is
   marked incomplete); they were not used here. Repositories claiming machine-checked proofs of the Hodge conjecture
   rest on added axioms, `sorry` or unproved assumptions.
-- The project reuses no code from these; it builds on Mathlib and [Tau Ceti](https://github.com/TauCetiProject/TauCeti) (Clifford algebras, spin groups).
+- The project reuses no code from these. It builds on Mathlib and [Tau Ceti](https://github.com/TauCetiProject/TauCeti) (Clifford algebras, spin groups), and
+  includes a copy of the Hasse–Minkowski development of [jayyswan/hasse-minkowski](https://github.com/jayyswan/hasse-minkowski) (Apache-2.0, through
+  [Vilin97/lean-pool](https://github.com/Vilin97/lean-pool)), for Meyer's theorem.
 
 ## What's next
 
 Nothing published since the paper casts doubt on its results; the author has corrected the integral Clifford algebra
 of §2.1 (E4) and a misprint in Lemma 2.2.2 (E28). Perry claims the paper's Conjecture 7.3.9 (preprint), which would
-simplify §9. See [REPORT.md, Section 10](REPORT.md#10-whats-next). [`ROADMAP.md`](ROADMAP.md) plans how to remove the
-hypotheses, in layers: first those about Hodge structures, then actual abelian varieties and their algebraic cycles,
-and finally the paper's sheaf theory.
+simplify §9. See [REPORT.md, Section 10](REPORT.md#10-whats-next). [`ROADMAP.md`](ROADMAP.md) plans how to remove the hypotheses, in layers: first those
+about Hodge structures, then actual abelian varieties and their algebraic cycles, and finally the paper's sheaf
+theory. In the first layer, van Geemen's moduli result, Igusa's normal form and Schoen's degeneration (from
+push-forward) are proved.
 
 ## Building
 
@@ -166,9 +171,10 @@ Mathlib). Generated files: [`scripts/Audit.lean`](scripts/Audit.lean) (`python3 
 | [`WeilClasses/Orlov`](WeilClasses/Orlov) | §1.3, §6: Orlov's equivalence, Proposition 6.1.2, Lemma 6.2.3, Lemma 6.3.2, Proposition 6.4.1, Corollary 1.3.2 |
 | [`WeilClasses/Secant`](WeilClasses/Secant) | §8: `K`-secants on a generic ppav, Lemma 8.2.1, Lemma 8.3.1 |
 | [`WeilClasses/Igusa`](WeilClasses/Igusa) | §10: the Igusa quartic, Lemmas 10.1.1 and 10.2.1 |
-| [`WeilClasses/AbelianVariety`](WeilClasses/AbelianVariety) | Abelian varieties up to isogeny; hard Lefschetz and Poincaré reducibility (for Corollary 1.6.1) |
+| [`WeilClasses/AbelianVariety`](WeilClasses/AbelianVariety) | Abelian varieties up to isogeny; products and push-forward; hard Lefschetz and Poincaré reducibility (for Corollary 1.6.1) |
 | [`WeilClasses/Main`](WeilClasses/Main) | Theorems 1.4.1, 1.5.1, Corollary 1.6.1; `X × X̂` explicitly; the instances |
 | `WeilClasses/External/<Source>` | The cited results, one directory per source, each with a README |
+| [`WeilClasses/External/HasseMinkowski`](WeilClasses/External/HasseMinkowski) | The Hasse–Minkowski theorem over `ℚ` (Meyer's theorem), copied from jayyswan/hasse-minkowski |
 | [`Challenge.lean`](Challenge.lean), [`Solution.lean`](Solution.lean) | The statements of record, and their proofs from the library |
 | [`scripts/`](scripts) | The audit, the route check, the synchronization of the Challenge |
 | [`docs/`](docs) | The routes of the paper's proofs and the recorded differences |

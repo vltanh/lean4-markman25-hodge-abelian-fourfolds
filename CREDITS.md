@@ -63,3 +63,27 @@ Figures, from the start (4 October 2026, 07:51 CDT) to the commit that completed
 The figures are those that the session transcripts record. They leave out the time the owner spent answering
 questions, which is included in the elapsed time, and the builds run by background commands, which are not agent
 work.
+
+## Roadmap, Layer 1 (4–5 October 2026)
+
+At the owner's request, the main session wrote [`ROADMAP.md`](ROADMAP.md), after a survey of the Lean ecosystem by
+one agent (its claims spot-checked by the main session), and then carried out the first layer:
+
+- **Meyer's theorem.** The main session copied the Hasse–Minkowski development of jayyswan/hasse-minkowski (as
+  packaged in Vilin97/lean-pool, Apache-2.0) into [`WeilClasses/External/HasseMinkowski/`](WeilClasses/External/HasseMinkowski), with two edits for this
+  project's Mathlib commit.
+- **Three provers in parallel**, each on new files against a private snapshot of the build: [van Geemen, Th. 5.2(3)]
+  in the case used, through Landherr's theorem; Igusa's normal form; and [Schoen, Prop. 10] from push-forward of
+  cycles, by Voisin's argument. The prover of the last corrected two steps of its brief (the class of the product it
+  had been told to use is not a Hodge–Weil class; the discriminant of the fourfold must be taken positive).
+- **Integration.** The main session removed the hypotheses `VanGeemenModuli`, [`SchoenDegeneration`](WeilClasses/External/Voisin/Lemma2_9.lean#L2221) (replaced by the
+  standard [`PushforwardClosed`](Challenge.lean#L404)) and `IgusaProp3NormalForm`, narrowed [`IgusaProp3OrbitSubfield`](WeilClasses/External/Igusa/Sec10.lean#L2026), rebuilt, reran the
+  checks and updated the documents.
+
+Figures for this round, from {ROUND_START} to the commit that completed it ({ROUND_END}):
+
+- elapsed time: {R_ELAPSED};
+- sub-agents: {R_NAGENTS}, at most {R_MAXAGENTS} running at once, {R_AGENTHOURS} of working time in all;
+- tool calls: {R_TOOLCALLS};
+- model calls: {R_MODELCALLS}, all to `claude-opus-5-5`.
+

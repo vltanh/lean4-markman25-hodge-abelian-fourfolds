@@ -72,6 +72,12 @@ for p in sorted((ROOT / 'WeilClasses').rglob('*.lean')):
     text = p.read_text()
     rel = p.relative_to(ROOT).as_posix()
     for full, doc, line in decls_with_docs(text):
+        if '/External/HasseMinkowski/' in rel:
+            # vendored code (jayyswan/hasse-minkowski, namespace `HasseMinkowski`): only the theorems
+            # that this project cites are listed; its definitions are not hypotheses
+            if line.startswith('theorem') and full in ('HasseMinkowski.meyer', 'HasseMinkowski.hasseMinkowski'):
+                external.append(('HasseMinkowski', full))
+            continue
         full = namespace_prefix(full).replace('WeilClasses.WeilClasses.', 'WeilClasses.')
         if '/External/' in rel and line.startswith('theorem'):
             # the cited results: docstring opens with a bold citation `**[Source, …]**`; helper

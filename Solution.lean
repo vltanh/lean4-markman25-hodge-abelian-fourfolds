@@ -85,7 +85,7 @@ theorem theorem1_5_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
 algebraic. -/
 theorem corollary1_6_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
     [LefschetzOneOne Z] [VoisinLocus Z] [SecantSheafDeformation Z]
-    [SchoenDegeneration Z] [MoonenZarhinSimple] [RamonMariProducts Z] [MoonenZarhinLowDim]
+    [PushforwardClosed Z] [MoonenZarhinSimple] [RamonMariProducts Z] [MoonenZarhinLowDim]
     (A : AbVar (2 * 2)) (p : ℕ) : A.hodge p ≤ Z.alg (2 * 2) A.J :=
   WeilClasses.corollary1_6_1 Z A p
 

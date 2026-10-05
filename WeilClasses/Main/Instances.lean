@@ -11,7 +11,7 @@ their hypotheses are consistent, and the objects they quantify over exist.
 * **The hypothesis classes on a system of algebraic classes.** For the system
   `CycleClasses.all`, in which every rational class is algebraic, each of `PullbackClosed`,
   `SubalgebraClosed`, `LefschetzOneOne`, `VoisinLocus`, `SecantSheafDeformation`,
-  `SchoenDegeneration` and `RamonMariProducts` holds. For `SecantSheafDeformation` this needs a
+  `PushforwardClosed` and `RamonMariProducts` holds. For `SecantSheafDeformation` this needs a
   complex structure on `ℝ⁶` for which `ThetaStd` is ample: the standard `J₀`
   (`s8_J0`, `s8_ample_J0`).
 * **The objects.** For every `n` and every `d > 0`, `X × X̂` (with `X = (ℝ^{2n}, J₀)`) is a
@@ -50,8 +50,8 @@ instance CycleClasses.all_secantSheafDeformation : SecantSheafDeformation CycleC
   ⟨fun _ _ => ⟨s8_J0 3, s8_J0_isComplex 3, s8_ample_J0 3, fun _ _ =>
     Filter.Eventually.of_forall fun _ _ => Submodule.mem_top⟩⟩
 
-instance CycleClasses.all_schoenDegeneration : SchoenDegeneration CycleClasses.all :=
-  ⟨fun _ _ _ _ _ => le_top⟩
+instance CycleClasses.all_pushforwardClosed : PushforwardClosed CycleClasses.all :=
+  ⟨fun _ _ _ _ => Submodule.mem_top⟩
 
 instance CycleClasses.all_ramonMariProducts : RamonMariProducts CycleClasses.all :=
   ⟨fun _ _ _ _ _ => le_top⟩

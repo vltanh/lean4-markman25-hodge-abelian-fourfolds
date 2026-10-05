@@ -19,17 +19,18 @@ project:
     1.4.1(3) and (4) (the characteristic class of the secant-square sheaf stays of Hodge type on every Weil-type
     deformation of X x X^, and its K-translates with h^3 span Q h^3 + HW), Corollary 1.3.2, the cohomological
     results of Section 8, and Section 10. The results the paper cites from Chevalley, Igusa (Lemmas 1-2, Section
-    2, the invariance of the quartic), Golyshev-Lunts-Orlov, Orlov, Huybrechts, Trautman, van Geemen (Def. 4.9)
-    and Markman (2023) are proved in the case the paper uses.
+    2, Proposition 3 except the orbits over subfields in which -d is not a square), Golyshev-Lunts-Orlov, Orlov,
+    Huybrechts, Trautman, van Geemen (Def. 4.9, and Th. 5.2(3) through Landherr's theorem and Meyer's theorem),
+    Markman (2023) and Schoen (Prop. 10, from push-forward of cycles, by Voisin's argument) are proved in the case
+    the paper uses.
 
 
     Theorem 1.5.1 and Corollary 1.6.1 are proved assuming, as named hypotheses in their statements, the paper's
     own sheaf-theoretic Sections 7-9 (in the form: the class kappa_3(E) is algebraic near X x X^ wherever kappa(E)
     is of Hodge type) and results from algebraic geometry not yet available in Lean: about algebraic cycles,
-    pullbacks and products of algebraic classes, the Lefschetz (1,1) theorem, Voisin's algebraicity loci,
-    Schoen's degeneration and a theorem of Ramon-Mari; about Hodge structures, van Geemen's moduli of Weil-type
-    abelian varieties and two theorems of Moonen-Zarhin. Three results of Section 10 assume two parts of Igusa's
-    Proposition 3. Eleven statements of the paper are false or misprinted as printed and are formalized in
+    pullbacks, push-forwards along projections and products of algebraic classes, the Lefschetz (1,1) theorem,
+    Voisin's algebraicity loci and a theorem of Ramon-Mari; about Hodge structures, two theorems of Moonen-Zarhin.
+    Remark 10.1.2(1) assumes part of Igusa's Proposition 3 when -d is not a square. Eleven statements of the paper are false or misprinted as printed and are formalized in
     corrected form (the basis of Example 10.2.2 is also misprinted, with no effect on the value computed there);
     REPORT.md audits the paper.
   authors:
@@ -71,9 +72,9 @@ sources:
     location: "Amer. J. Math. 92 (1970), no. 4, 997-1028"
     relationship: "background"
     note: >-
-      Lemmas 1 and 2, the elements of Section 2 and the invariance of the quartic in Proposition 3 are proved in
-      WeilClasses/External/Igusa; two parts of Proposition 3 (the normal form, and the orbits over subfields of C)
-      are assumed as named hypotheses of three results of Section 10.
+      Lemmas 1 and 2, the elements of Section 2 and Proposition 3 (the invariance of the quartic, the normal form,
+      the orbits over C) are proved in WeilClasses/External/Igusa; the orbits over subfields of C in which -d is not
+      a square are assumed as a named hypothesis of Remark 10.1.2(1).
   - title: "Mirror symmetry for abelian varieties"
     authors:
       - "Vasily Golyshev"
@@ -113,7 +114,8 @@ sources:
     relationship: "background"
     note: >-
       Definition 4.9 (the condition on the polarization) is proved in WeilClasses/External/VanGeemen; Theorem
-      5.2(3) is assumed as the named hypothesis VanGeemenModuli of Theorem 1.5.1 and Corollary 1.6.1.
+      5.2(3), in the case Theorem 1.5.1 uses, is proved in WeilClasses/External/VanGeemen/Moduli.lean through Landherr's
+      theorem (WeilClasses/External/VanGeemen/Landherr.lean).
   - title: "The monodromy of generalized Kummer varieties and algebraic cycles on their intermediate Jacobians"
     authors:
       - "Eyal Markman"
@@ -134,7 +136,7 @@ sources:
     type: "article"
     location: "Compositio Math. 114 (1998), no. 3, 329-336"
     relationship: "background"
-    note: "Proposition 10 is assumed as the named hypothesis SchoenDegeneration of Corollary 1.6.1."
+    note: "Proposition 10, in the form Corollary 1.6.1 uses, is proved from push-forward of cycles along a projection (the hypothesis PushforwardClosed) by Voisin's argument, in WeilClasses/External/Voisin."
   - title: "Hodge classes and Tate classes on simple abelian fourfolds"
     authors:
       - "Ben Moonen"
@@ -158,6 +160,20 @@ sources:
     location: "Collect. Math. 59 (2008), no. 1, 1-26"
     relationship: "background"
     note: "Theorem 4.11 is assumed as the named hypothesis RamonMariProducts of Corollary 1.6.1."
+  - title: "La conjecture de Hodge pour les variétés abéliennes de dimension au plus 5 [d'après Markman]"
+    authors:
+      - "Claire Voisin"
+    type: "article"
+    location: "Séminaire Bourbaki, exposé 1248, January 2026, https://www.bourbaki.fr/TEXTES/Exp1248-Voisin.pdf"
+    relationship: "background"
+    note: "Lemme 2.9 and Corollaire 2.10 give the proof of [Schoen, Prop. 10] used here (WeilClasses/External/Voisin/Lemma2_9.lean)."
+  - title: "Äquivalenz Hermitescher Formen über einem beliebigen algebraischen Zahlkörper"
+    authors:
+      - "Walther Landherr"
+    type: "article"
+    location: "Abh. Math. Sem. Univ. Hamburg 11 (1936), 245-248"
+    relationship: "background"
+    note: "The split case of the classification of Hermitian forms over Q(sqrt(-d)), used by van Geemen's Th. 5.2(3), is proved in WeilClasses/External/VanGeemen/Landherr.lean."
   - title: "A semi-regularity map for modules and applications to deformations"
     authors:
       - "Ragnar-Olaf Buchweitz"
@@ -175,6 +191,12 @@ sources:
     note: "Footnotes 3 and 8 correct the definition of the integral Clifford algebra in Section 2.1 and the group in Lemma 2.2.2 of the paper (REPORT.md, E4 and E28)."
 
 related_formalizations:
+  - id: "https://github.com/jayyswan/hasse-minkowski"
+    relationship: "incorporated"
+    note: >-
+      Its Hasse-Minkowski development over Q, as packaged in Vilin97/lean-pool (commit 98ae4aac, Apache-2.0), is
+      copied into WeilClasses/External/HasseMinkowski for Meyer's theorem, which proves Landherr's theorem in the
+      case used.
   - id: "https://github.com/Paul-Lez/HodgeConjecture"
     relationship: "independent"
     note: >-
@@ -191,8 +213,8 @@ status:
     Chevalley, Igusa (Lemmas 1-2, Section 2, the invariance of the quartic), Golyshev-Lunts-Orlov, Orlov,
     Huybrechts, Trautman, van Geemen (Def. 4.9) and Markman (2023). Theorem 1.5.1 and Corollary 1.6.1 are proved
     from named hypotheses: the paper's own Sections 7-9 (SecantSheafDeformation), PullbackClosed, SubalgebraClosed,
-    LefschetzOneOne, VoisinLocus, VanGeemenModuli, SchoenDegeneration, MoonenZarhinSimple, RamonMariProducts and
-    MoonenZarhinLowDim; three results of Section 10 assume IgusaProp3NormalForm or IgusaProp3OrbitSubfield. Not
+    LefschetzOneOne, VoisinLocus, and for Corollary 1.6.1 PushforwardClosed, MoonenZarhinSimple, RamonMariProducts
+    and MoonenZarhinLowDim; Remark 10.1.2(1) assumes IgusaProp3OrbitSubfield when -d is not a square. Not
     formalized: the sheaf theory and derived categories of Sections 5.1, 6.2 (Lemma 6.2.1), 7, 8.2-8.5, 9 and 11, and algebraic cycles
     themselves (algebraic classes are an abstract system with the hypotheses above). Eleven statements of the paper
     are formalized in corrected form (fidelity.divergences).
@@ -255,7 +277,8 @@ fidelity:
     l, reason 1), Lemma 8.1.1 (cosets instead of a Zariski closure, reason 2), Theorem 1.4.1(2) (the rank from
     ch(E), reason 3), Theorem 1.5.1 (d = 1, 2 via 4d and van Geemen's Th. 5.2(3) at the last step, reason 1), Lemma
     10.1.1 (Galois descent through w, reason 3; uniqueness via Igusa's Lemma 2, reason 1), Lemma 10.2.1 (order of
-    two steps, reason 1; density via transvections, reason 2). Every other proof follows the paper's argument;
+    two steps, reason 1; density via transvections, reason 2). Cited results proved by another argument than their source's: [Schoen, Prop. 10] by Voisin's argument
+    (Bourbaki 1248, Lemme 2.9) instead of a degeneration (reason 2). Every other proof follows the paper's argument;
     docs/route_differences.tsv records every difference between the results a formal proof uses and those the
     paper's proof cites.
 
@@ -286,12 +309,12 @@ alignment:
       lean: "WeilClasses.Challenge.theorem1_5_1"
       module: "Challenge"
       status: "proved, conditional"
-      note: "Under the named hypotheses PullbackClosed, SubalgebraClosed, LefschetzOneOne, VoisinLocus, VanGeemenModuli and SecantSheafDeformation (the paper's Sections 7-9)."
+      note: "Under the named hypotheses PullbackClosed, SubalgebraClosed, LefschetzOneOne, VoisinLocus and SecantSheafDeformation (the paper's Sections 7-9)."
     - source: "Corollary 1.6.1"
       lean: "WeilClasses.Challenge.corollary1_6_1"
       module: "Challenge"
       status: "proved, conditional"
-      note: "Under the hypotheses of Theorem 1.5.1 and SchoenDegeneration, MoonenZarhinSimple, RamonMariProducts, MoonenZarhinLowDim."
+      note: "Under the hypotheses of Theorem 1.5.1 and PushforwardClosed, MoonenZarhinSimple, RamonMariProducts, MoonenZarhinLowDim."
     - source: "Section 1.2 (the norm of K = Q(sqrt(-d)))"
       lean: "WeilClasses.Challenge.Kd_Nm"
       module: "Challenge"
