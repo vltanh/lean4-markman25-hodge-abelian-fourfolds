@@ -132,7 +132,13 @@ spinor `exp(√-dΘ)` and its complex conjugate `exp(-√-dΘ)`.
 Model: `ch(F₁) = chF1 d` (the value of the Chern character is geometric, see the module docstring);
 `ch(F^∨) = τ(ch F)` (Remark 5.2.3); the secant line is the plane `P` of the oriented `K`-secant
 `P_Θ` (`PJac`, `u₁ = exp(√-dΘ)`, `u₂ = exp(-√-dΘ)`). `d > 0` rational (the paper: a positive
-integer); `X` given by a complex structure `J` for which `Θ` is ample. -/
+integer); `X` given by a complex structure `J` for which `Θ` is ample.
+
+Proof: the paper's computation of the first equality (TeX lines 3758–3770,
+`ch(I_{∪_{i=1}^n Cᵢ}) · ch(𝒪_X(kΘ))` with `k = 1`, `n = d + 1`) is `lemma8_2_1_product` and
+`chF1_eq_mul_exp` (`chF1 d = ch(I_{∪Cᵢ}) · exp(Θ)`; `ch(𝒪_{Cᵢ}) = Θ²/2 - 2[pt]` is geometric input).
+Its result `1 + Θ - (d/2)Θ² - d[pt]` is the definition of `chF1 d`, so the proof below shows the
+second equality, `= α + β`, and the "Consequently" (`τ(ch F₁) = α - β`, `s8_tau_chF1`). -/
 theorem lemma8_2_1 {J : Module.End ℝ (H1 ℝ 3)} (hΘ : IsAmple 3 J (ThetaStd ℚ 3)) (hd : 0 < d) :
     chF1 d = alphaJac d + betaJac d ∧ chF1 d ∈ (PJac d hΘ hd).Pℚ ∧
       tau ℚ 3 (chF1 d) ∈ (PJac d hΘ hd).Pℚ := by

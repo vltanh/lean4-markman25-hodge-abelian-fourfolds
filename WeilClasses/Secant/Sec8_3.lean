@@ -24,7 +24,8 @@ Statements of the paper's §8.3, TeX lines 3963–4041 (`n = 3`, the notation of
   formalized), the invariance of the two classes (`lemma8_3_1_invariant`; for `κ₃` by
   Corollary 1.3.2, `corollary1_3_2` in `WeilClasses.Orlov.Cor1_3_2`), the value of the rank
   (`lemma8_3_1_rank_eq`: `8d`), and the claims of the proof (`chF1_eq_lambda`, `tau_lambda`,
-  `chF1_tmul_tau_decomp`).
+  `chF1_tmul_tau_decomp`; `λ₁ ⊠ λ₁ + λ₂ ⊠ λ₂` is not `Spin(V_K)_{ℓ₁,ℓ₂}`-invariant by Lemma 2.2.7
+  and Proposition 6.4.1(1), `s8_HW_not_invariant`).
 
 Checked numerically (exact arithmetic, `d = 1, 2, 3, 5, 7`): `(α, β)_S = -4d`, the rank of
 `φ(w ⊗ w)` is `8d`, `h³` and `κ₃(φ(w ⊗ w))` are linearly independent, and
@@ -293,22 +294,6 @@ theorem s8_rhoExt_hClass (P : KSecant n d) (hd : 0 < d) (hn : 2 ≤ n) (hP : ¬ 
     sub_self]
 
 
-/-- A linear functional separating two linearly independent vectors. -/
-theorem s8_exists_dual {K M : Type*} [Field K] [AddCommGroup M] [Module K M] {v w : M}
-    (h : LinearIndependent K ![v, w]) : ∃ φ : Module.Dual K M, φ v = 1 ∧ φ w = 0 := by
-  obtain ⟨φ, hφ⟩ := LinearMap.exists_extend ((Module.Basis.span h).coord 0)
-  refine ⟨φ, ?_, ?_⟩
-  · have := LinearMap.congr_fun hφ ((Module.Basis.span h) 0)
-    rw [LinearMap.comp_apply, Module.Basis.coord_apply, Module.Basis.repr_self,
-      Finsupp.single_eq_same] at this
-    rw [Module.Basis.span_apply] at this
-    simpa using this
-  · have := LinearMap.congr_fun hφ ((Module.Basis.span h) 1)
-    rw [LinearMap.comp_apply, Module.Basis.coord_apply, Module.Basis.repr_self,
-      Finsupp.single_eq_of_ne (by decide)] at this
-    rw [Module.Basis.span_apply] at this
-    simpa using this
-
 /-- `x = Σ_{k ≤ 4n} x_k` (the graded pieces of `⋀• V`). -/
 theorem s8_eq_sum_projDeg (F : Type*) [Field F] [CharZero F] (x : ExtV F n) :
     x = ∑ k ∈ Finset.range (4 * n + 1), projDeg F n k x := by
@@ -331,184 +316,7 @@ theorem s8_eq_sum_projDeg (F : Type*) [Field F] [CharZero F] (x : ExtV F n) :
 
 end S8Inv
 
-/-! ## Helpers (prefix `s8_`): a complex structure for which `Θ` is ample, and weights -/
-
-section S8J0
-
-
-variable (n : ℕ)
-
-/-- The involution `2i ↔ 2i + 1` of `Fin (2n)`. -/
-def s8_swap (k : Fin (2 * n)) : Fin (2 * n) :=
-  ⟨if k.val % 2 = 0 then k.val + 1 else k.val - 1, by split_ifs <;> omega⟩
-
-/-- The sign `+1` on even, `-1` on odd indices. -/
-def s8_sgn (k : Fin (2 * n)) : ℝ := if k.val % 2 = 0 then 1 else -1
-
-theorem s8_swap_swap (k : Fin (2 * n)) : s8_swap n (s8_swap n k) = k := by
-  ext; simp only [s8_swap]; split_ifs <;> omega
-
-theorem s8_sgn_swap (k : Fin (2 * n)) : s8_sgn n (s8_swap n k) = -s8_sgn n k := by
-  simp only [s8_sgn, s8_swap]; split_ifs <;> (try norm_num) <;> omega
-
-theorem s8_swap_even (i : Fin n) : s8_swap n ⟨2 * i, by omega⟩ = ⟨2 * i + 1, by omega⟩ := by
-  ext; simp [s8_swap]
-
-theorem s8_swap_odd (i : Fin n) : s8_swap n ⟨2 * i + 1, by omega⟩ = ⟨2 * i, by omega⟩ := by
-  ext; simp only [s8_swap]; split_ifs <;> omega
-
-theorem s8_sgn_even (i : Fin n) : s8_sgn n ⟨2 * i, by omega⟩ = 1 := by
-  simp [s8_sgn]
-
-theorem s8_sgn_odd (i : Fin n) : s8_sgn n ⟨2 * i + 1, by omega⟩ = -1 := by
-  simp only [s8_sgn]; split_ifs <;> first | rfl | omega
-
-theorem s8_swap_eq_iff (k j : Fin (2 * n)) : s8_swap n k = j ↔ k = s8_swap n j := by
-  constructor
-  · rintro rfl; rw [s8_swap_swap]
-  · rintro rfl; rw [s8_swap_swap]
-
-/-- The matrix of the standard complex structure `J₀`. -/
-noncomputable def s8_M0 : Matrix (Fin (2 * n)) (Fin (2 * n)) ℝ :=
-  fun k j => if j = s8_swap n k then s8_sgn n k else 0
-
-/-- A complex structure `J₀` of `H¹(X, ℝ) = ℝ^{2n}` for which `Θ = ThetaStd` is ample:
-`J₀ e_{2i} = -e_{2i+1}`, `J₀ e_{2i+1} = e_{2i}` (the torus `ℂⁿ/(ℤⁿ + iℤⁿ)`). -/
-noncomputable def s8_J0 : Module.End ℝ (H1 ℝ n) := Matrix.toLin' (s8_M0 n)
-
-theorem s8_J0_apply (x : H1 ℝ n) (k : Fin (2 * n)) :
-    s8_J0 n x k = s8_sgn n k * x (s8_swap n k) := by
-  simp [s8_J0, s8_M0, Matrix.mulVec, dotProduct]
-
-theorem s8_J0_isComplex : IsComplexStructure (s8_J0 n) := by
-  refine LinearMap.ext fun x => funext fun k => ?_
-  simp only [Module.End.mul_apply, s8_J0_apply, s8_swap_swap, s8_sgn_swap]
-  simp only [LinearMap.neg_apply, Module.End.one_apply, Pi.neg_apply]
-  have : s8_sgn n k * s8_sgn n k = 1 := by
-    simp only [s8_sgn]; split_ifs <;> norm_num
-  linear_combination (-(x k)) * this
-
-theorem s8_complexify_J0_apply (v : H1 ℂ n) (k : Fin (2 * n)) :
-    complexifyH1 n (s8_J0 n) v k = (s8_sgn n k : ℂ) * v (s8_swap n k) := by
-  simp only [complexifyH1, s8_J0, LinearMap.toMatrix_eq_toMatrix', Matrix.toLin_eq_toLin',
-    LinearMap.toMatrix'_toLin', Matrix.toLin'_apply, Matrix.mulVec, dotProduct, Matrix.map_apply,
-    s8_M0]
-  simp [apply_ite (fun r : ℝ => (r : ℂ)), ite_mul, Finset.sum_ite_eq']
-
-theorem s8_J0_e_even (i : Fin n) :
-    s8_J0 n (e ℝ n ⟨2 * i, by omega⟩) = -e ℝ n ⟨2 * i + 1, by omega⟩ := by
-  funext k
-  rw [s8_J0_apply]
-  simp only [e, Pi.single_apply, s8_swap_eq_iff, s8_swap_even, Pi.neg_apply]
-  split_ifs with h
-  · subst h; rw [s8_sgn_odd]; ring
-  · ring
-
-theorem s8_J0_e_odd (i : Fin n) :
-    s8_J0 n (e ℝ n ⟨2 * i + 1, by omega⟩) = e ℝ n ⟨2 * i, by omega⟩ := by
-  funext k
-  rw [s8_J0_apply]
-  simp only [e, Pi.single_apply, s8_swap_eq_iff, s8_swap_odd]
-  split_ifs with h
-  · subst h; rw [s8_sgn_even]; ring
-  · ring
-
-theorem s8_mem_H10_J0 (i : Fin n) :
-    e ℂ n ⟨2 * i, by omega⟩ + Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩ ∈ H10 n (s8_J0 n) := by
-  rw [H10, Module.End.mem_eigenspace_iff]
-  funext k
-  rw [s8_complexify_J0_apply]
-  simp only [e, Pi.add_apply, Pi.smul_apply, Pi.single_apply, smul_eq_mul, s8_swap_eq_iff,
-    s8_swap_even, s8_swap_odd]
-  by_cases h1 : k = ⟨2 * i, by omega⟩
-  · subst h1
-    have : (⟨2 * i, by omega⟩ : Fin (2 * n)) ≠ ⟨2 * i + 1, by omega⟩ := by simp
-    simp [s8_sgn_even, this]
-  · by_cases h2 : k = ⟨2 * i + 1, by omega⟩
-    · subst h2
-      simp [s8_sgn_odd, h1]
-    · simp [h1, h2]
-
-theorem s8_mem_H01_J0 (i : Fin n) :
-    e ℂ n ⟨2 * i, by omega⟩ - Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩ ∈ H01 n (s8_J0 n) := by
-  rw [H01, Module.End.mem_eigenspace_iff]
-  funext k
-  rw [s8_complexify_J0_apply]
-  simp only [e, Pi.sub_apply, Pi.smul_apply, Pi.single_apply, smul_eq_mul, s8_swap_eq_iff,
-    s8_swap_even, s8_swap_odd]
-  by_cases h1 : k = ⟨2 * i, by omega⟩
-  · subst h1
-    have : (⟨2 * i, by omega⟩ : Fin (2 * n)) ≠ ⟨2 * i + 1, by omega⟩ := by simp
-    simp [s8_sgn_even, this]
-  · by_cases h2 : k = ⟨2 * i + 1, by omega⟩
-    · subst h2
-      simp [s8_sgn_odd, h1]
-    · simp [h1, h2]
-
-theorem s8_eval2_ι_mul_ι (a b : Module.Dual ℝ (H1 ℝ n)) (x y : H1 ℝ n) :
-    eval2 ℝ n (ExteriorAlgebra.ι ℝ x * ExteriorAlgebra.ι ℝ y) a b = a x * b y - a y * b x := by
-  have h := s8_algebraMapInv_contractLeft_contractLeft_ι_mul_ι a b x y
-  have hD : D ℝ n b (D ℝ n a (ExteriorAlgebra.ι ℝ x * ExteriorAlgebra.ι ℝ y)) =
-      algebraMap ℝ (S ℝ n) (a x * b y - a y * b x) := by
-    rw [← h]
-    exact s8_eq_algebraMap_of_mem_zero (s8_contractLeft_mem _ (s8_contractLeft_mem _
-      (s8_ι_mul_ι_mem x y)))
-  rw [eval2, hD, Algebra.algebraMap_eq_smul_one, map_smul, ← s8_basisS_empty,
-    Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_eq_same, smul_eq_mul, mul_one]
-
-/-- `Θ = ThetaStd` is ample for `J₀`. -/
-theorem s8_ample_J0 : IsAmple n (s8_J0 n) (ThetaStd ℚ n) := by
-  refine ⟨(mem_hodgeClassesX_iff n _ 1 _).mpr ⟨s8_ThetaStd_mem ℚ n, ?_⟩, fun a ha => ?_⟩
-  · rw [s8_bcS_ThetaStd]
-    refine Submodule.sum_mem _ fun i _ => ?_
-    set v := e ℂ n ⟨2 * i, by omega⟩ + Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩
-    set w := e ℂ n ⟨2 * i, by omega⟩ - Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩
-    have key : ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i, by omega⟩) *
-        ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i + 1, by omega⟩) =
-        (Complex.I / 2) • (ExteriorAlgebra.ι ℂ v * ExteriorAlgebra.ι ℂ w) := by
-      have hc : ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i + 1, by omega⟩) *
-          ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i, by omega⟩) =
-          -(ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i, by omega⟩) *
-            ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i + 1, by omega⟩)) :=
-        eq_neg_of_add_eq_zero_left (ExteriorAlgebra.ι_add_mul_swap _ _)
-      simp only [v, w, map_add, map_sub, map_smul, add_mul, mul_sub,
-        smul_mul_assoc, mul_smul_comm, ExteriorAlgebra.ι_sq_zero, smul_zero, hc]
-      match_scalars
-      ring_nf
-      rw [Complex.I_sq]
-      ring
-    rw [key]
-    refine Submodule.smul_mem _ _ (Submodule.subset_span ⟨![v], ![w], ?_, ?_, ?_⟩)
-    · intro j; fin_cases j; exact s8_mem_H10_J0 n i
-    · intro j; fin_cases j; exact s8_mem_H01_J0 n i
-    · simp [ExteriorAlgebra.ιMulti_apply]
-  · have hsum : eval2 ℝ n (ThetaStd ℝ n) a (a ∘ₗ s8_J0 n) =
-        ∑ i : Fin n, ((a (e ℝ n ⟨2 * i, by omega⟩)) ^ 2 +
-          (a (e ℝ n ⟨2 * i + 1, by omega⟩)) ^ 2) := by
-      have hlin : ∀ ξ : S ℝ n, eval2 ℝ n ξ a (a ∘ₗ s8_J0 n) =
-          ((basisS ℝ n).coord ∅ ∘ₗ D ℝ n (a ∘ₗ s8_J0 n) ∘ₗ D ℝ n a) ξ := fun ξ => rfl
-      rw [hlin, ThetaStd, map_sum]
-      refine Finset.sum_congr rfl fun i _ => ?_
-      rw [← hlin, s8_eval2_ι_mul_ι]
-      simp only [LinearMap.comp_apply, s8_J0_e_even, s8_J0_e_odd, map_neg]
-      ring
-    rw [s8_bcS_ThetaStd, hsum]
-    obtain ⟨k, hk⟩ : ∃ k, a (e ℝ n k) ≠ 0 := by
-      by_contra! h
-      exact ha ((Pi.basisFun ℝ (Fin (2 * n))).ext fun k => by simpa [e] using h k)
-    refine Finset.sum_pos' (fun i _ => by positivity)
-      ⟨⟨k.val / 2, by omega⟩, Finset.mem_univ _, ?_⟩
-    rcases Nat.mod_two_eq_zero_or_one k.val with h | h
-    · have hk' : k = ⟨2 * (k.val / 2), by omega⟩ := Fin.ext (by simp; omega)
-      rw [← hk']
-      have := sq_pos_of_ne_zero hk
-      positivity
-    · have hk' : k = ⟨2 * (k.val / 2) + 1, by omega⟩ := Fin.ext (by simp; omega)
-      rw [← hk']
-      have := sq_pos_of_ne_zero hk
-      positivity
-
-end S8J0
+/-! ## Helpers (prefix `s8_`): weights -/
 
 section S8Weight
 
@@ -545,6 +353,71 @@ theorem s8_mem_extFiltGE_one_of_rank {x : ExtV F n} (hx : rankExt F n x = 0) :
   exact (DirectSum.decompose (fun i : ℕ => ⋀[F]^i (V F n)) x (k + 1)).2
 
 end S8Weight
+
+/-! ## Helpers (prefix `s8_`): `λ₁ ⊠ λ₁ + λ₂ ⊠ λ₂` is not `Spin(V_K)_{ℓ₁,ℓ₂}`-invariant -/
+
+section S8HW
+
+variable {n : ℕ} {d : ℚ}
+
+/-- (Proof of Lemma 8.3.1, TeX line 4021) For `P` as in §6.4 (Assumption 2.4.1),
+`λ₁ ⊠ λ₁ + λ₂ ⊠ λ₂ ∈ HW_{P_K} = ℓ̃₁^{⊗2} ⊕ ℓ̃₂^{⊗2}` (`λᵢ = uᵢ`) is not
+`Spin(V_K)_{ℓ₁,ℓ₂}`-invariant, "by Lemma 2.2.7 and Proposition 6.4.1(1)". By Proposition 6.4.1(1)
+(`proposition6_4_1_1_line₁/₂`), `φ'` maps it into `F_{2n} = ⊕_{k ≥ 2n} H^k(X × X̂, K)`, with
+projection `v₁ + v₂` to `H^{2n}`, `vᵢ` spanning `⋀^{2n} Wᵢ`, a line (Lemma 2.2.7,
+`lemma2_2_7_K_finrank`). If it were invariant, `ρ'_g` would fix its image (`φ'` intertwines
+`m_g ⊗ m_g` with `ρ'_g`, (6.1.4)), so `ρ_g` would fix `v₁ + v₂` (`ρ'_g` induces `ρ_g` on the graded
+pieces, `rhoPrime_projDeg`). But `Spin(V_K)_{ℓ₁,ℓ₂}` acts on `⋀^{2n} Wᵢ` by `detᵢ` and
+`⋀^{2n} W₁ ⊕ ⋀^{2n} W₂` is direct (Lemma 2.2.7, `lemma2_2_7_K_det₁/₂`, `lemma2_2_7_K_indep`), and
+`det₁` is non-trivial (§6.4, TeX line 2860, `exists_det₁_ne`). -/
+theorem s8_HW_not_invariant (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
+    (hA : Assumption2_4_1 P J) :
+    ¬ ∀ g : P.spinL₁L₂, TensorProduct.map (m (Kd d) n ((g : Spin (Kd d) n) : C (Kd d) n))
+        (m (Kd d) n ((g : Spin (Kd d) n) : C (Kd d) n))
+        (P.u₁ ⊗ₜ[Kd d] P.u₁ + P.u₂ ⊗ₜ[Kd d] P.u₂) = P.u₁ ⊗ₜ[Kd d] P.u₁ + P.u₂ ⊗ₜ[Kd d] P.u₂ := by
+  intro hinv
+  have hd := hA.pos
+  have hP := hA.nonIsotropic
+  -- Proposition 6.4.1(1): `φ'(λᵢ ⊠ λᵢ) ∈ F_{2n}`, with projection `vᵢ` spanning `⋀^{2n} Wᵢ`
+  obtain ⟨hF₁, hproj₁⟩ := proposition6_4_1_1_line₁ P J hA
+  obtain ⟨hF₂, hproj₂⟩ := proposition6_4_1_1_line₂ P J hA
+  obtain ⟨v₁, hv₁def⟩ : ∃ v, v = projDeg (Kd d) n (2 * n) (phiPrime (Kd d) n (P.u₁ ⊗ₜ[Kd d] P.u₁)) :=
+    ⟨_, rfl⟩
+  obtain ⟨v₂, hv₂def⟩ : ∃ v, v = projDeg (Kd d) n (2 * n) (phiPrime (Kd d) n (P.u₂ ⊗ₜ[Kd d] P.u₂)) :=
+    ⟨_, rfl⟩
+  have hv₁ : v₁ ∈ pqPiece P.W₁ P.W₂ (2 * n) 0 := by
+    rw [hv₁def, s62_pqPiece_zero_right, ← hproj₁]
+    exact Submodule.mem_map_of_mem (Submodule.mem_span_singleton_self _)
+  have hv₂ : v₂ ∈ pqPiece P.W₁ P.W₂ 0 (2 * n) := by
+    rw [hv₂def, s62_pqPiece_zero_left, ← hproj₂]
+    exact Submodule.mem_map_of_mem (Submodule.mem_span_singleton_self _)
+  -- `v₁ ≠ 0`: `⋀^{2n} W₁ = span{v₁}` is a line (Lemma 2.2.7)
+  have hv₁0 : v₁ ≠ 0 := by
+    have hspan : Submodule.span (Kd d) {v₁} = pqPiece P.W₁ P.W₂ (2 * n) 0 := by
+      rw [s62_pqPiece_zero_right, ← hproj₁, Submodule.map_span, Set.image_singleton, hv₁def]
+    intro h0
+    have h1 := (lemma2_2_7_K_finrank P hd hP).1
+    rw [← hspan, h0, Submodule.span_zero_singleton, finrank_bot] at h1
+    exact zero_ne_one h1
+  -- `g` with `det₁ g ≠ 1` (§6.4: `ℓ̃₁^{⊗2}` is a non-trivial character)
+  obtain ⟨g, hg⟩ := (P.exists_det₁_ne hd hP).1
+  -- `ρ'_g` fixes `φ'(λ₁ ⊠ λ₁ + λ₂ ⊠ λ₂)`, so `ρ_g` fixes its projection `v₁ + v₂` to `H^{2n}`
+  have hmemF : phiPrime (Kd d) n (P.u₁ ⊗ₜ[Kd d] P.u₁ + P.u₂ ⊗ₜ[Kd d] P.u₂) ∈
+      extFiltGE (Kd d) n (2 * n) := by
+    rw [map_add]; exact add_mem hF₁ hF₂
+  have hfix := rhoPrime_projDeg (Kd d) n (g : Spin (Kd d) n) (2 * n) hmemF
+  rw [← s62_phiPrime_map, hinv g, map_add, map_add, map_add, ← hv₁def, ← hv₂def,
+    lemma2_2_7_K_det₁ P hd hP g v₁ hv₁, lemma2_2_7_K_det₂ P hd hP g v₂ hv₂] at hfix
+  -- `(det₁ g - 1) v₁ + (det₂ g - 1) v₂ = 0` in `⋀^{2n} W₁ ⊕ ⋀^{2n} W₂`
+  have key : (P.det₁ g - 1) • v₁ + (P.det₂ g - 1) • v₂ = 0 :=
+    calc (P.det₁ g - 1) • v₁ + (P.det₂ g - 1) • v₂
+        = (P.det₁ g • v₁ + P.det₂ g • v₂) - (v₁ + v₂) := by module
+      _ = 0 := by rw [← hfix, sub_self]
+  have h0 := (s62_indep_three (lemma2_2_7_K_indep P hd hP) (i := 0) (j := 1) (by decide)
+    (Submodule.smul_mem _ _ hv₁) (Submodule.smul_mem _ _ hv₂) key).1
+  exact hg (sub_eq_zero.mp ((smul_eq_zero.mp h0).resolve_right hv₁0))
+
+end S8HW
 
 /-! ## Lemma 8.3.1 -/
 
@@ -830,9 +703,12 @@ theorem s8_tensor_invariant (g : Spin (Kd d) 3)
   have hy := congrArg (phiPrimeInv (Kd d) 3) hg
   rwa [hinv, hinv] at hy
 
-/-- (Proof of Lemma 8.3.1) `ch(F₁) ⊠ τ(ch F₁)` is not `Spin(V_K)_{ℓ₁,ℓ₂}`-invariant: its summand
-`((d+1)/(4d)) [λ₁ ⊠ λ₁ + λ₂ ⊠ λ₂]` transforms by the characters `det₁`, `det₂` (Lemma 2.2.7,
-Proposition 6.4.1), and `det₁` is non-trivial, while the other summands are invariant. -/
+/-- (Proof of Lemma 8.3.1, TeX lines 4019–4023) `ch(F₁) ⊠ τ(ch F₁)` is not
+`Spin(V_K)_{ℓ₁,ℓ₂}`-invariant. In the decomposition `chF1_tmul_tau_decomp`, the summands
+`λ₁ ⊠ λ₂ + λ₂ ⊠ λ₁` and `λ₂ ⊠ λ₁ - λ₁ ⊠ λ₂` are invariant (`map_m_u₁_tmul_u₂`), while the first
+summand `λ₁ ⊠ λ₁ + λ₂ ⊠ λ₂` is not, by Lemma 2.2.7 and Proposition 6.4.1(1)
+(`s8_HW_not_invariant`, for `P_Θ` with the complex structure `J₀` for which `Θ` is ample:
+Assumption 2.4.1); its coefficient `(d+1)/(4d)` is non-zero. -/
 theorem s8_not_tensor_invariant :
     ¬ ∀ g : (PJac d hΘ hd).spinL₁L₂,
       TensorProduct.map (m (Kd d) 3 ((g : Spin (Kd d) 3) : C (Kd d) 3))
@@ -841,25 +717,31 @@ theorem s8_not_tensor_invariant :
         bcS ℚ (Kd d) 3 (chF1 d) ⊗ₜ[Kd d] bcS ℚ (Kd d) 3 (tau ℚ 3 (chF1 d)) := by
   intro hall
   have hP := PJac_not_isIsotropic d hΘ hd
-  obtain ⟨g, hdet⟩ := ((PJac d hΘ hd).exists_det₁_ne hd hP).1
+  -- the first summand is not invariant (Lemma 2.2.7, Proposition 6.4.1(1))
+  refine s8_HW_not_invariant (PJac d hΘ hd) (s8_J0 3)
+    (PJac_assumption2_4_1 d (s8_J0_isComplex 3) (s8_ample_J0 3) hd) fun g => ?_
+  -- but it would be, as the other two summands are invariant and its coefficient is non-zero
   have hy := hall g
   rw [chF1_tmul_tau_decomp d hΘ hd] at hy
-  obtain ⟨φ, hφ1, hφ2⟩ := s8_exists_dual (PJac d hΘ hd).linIndep
-  have hφ2' : φ (PJac d hΘ hd).u₂ = 0 := hφ2
-  let B : S (Kd d) 3 ⊗[Kd d] S (Kd d) 3 →ₗ[Kd d] Kd d :=
-    TensorProduct.lift ((LinearMap.mul (Kd d) (Kd d)).compl₁₂ φ φ)
-  have hB : ∀ a b, B (a ⊗ₜ[Kd d] b) = φ a * φ b := fun a b => rfl
-  have hW0 : (PJac d hΘ hd).W₁ ⊓ (PJac d hΘ hd).W₂ = ⊥ :=
-    ((PJac d hΘ hd).isCompl_of_not_isIsotropic hd hP).inf_eq_bot
   have h12 := (PJac d hΘ hd).map_m_u₁_tmul_u₂ hd hP g
-  have hB' := congrArg B hy
-  simp only [map_add, map_sub, LinearMap.map_smul_of_tower,
-    (PJac d hΘ hd).map_m_u₁_tmul_u₁ hd hW0 g, (PJac d hΘ hd).map_m_u₂_tmul_u₂ hd hW0 g, h12.1,
-    h12.2, map_smul, hB, hφ1, hφ2', mul_zero, zero_mul, mul_one, add_zero, sub_zero, smul_zero,
-    smul_eq_mul] at hB'
-  apply hdet
+  set T := TensorProduct.map (m (Kd d) 3 ((g : Spin (Kd d) 3) : C (Kd d) 3))
+    (m (Kd d) 3 ((g : Spin (Kd d) 3) : C (Kd d) 3)) with hT
+  set A := (PJac d hΘ hd).u₁ ⊗ₜ[Kd d] (PJac d hΘ hd).u₁ +
+    (PJac d hΘ hd).u₂ ⊗ₜ[Kd d] (PJac d hΘ hd).u₂ with hA
+  have hB : T ((PJac d hΘ hd).u₁ ⊗ₜ[Kd d] (PJac d hΘ hd).u₂ +
+      (PJac d hΘ hd).u₂ ⊗ₜ[Kd d] (PJac d hΘ hd).u₁) =
+      (PJac d hΘ hd).u₁ ⊗ₜ[Kd d] (PJac d hΘ hd).u₂ +
+        (PJac d hΘ hd).u₂ ⊗ₜ[Kd d] (PJac d hΘ hd).u₁ := by
+    rw [map_add, h12.1, h12.2]
+  have hC : T ((PJac d hΘ hd).u₂ ⊗ₜ[Kd d] (PJac d hΘ hd).u₁ -
+      (PJac d hΘ hd).u₁ ⊗ₜ[Kd d] (PJac d hΘ hd).u₂) =
+      (PJac d hΘ hd).u₂ ⊗ₜ[Kd d] (PJac d hΘ hd).u₁ -
+        (PJac d hΘ hd).u₁ ⊗ₜ[Kd d] (PJac d hΘ hd).u₂ := by
+    rw [map_sub, h12.1, h12.2]
+  rw [map_add, map_add, LinearMap.map_smul_of_tower, LinearMap.map_smul_of_tower, map_smul, hB,
+    hC] at hy
   have hc : ((d + 1) / (4 * d) : ℚ) ≠ 0 := by positivity
-  exact smul_right_injective (Kd d) hc hB'
+  exact smul_right_injective _ hc (add_right_cancel (add_right_cancel hy))
 
 /-- **Lemma 8.3.1** (`lemma-kappa-3-is-linearly-independent-from-h-cube`), second sentence: the
 `Spin(V)_P`-invariant classes `h³` and `κ₃(Φ(F₁ ⊠ F₁))` are linearly independent.

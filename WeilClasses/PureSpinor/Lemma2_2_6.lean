@@ -2601,16 +2601,24 @@ ring of `X`, then `W₁^{1,0} := W_{1,ℂ} ∩ V^{1,0}` and `W₂^{1,0} := W_{2,
 `n`-dimensional. Here `V^{1,0}` is the `i`-eigenspace of the complex structure of `X × X̂`. Standing
 hypotheses: `P` non-isotropic (not used by the proof), `K` imaginary quadratic.
 
-Proof (the paper's, `KSecant.s22b_core`): the circle action of the Hodge structure is used through
-one element `g ∈ Spin(V_ℂ)` of the complexified circle, the spin lift of `⋀T` with `T = 2` on
-`H^{1,0}` and `1/2` on `H^{0,1}` (`s22b_exists_torus`; `ρ(g)` acts by `1/2` on `V^{1,0}` and by `2`
-on `V^{0,1}`). As `λᵢ ∈ P_K` lies in the Hodge ring, `g` fixes `λᵢ` (`ℓ̃ᵢ ⊗ ℓ̃ᵢ` is the trivial
-character), so `ρ(g)` preserves `W_{i,ℂ} = ker m_{λᵢ}` and `W_{i,ℂ} = W_i^{1,0} ⊕ W_i^{0,1}`.
-Chevalley's `φ` is an isomorphism [Chevalley, III.3.1] (`chevalley_III_3_1_bijective`) of Hodge
-structures (`chevalley_III_3_1_equivariant`: `φ(g u ⊗ g u) = g φ(u ⊗ u) g*`) mapping `ℓ̃ᵢ ⊗ ℓ̃ᵢ`
-onto `⋀^{2n} W_{i,ℂ} ⊆ C(V_ℂ)` [Chevalley, III.3.2] (`chevalley_III_3_2`). So the character
-`⋀^{2n} W_{i,ℂ}` is trivial: `det(ρ(g)|_{W_{i,ℂ}}) = 2^{dim W_i^{0,1} - dim W_i^{1,0}} = 1`
-(`s22b_conj_cliffordTopPiece`). -/
+Proof (`KSecant.s22b_core`), the paper's steps: as `λᵢ ∈ P_K` lies in the Hodge ring, `m_{λᵢ}` is
+equivariant for the circle action, so `W_{i,ℂ} = ker m_{λᵢ}` is invariant and
+`W_{i,ℂ} = W_i^{1,0} ⊕ W_i^{0,1}`; Chevalley's `φ` is an isomorphism [Chevalley, III.3.1]
+(`chevalley_III_3_1_bijective`) of Hodge structures mapping the trivial character `ℓ̃ᵢ ⊗ ℓ̃ᵢ` onto
+`⋀^{2n} W_{i,ℂ} ⊆ C(V_ℂ)` [Chevalley, III.3.2] (`chevalley_III_3_2`); so the character
+`⋀^{2n} W_{i,ℂ}` is trivial, i.e. `dim W_i^{1,0} = dim W_i^{0,1}`.
+
+Departure from the paper (reason 3), in "`φ` is an isomorphism of Hodge structures": the paper puts
+on `C(V)` the Hodge structure transported by `m : C(V) ≅ End(S)` (with the weight of `H¹(X̂)` shifted
+to `-1`) and checks that `φ` is a morphism of Hodge structures through its building blocks (the
+product of `C(V)`, `S_X`, `S_X̂`, `[pt_X̂]`, `τ`). In the model a Hodge structure is a circle action,
+and the Hodge structure of `C(V)` is not modeled. Here the circle acts through one element
+`g ∈ Spin(V_ℂ)` of the complexified circle, the spin lift of `⋀T` with `T = 2` on `H^{1,0}` and
+`1/2` on `H^{0,1}` (`s22b_exists_torus`; `ρ(g)` acts by `1/2` on `V^{1,0}` and by `2` on
+`V^{0,1}`). `g` fixes `λᵢ`, so `ρ(g)` preserves `W_{i,ℂ}`; "`φ` is a morphism of Hodge structures"
+becomes its `g`-equivariance ([Chevalley, III.3.1], `chevalley_III_3_1_equivariant`:
+`φ(g u ⊗ g u) = g φ(u ⊗ u) g*`); and the triviality of the character `⋀^{2n} W_{i,ℂ}` becomes
+`det(ρ(g)|_{W_{i,ℂ}}) = 2^{dim W_i^{0,1} - dim W_i^{1,0}} = 1` (`s22b_conj_cliffordTopPiece`). -/
 theorem _root_.WeilClasses.lemma2_2_6 (hd : 0 < d) (hP : ¬ P.IsIsotropic)
     (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hPJ : P.Pℚ ≤ hodgeRingX n J) :
     Module.finrank ℂ (P.W₁ℂ ⊓ V10 n (productStructure n J) : Submodule ℂ (V ℂ n)) = n ∧
@@ -2624,7 +2632,14 @@ theorem _root_.WeilClasses.lemma2_2_6 (hd : 0 < d) (hP : ¬ P.IsIsotropic)
 
 /-- **Lemma 2.2.6** (`lemma-decomposition-into-4-direct-summands`), the equivalent form: if `P` is
 contained in the Hodge ring, then `W₁^{0,1} := W_{1,ℂ} ∩ V^{0,1}` and
-`W₂^{0,1} := W_{2,ℂ} ∩ V^{0,1}` are both `n`-dimensional. -/
+`W₂^{0,1} := W_{2,ℂ} ∩ V^{0,1}` are both `n`-dimensional.
+
+Proof: `KSecant.s22b_core`, as for `lemma2_2_6` (the paper notes that the two forms are complex
+conjugate, hence equivalent; here both come out of the same computation).
+
+Departure from the paper (reason 3), as at `lemma2_2_6`: the Hodge structure of `C(V)` is not
+modeled; "`φ` is a morphism of Hodge structures" is the equivariance of `φ` under one element `g` of
+the complexified circle. -/
 theorem _root_.WeilClasses.lemma2_2_6_V01 (hd : 0 < d) (hP : ¬ P.IsIsotropic)
     (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hPJ : P.Pℚ ≤ hodgeRingX n J) :
     Module.finrank ℂ (P.W₁ℂ ⊓ V01 n (productStructure n J) : Submodule ℂ (V ℂ n)) = n ∧
@@ -2641,9 +2656,13 @@ is contained in the Hodge ring, then `W_{i,ℂ}` is invariant under the circle a
 structure, so `W_{i,ℂ} = (W_{i,ℂ} ∩ V^{1,0}) ⊕ (W_{i,ℂ} ∩ V^{0,1})` for `i = 1, 2`. Used in §2.4
 ("`I` commutes with `f`, by Lemma 2.2.6") and in §§3–4.
 
-Proof: the `U(1)`-equivariance of `m_{λ_i}` is used through the element `g` of the complexified
-circle described at `lemma2_2_6`. `ρ(g)` acts by `1/2` on `V^{1,0}` and by `2` on `V^{0,1}`. It
-fixes `u_i`, so it preserves `W_{i,ℂ} = ker m_{u_i}`, and `W_{i,ℂ}` splits into its eigenspaces. -/
+Proof (`KSecant.s22b_core`): the paper's "`m_{λᵢ}` is equivariant with respect to the `U(1)` action,
+thus its kernel `W_{i,ℂ}` is `U(1)`-invariant".
+
+Departure from the paper (reason 3, as at `lemma2_2_6`): the `U(1)`-equivariance of `m_{λᵢ}` is used
+through the element `g` of the complexified circle described at `lemma2_2_6`. `ρ(g)` acts by `1/2`
+on `V^{1,0}` and by `2` on `V^{0,1}`. It fixes `uᵢ`, so it preserves `W_{i,ℂ} = ker m_{uᵢ}`, and
+`W_{i,ℂ}` splits into its eigenspaces. -/
 theorem _root_.WeilClasses.lemma2_2_6_decomp (hd : 0 < d) (hP : ¬ P.IsIsotropic)
     (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hPJ : P.Pℚ ≤ hodgeRingX n J) :
     P.W₁ℂ =

@@ -12,8 +12,9 @@ import TauCeti.LinearAlgebra.ExteriorPower.Basic
 # §6.3: Orlov's equivalence induces Chevalley's isomorphism `S ⊗ S ≅ ⋀•V`
 
 Statements of the paper's §6.3 (TeX lines 2660–2855): Lemma 6.3.1 with the displayed equations
-(6.3.1), (6.3.2) and the unnumbered formulas of its proof, the proof of Lemma 6.1.1
-(`phiOrlov_eq_PiMap_comp_nuOrlov`), Lemma 6.3.2 and Remark 6.3.3.
+(6.3.1), (6.3.2) and the unnumbered formulas of its proof, Lemma 6.1.1 (`lemma6_1_1`, stated in §6.1
+and proved in §6.3, TeX lines 2789–2796) with the step `phiOrlov_eq_PiMap_comp_nuOrlov` of its
+proof, Lemma 6.3.2 and Remark 6.3.3.
 
 Notation (proof of Lemma 6.3.1): `e_K = basisS F n K`, `f_K = basisSHat F n K` (increasing wedge
 products), `π_X^*`, `π_X̂^*` (`pullX`, `pullXHat`), `ε_{K,L}` (`epsSign`), `Σ(K)` (`sumIdx`, indices
@@ -33,12 +34,15 @@ Cor. 9.24] (`WeilClasses.External.Huybrechts.Sec6_3`). `import all` of
 `LinearMap.BilinForm.bilinForm_ιMulti_ιMulti` (non-exported in Mathlib), needed to compute
 `extPairing` (`s61_extPairing_ιMulti`).
 
-The last section holds the algebraic computation of `ρ'_g` from the identity of Lemma 6.1.1
-(`sd_rhoPrime_of_lemma6_1_1`, with the `Spin(V)`-equivariance of `Π = ±PD`, `s61_PiMap_rhoExt`),
-which proves Proposition 6.1.2 in `WeilClasses.Orlov.Sec6_1` and, upstream of §6.1, the cited
-[Orlov, Th. 2.10] (`WeilClasses.External.Orlov.Sec6_1`); this is why this file imports
-`WeilClasses.Chevalley.Sec2_3`. Part of the helpers written for this file (prefix `s61_`) are in
-`WeilClasses.Orlov.Basis`, where `WeilClasses.Chevalley.Sec2_3` can use them.
+The last two sections hold, upstream of §6.1, what the proof in the model of the cited
+[Orlov, Th. 2.10] (`WeilClasses.External.Orlov.Sec6_1`) uses: the algebraic computation of `ρ'_g`
+from the identity of Lemma 6.1.1 (`sd_rhoPrime_of_lemma6_1_1`, with the `Spin(V)`-equivariance of
+`Π = ±PD`, `s61_PiMap_rhoExt`), which also proves Proposition 6.1.2 in `WeilClasses.Orlov.Sec6_1`
+(this is why this file imports `WeilClasses.Chevalley.Sec2_3`); and the integrality of
+`½[c₁(𝒫) - ρ_g(c₁(𝒫))]` for integral `g` (the remark after Proposition 6.1.2, TeX lines 2277–2279:
+`c1P_pairing_mod_two`, `half_c1P_sub_rho_mem_ExtZ`), which gives the integrality of `c₁(N_g)`. Part
+of the helpers written for this file (prefix `s61_`) are in `WeilClasses.Orlov.Basis`, where
+`WeilClasses.Chevalley.Sec2_3` can use them.
 -/
 
 @[expose] public section
@@ -1017,6 +1021,19 @@ theorem phiOrlov_eq_PiMap_comp_nuOrlov : phiOrlov F n = PiMap F n ∘ₗ nuOrlov
     LinearEquiv.symm_apply_apply]
   rw [← LinearMap.comp_apply (TensorProduct.map (phiP F n) (psiPinvShift F n)), h]
 
+/-- **Lemma 6.1.1** (`lemma-orlov-isomorphism-is-chevalley`).
+`φ = (φ_𝒫 ⊗ ψ_{𝒫⁻¹[n]}) ∘ φ̃ ∘ (id ⊗ τ)`, where `φ̃ : H*(X × X) → H*(X̂ × X)` is Chevalley's
+isomorphism (2.3.2) and `φ_𝒫 ⊗ ψ_{𝒫⁻¹[n]} : H*(X̂ × X) → H*(X × X̂)`. (Checked numerically for
+`n = 1, 2` with the sign convention of `c1P`.)
+Proof (the paper's, §6.3, TeX lines 2789–2796): `φ = (φ_𝒫 ⊗ ψ_{𝒫⁻¹[n]}) ∘ ν`
+(`phiOrlov_eq_PiMap_comp_nuOrlov`) and `ν ∘ (id ⊗ τ) = φ̃` (Lemma 6.3.1), with `τ² = 1`. The lemma
+is stated in §6.1 and proved in §6.3; it is placed here, next to Lemma 6.3.1, so that the proof of
+the cited [Orlov, Th. 2.10] in the model (`WeilClasses.External.Orlov.Sec6_1`, upstream of §6.1)
+can cite it. -/
+theorem lemma6_1_1 : phiOrlov F n = PiMap F n ∘ₗ varphiTilde F n ∘ₗ tauTensor F n := by
+  rw [← lemma6_3_1, LinearMap.comp_assoc, tauTensor_comp_tauTensor, LinearMap.comp_id,
+    phiOrlov_eq_PiMap_comp_nuOrlov]
+
 /-- `ψ_{𝒫⁻¹} = (-1)ⁿ ψ_{𝒫⁻¹[n]}` (the shift `[n]` multiplies the Chern character by `(-1)ⁿ`). -/
 theorem sd_psiPinv_eq_smul : psiPinv F n = (-1 : F) ^ n • psiPinvShift F n := by
   rw [s61_psiPinvShift_eq_smul, smul_smul, ← pow_add, ← two_mul, pow_mul, neg_one_sq, one_pow,
@@ -1351,5 +1368,183 @@ theorem sd_rhoPrime_of_lemma6_1_1
         exact ((s61_commute_c1P F n _).smul_left _)
 
 end S61Equivariance
+
+/-! ## The integrality of `½[c₁(𝒫) - ρ_g(c₁(𝒫))]` (§6.1)
+
+The remark after Proposition 6.1.2 (TeX lines 2277–2279): "the integral alternating bilinear form
+`c₁(𝒫)` and the symmetric bilinear pairing `(•,•)_V` agree modulo `2`, and so the class
+`½[c₁(𝒫) - ρ_g(c₁(𝒫))]` is indeed integral, for every element `g ∈ Spin(V)`"
+(`c1P_pairing_mod_two`, `half_c1P_sub_rho_mem_ExtZ`), with its helpers (prover P10). It is stated
+here, upstream of §6.1, so that the proof in the model of the cited [Orlov, Th. 2.10]
+(`WeilClasses.External.Orlov.Sec6_1`), whose class `c₁(N_g)` is `½[c₁(𝒫) - ρ_g(c₁(𝒫))]`, can use it
+for the integrality of `c₁(N_g)`. -/
+
+section S61Pair2
+
+variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
+
+omit [CharZero F] in
+theorem s61_ι_mul_ι_eq_ιMulti (u v : V F n) :
+    ExteriorAlgebra.ι F u * ExteriorAlgebra.ι F v = ExteriorAlgebra.ιMulti F 2 ![u, v] := by
+  rw [ExteriorAlgebra.ιMulti_succ_apply, ExteriorAlgebra.ιMulti_succ_apply,
+    ExteriorAlgebra.ιMulti_zero_apply, mul_one]
+  rfl
+
+omit [CharZero F] in
+/-- The alternating form of `c₁(𝒫)`: `(c₁(𝒫), x ∧ y) = θ_x(w_y) - θ_y(w_x)`. -/
+theorem s61_extPairing_c1P (x y : V F n) :
+    extPairing F n (c1P F n) (ExteriorAlgebra.ι F x * ExteriorAlgebra.ι F y) = x.1 y.2 - y.1 x.2 := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · have hH : ∀ w : H1 F 0, w = 0 := fun w => funext fun i => absurd i.2 (by simp)
+    have hV : ∀ v : V F 0, v = 0 := fun v =>
+      Prod.ext (LinearMap.ext fun w => by rw [hH w, map_zero]; rfl) (hH v.2)
+    rw [hV x, hV y]
+    simp
+  rw [s61_c1P_eq, map_sum, LinearMap.sum_apply, s61_dual_apply F n x.1, s61_dual_apply F n y.1,
+    ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [s61_a_eq, s61_ι_mul_ι_eq_ιMulti, s61_ι_mul_ι_eq_ιMulti, s61_extPairing_ιMulti F n (by omega),
+    Matrix.det_fin_two]
+  simp only [Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one, s61_pairing_apply,
+    map_zero, LinearMap.zero_apply, zero_add, add_zero, f, LinearMap.proj_apply]
+  ring
+
+omit [CharZero F] in
+theorem s61_extPairing_basisExt_flip_eq (M : Finset (Fin (2 * n + 2 * n))) :
+    ∃ k : ℕ, extPairing F n (basisExt F n M)
+      (basisExt F n (M.map (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding)) =
+      (-1 : F) ^ k := by
+  obtain ⟨L, K, -, hM⟩ := s61_basisExt_eq_beta F n M
+  have hMeq : M = L.map (Fin.castAddOrderEmb (2 * n)).toEmbedding ∪
+      K.map (Fin.natAddOrderEmb (2 * n)).toEmbedding :=
+    (basisExt F n).injective (hM.trans (s61_beta_eq F n L K))
+  have hflip : M.map (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding =
+      K.map (Fin.castAddOrderEmb (2 * n)).toEmbedding ∪
+        L.map (Fin.natAddOrderEmb (2 * n)).toEmbedding := by
+    rw [hMeq, Finset.map_union, Finset.map_map, Finset.map_map, Finset.union_comm]
+    congr 1
+    · congr 1
+      exact Function.Embedding.ext fun x => finAddFlip_apply_natAdd x (2 * n)
+    · congr 1
+      exact Function.Embedding.ext fun x => finAddFlip_apply_castAdd x (2 * n)
+  rw [hflip, ← s61_beta_eq, hM]
+  have hcomm : pullXHat F n (basisSHat F n L) * pullX F n (basisS F n K) =
+      (-1 : F) ^ (L.card * K.card) • (pullX F n (basisS F n K) * pullXHat F n (basisSHat F n L)) :=
+    s61_mul_comm_of_mem (s61_map_mem _ (s61_basis_mem _ L)) (s61_map_mem _ (s61_basis_mem _ K))
+  rw [hcomm, map_smul, LinearMap.smul_apply, s61_extPairing_identity, smul_eq_mul, mul_one]
+  exact ⟨_, rfl⟩
+
+omit [CharZero F] in
+theorem s61_repr_mul_extPairing_flip (ω : ExtV F n) (M : Finset (Fin (2 * n + 2 * n))) :
+    (basisExt F n).repr ω M * extPairing F n (basisExt F n M)
+      (basisExt F n (M.map (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding)) =
+      extPairing F n ω
+        (basisExt F n (M.map (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding)) := by
+  classical
+  conv_rhs => rw [← (basisExt F n).sum_repr ω]
+  rw [map_sum, LinearMap.sum_apply, Finset.sum_eq_single M]
+  · rw [map_smul, LinearMap.smul_apply, smul_eq_mul]
+  · intro N _ hN
+    rw [map_smul, LinearMap.smul_apply, s61_extPairing_basisExt_eq_zero, smul_zero]
+    intro h'
+    apply hN
+    have := congrArg (fun P : Finset (Fin (2 * n + 2 * n)) =>
+      P.map (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding) h'
+    simp only [s61_flip_flip] at this
+    exact this.symm
+  · intro h'; exact absurd (Finset.mem_univ M) h'
+
+omit [CharZero F] in
+theorem s61_basisExt_card_two (N : Finset (Fin (2 * n + 2 * n))) (h : N.card = 2) :
+    ∃ a b, basisExt F n N = ExteriorAlgebra.ι F (basisV F n a) * ExteriorAlgebra.ι F (basisV F n b) :=
+  ⟨N.orderEmbOfFin h 0, N.orderEmbOfFin h 1, by
+    rw [s61_basisExt_eq_ιMulti' F n N h, s61_ι_mul_ι_eq_ιMulti]
+    congr 1
+    ext i : 1
+    fin_cases i <;> rfl⟩
+
+theorem s61_extPairing_rhoExt_left (g : Spin F n) (c z : ExtV F n) :
+    extPairing F n (rhoExt F n g c) z = extPairing F n c (rhoExt F n g⁻¹ z) := by
+  conv_lhs => rw [← s61_rhoExt_rhoExt_inv F n g z]
+  exact s61_extPairing_rhoExt F n g c _
+
+end S61Pair2
+
+section S61Integral
+
+variable (n : ℕ)
+
+theorem s61_basisV_mem_VZ (a : Fin (2 * n + 2 * n)) : basisV ℚ n a ∈ VZ n := by
+  refine Fin.addCases (fun i => ?_) (fun i => ?_) a
+  · rw [s61_basisV_castAdd]
+    refine ⟨fun j => ?_, fun j => ⟨0, rfl⟩⟩
+    rw [s61_f_e]
+    by_cases h : i = j
+    · exact ⟨1, by rw [ite_eq_left h]; simp⟩
+    · exact ⟨0, by rw [ite_eq_right h]; simp⟩
+  · rw [s61_basisV_natAdd]
+    refine ⟨fun j => ⟨0, rfl⟩, fun j => ?_⟩
+    by_cases h : j = i
+    · exact ⟨1, by simp [e, h]⟩
+    · exact ⟨0, by simp [e, h]⟩
+
+/-- (§6.1, TeX lines 2277–2278) The integral alternating bilinear form `c₁(𝒫)` (the class
+`c₁(𝒫) ∈ ⋀²V` paired with `x ∧ y` by the determinant pairing of `(·,·)_V`) and the symmetric
+pairing `(·,·)_V` agree modulo `2` on the lattice `V`. -/
+theorem c1P_pairing_mod_two (x y : V ℚ n) (hx : x ∈ VZ n) (hy : y ∈ VZ n) :
+    ∃ k : ℤ, extPairing ℚ n (c1P ℚ n) (ExteriorAlgebra.ι ℚ x * ExteriorAlgebra.ι ℚ y) -
+      pairing ℚ n x y = 2 * k := by
+  have hx' : (∀ i, ∃ z : ℤ, x.1 (e ℚ n i) = z) ∧ ∀ i, ∃ z : ℤ, x.2 i = z := hx
+  have hy' : (∀ i, ∃ z : ℤ, y.1 (e ℚ n i) = z) ∧ ∀ i, ∃ z : ℤ, y.2 i = z := hy
+  choose zx hzx using hx'.2
+  choose zy hzy using hy'.1
+  refine ⟨-∑ i, zy i * zx i, ?_⟩
+  rw [s61_extPairing_c1P, s61_pairing_apply, s61_dual_apply ℚ n y.1 x.2]
+  simp only [hzx, hzy]
+  push_cast
+  ring
+
+/-- (§6.1, TeX lines 2277–2279) The class `½[c₁(𝒫) - ρ_g(c₁(𝒫))]` is integral for every `g` in the
+integral group `Spin(V)`: its pairing with `x ∧ y`, `x, y ∈ V_ℤ`, is
+`½[(c₁(𝒫), x ∧ y) - (x, y)_V] - ½[(c₁(𝒫), ρ_{g⁻¹}x ∧ ρ_{g⁻¹}y) - (ρ_{g⁻¹}x, ρ_{g⁻¹}y)_V] ∈ ℤ`
+(`c1P_pairing_mod_two`, `ρ_g` an isometry preserving `V_ℤ`). -/
+theorem half_c1P_sub_rho_mem_ExtZ (g : Spin ℚ n) (hg : g ∈ SpinZ n) :
+    (2 : ℚ)⁻¹ • (c1P ℚ n - rhoExt ℚ n g (c1P ℚ n)) ∈ ExtZ n := by
+  intro M
+  have hω := s61_beta_mem ℚ n g
+  by_cases hM : M.card = 2
+  · obtain ⟨k, hk⟩ := s61_extPairing_basisExt_flip_eq ℚ n M
+    have hrepr := s61_repr_mul_extPairing_flip ℚ n
+      ((2 : ℚ)⁻¹ • (c1P ℚ n - rhoExt ℚ n g (c1P ℚ n))) M
+    obtain ⟨a, b, hab⟩ := s61_basisExt_card_two ℚ n
+      (M.map (finAddFlip : Fin (2 * n + 2 * n) ≃ Fin (2 * n + 2 * n)).toEmbedding)
+      (by rw [Finset.card_map, hM])
+    rw [hk, hab] at hrepr
+    have hu := s61_basisV_mem_VZ n a
+    have hv := s61_basisV_mem_VZ n b
+    have hginv : g⁻¹ ∈ SpinZ n := inv_mem hg
+    have hu' : rho ℚ n g⁻¹ (basisV ℚ n a) ∈ VZ n := hginv.2 _ hu
+    have hv' : rho ℚ n g⁻¹ (basisV ℚ n b) ∈ VZ n := hginv.2 _ hv
+    obtain ⟨k₁, hk₁⟩ := c1P_pairing_mod_two n _ _ hu hv
+    obtain ⟨k₂, hk₂⟩ := c1P_pairing_mod_two n _ _ hu' hv'
+    rw [s61_pairing_rho] at hk₂
+    have hpair : extPairing ℚ n ((2 : ℚ)⁻¹ • (c1P ℚ n - rhoExt ℚ n g (c1P ℚ n)))
+        (ExteriorAlgebra.ι ℚ (basisV ℚ n a) * ExteriorAlgebra.ι ℚ (basisV ℚ n b)) = k₁ - k₂ := by
+      rw [map_smul, map_sub, LinearMap.smul_apply, LinearMap.sub_apply, s61_extPairing_rhoExt_left,
+        map_mul (rhoExt ℚ n g⁻¹), rhoExt, ExteriorAlgebra.map_apply_ι, ExteriorAlgebra.map_apply_ι,
+        smul_eq_mul]
+      push_cast
+      linear_combination (2 : ℚ)⁻¹ * hk₁ - (2 : ℚ)⁻¹ * hk₂
+    rw [hpair] at hrepr
+    refine ⟨(-1) ^ k * (k₁ - k₂), ?_⟩
+    have hsq : ((-1 : ℚ) ^ k) * (-1) ^ k = 1 := by rw [← pow_add, ← two_mul, pow_mul]; simp
+    push_cast
+    linear_combination (-1 : ℚ) ^ k * hrepr - (basisExt ℚ n).repr
+      ((2 : ℚ)⁻¹ • (c1P ℚ n - rhoExt ℚ n g (c1P ℚ n))) M * hsq
+  · have h0 : (basisExt ℚ n).repr ((2 : ℚ)⁻¹ • (c1P ℚ n - rhoExt ℚ n g (c1P ℚ n))) M = 0 :=
+      s61_repr_eq_zero_of_mem _ hω hM
+    exact ⟨0, by rw [h0]; simp⟩
+
+end S61Integral
 
 end WeilClasses

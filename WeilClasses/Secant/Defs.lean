@@ -75,6 +75,11 @@ which `Θ` is ample.
 * `WeilClasses.kappa3E d = κ₃(E)`.
 * `WeilClasses.PJac hΘ d hd`: the oriented `K`-secant `P_Θ` of §2.4 for `Θ = ThetaStd ℚ 3`
   (`P = span{α, β}`, §8.2–8.3), and `PJac_isCompl` (`V_K = W₁ ⊕ W₂`).
+
+## A complex structure for which `Θ` is ample
+
+`WeilClasses.s8_J0` (`J₀ e_{2i} = -e_{2i+1}`, `J₀ e_{2i+1} = e_{2i}`), with `s8_J0_isComplex` and
+`s8_ample_J0` (`ThetaStd` is ample for `J₀`): the one copy of `J₀` used throughout the library.
 -/
 
 @[expose] public section
@@ -837,6 +842,193 @@ noncomputable def H2P : Submodule ℚ (ExtV ℚ n) :=
   Submodule.span ℚ {y | ∃ g ∈ P.spinPZ, ∃ x ∈ ⋀[ℚ]^2 (V ℚ n), y = rhoExt ℚ n g x - x}
 
 end KSecant
+
+/-! ## Helpers (prefix `s8_`): a complex structure `J₀` for which `Θ` is ample
+
+`ThetaStd = Σ e_{2i} ∧ e_{2i+1}` is ample for `J₀ e_{2i} = -e_{2i+1}`, `J₀ e_{2i+1} = e_{2i}` (the torus
+`ℂⁿ/(ℤⁿ + iℤⁿ)`). The single copy of `J₀` in the library: statements that fix no complex structure on
+`X` but use results stated under Assumption 2.4.1 for some complex structure (§8.3, the bridges of
+`WeilClasses.Main.Compare`, Theorem 1.4.1(4) and the discriminant of `X × X̂` in the model, the
+instances of `WeilClasses.Main.Instances`) take `J₀`. -/
+
+section S8J0
+
+variable (n : ℕ)
+
+/-- The involution `2i ↔ 2i + 1` of `Fin (2n)`. -/
+def s8_swap (k : Fin (2 * n)) : Fin (2 * n) :=
+  ⟨if k.val % 2 = 0 then k.val + 1 else k.val - 1, by split_ifs <;> omega⟩
+
+/-- The sign `+1` on even, `-1` on odd indices. -/
+def s8_sgn (k : Fin (2 * n)) : ℝ := if k.val % 2 = 0 then 1 else -1
+
+theorem s8_swap_swap (k : Fin (2 * n)) : s8_swap n (s8_swap n k) = k := by
+  ext; simp only [s8_swap]; split_ifs <;> omega
+
+theorem s8_sgn_swap (k : Fin (2 * n)) : s8_sgn n (s8_swap n k) = -s8_sgn n k := by
+  simp only [s8_sgn, s8_swap]; split_ifs <;> (try norm_num) <;> omega
+
+theorem s8_swap_even (i : Fin n) : s8_swap n ⟨2 * i, by omega⟩ = ⟨2 * i + 1, by omega⟩ := by
+  ext; simp [s8_swap]
+
+theorem s8_swap_odd (i : Fin n) : s8_swap n ⟨2 * i + 1, by omega⟩ = ⟨2 * i, by omega⟩ := by
+  ext; simp only [s8_swap]; split_ifs <;> omega
+
+theorem s8_sgn_even (i : Fin n) : s8_sgn n ⟨2 * i, by omega⟩ = 1 := by
+  simp [s8_sgn]
+
+theorem s8_sgn_odd (i : Fin n) : s8_sgn n ⟨2 * i + 1, by omega⟩ = -1 := by
+  simp only [s8_sgn]; split_ifs <;> first | rfl | omega
+
+theorem s8_swap_eq_iff (k j : Fin (2 * n)) : s8_swap n k = j ↔ k = s8_swap n j := by
+  constructor
+  · rintro rfl; rw [s8_swap_swap]
+  · rintro rfl; rw [s8_swap_swap]
+
+/-- The matrix of the standard complex structure `J₀`. -/
+noncomputable def s8_M0 : Matrix (Fin (2 * n)) (Fin (2 * n)) ℝ :=
+  fun k j => if j = s8_swap n k then s8_sgn n k else 0
+
+/-- A complex structure `J₀` of `H¹(X, ℝ) = ℝ^{2n}` for which `Θ = ThetaStd` is ample:
+`J₀ e_{2i} = -e_{2i+1}`, `J₀ e_{2i+1} = e_{2i}` (the torus `ℂⁿ/(ℤⁿ + iℤⁿ)`). -/
+noncomputable def s8_J0 : Module.End ℝ (H1 ℝ n) := Matrix.toLin' (s8_M0 n)
+
+theorem s8_J0_apply (x : H1 ℝ n) (k : Fin (2 * n)) :
+    s8_J0 n x k = s8_sgn n k * x (s8_swap n k) := by
+  simp [s8_J0, s8_M0, Matrix.mulVec, dotProduct]
+
+/-- `J₀² = -1`. -/
+theorem s8_J0_isComplex : IsComplexStructure (s8_J0 n) := by
+  refine LinearMap.ext fun x => funext fun k => ?_
+  simp only [Module.End.mul_apply, s8_J0_apply, s8_swap_swap, s8_sgn_swap]
+  simp only [LinearMap.neg_apply, Module.End.one_apply, Pi.neg_apply]
+  have : s8_sgn n k * s8_sgn n k = 1 := by
+    simp only [s8_sgn]; split_ifs <;> norm_num
+  linear_combination (-(x k)) * this
+
+theorem s8_complexify_J0_apply (v : H1 ℂ n) (k : Fin (2 * n)) :
+    complexifyH1 n (s8_J0 n) v k = (s8_sgn n k : ℂ) * v (s8_swap n k) := by
+  simp only [complexifyH1, s8_J0, LinearMap.toMatrix_eq_toMatrix', Matrix.toLin_eq_toLin',
+    LinearMap.toMatrix'_toLin', Matrix.toLin'_apply, Matrix.mulVec, dotProduct, Matrix.map_apply,
+    s8_M0]
+  simp [apply_ite (fun r : ℝ => (r : ℂ)), ite_mul, Finset.sum_ite_eq']
+
+theorem s8_J0_e_even (i : Fin n) :
+    s8_J0 n (e ℝ n ⟨2 * i, by omega⟩) = -e ℝ n ⟨2 * i + 1, by omega⟩ := by
+  funext k
+  rw [s8_J0_apply]
+  simp only [e, Pi.single_apply, s8_swap_eq_iff, s8_swap_even, Pi.neg_apply]
+  split_ifs with h
+  · subst h; rw [s8_sgn_odd]; ring
+  · ring
+
+theorem s8_J0_e_odd (i : Fin n) :
+    s8_J0 n (e ℝ n ⟨2 * i + 1, by omega⟩) = e ℝ n ⟨2 * i, by omega⟩ := by
+  funext k
+  rw [s8_J0_apply]
+  simp only [e, Pi.single_apply, s8_swap_eq_iff, s8_swap_odd]
+  split_ifs with h
+  · subst h; rw [s8_sgn_even]; ring
+  · ring
+
+/-- `e_{2i} + i e_{2i+1} ∈ H^{1,0}` for `J₀`. -/
+theorem s8_mem_H10_J0 (i : Fin n) :
+    e ℂ n ⟨2 * i, by omega⟩ + Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩ ∈ H10 n (s8_J0 n) := by
+  rw [H10, Module.End.mem_eigenspace_iff]
+  funext k
+  rw [s8_complexify_J0_apply]
+  simp only [e, Pi.add_apply, Pi.smul_apply, Pi.single_apply, smul_eq_mul, s8_swap_eq_iff,
+    s8_swap_even, s8_swap_odd]
+  by_cases h1 : k = ⟨2 * i, by omega⟩
+  · subst h1
+    have : (⟨2 * i, by omega⟩ : Fin (2 * n)) ≠ ⟨2 * i + 1, by omega⟩ := by simp
+    simp [s8_sgn_even, this]
+  · by_cases h2 : k = ⟨2 * i + 1, by omega⟩
+    · subst h2
+      simp [s8_sgn_odd, h1]
+    · simp [h1, h2]
+
+/-- `e_{2i} - i e_{2i+1} ∈ H^{0,1}` for `J₀`. -/
+theorem s8_mem_H01_J0 (i : Fin n) :
+    e ℂ n ⟨2 * i, by omega⟩ - Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩ ∈ H01 n (s8_J0 n) := by
+  rw [H01, Module.End.mem_eigenspace_iff]
+  funext k
+  rw [s8_complexify_J0_apply]
+  simp only [e, Pi.sub_apply, Pi.smul_apply, Pi.single_apply, smul_eq_mul, s8_swap_eq_iff,
+    s8_swap_even, s8_swap_odd]
+  by_cases h1 : k = ⟨2 * i, by omega⟩
+  · subst h1
+    have : (⟨2 * i, by omega⟩ : Fin (2 * n)) ≠ ⟨2 * i + 1, by omega⟩ := by simp
+    simp [s8_sgn_even, this]
+  · by_cases h2 : k = ⟨2 * i + 1, by omega⟩
+    · subst h2
+      simp [s8_sgn_odd, h1]
+    · simp [h1, h2]
+
+theorem s8_eval2_ι_mul_ι (a b : Module.Dual ℝ (H1 ℝ n)) (x y : H1 ℝ n) :
+    eval2 ℝ n (ExteriorAlgebra.ι ℝ x * ExteriorAlgebra.ι ℝ y) a b = a x * b y - a y * b x := by
+  have h := s8_algebraMapInv_contractLeft_contractLeft_ι_mul_ι a b x y
+  have hD : D ℝ n b (D ℝ n a (ExteriorAlgebra.ι ℝ x * ExteriorAlgebra.ι ℝ y)) =
+      algebraMap ℝ (S ℝ n) (a x * b y - a y * b x) := by
+    rw [← h]
+    exact s8_eq_algebraMap_of_mem_zero (s8_contractLeft_mem _ (s8_contractLeft_mem _
+      (s8_ι_mul_ι_mem x y)))
+  rw [eval2, hD, Algebra.algebraMap_eq_smul_one, map_smul, ← s8_basisS_empty,
+    Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_eq_same, smul_eq_mul, mul_one]
+
+/-- `Θ = ThetaStd` is ample for `J₀`. -/
+theorem s8_ample_J0 : IsAmple n (s8_J0 n) (ThetaStd ℚ n) := by
+  refine ⟨(mem_hodgeClassesX_iff n _ 1 _).mpr ⟨s8_ThetaStd_mem ℚ n, ?_⟩, fun a ha => ?_⟩
+  · rw [s8_bcS_ThetaStd]
+    refine Submodule.sum_mem _ fun i _ => ?_
+    set v := e ℂ n ⟨2 * i, by omega⟩ + Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩
+    set w := e ℂ n ⟨2 * i, by omega⟩ - Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩
+    have key : ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i, by omega⟩) *
+        ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i + 1, by omega⟩) =
+        (Complex.I / 2) • (ExteriorAlgebra.ι ℂ v * ExteriorAlgebra.ι ℂ w) := by
+      have hc : ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i + 1, by omega⟩) *
+          ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i, by omega⟩) =
+          -(ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i, by omega⟩) *
+            ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i + 1, by omega⟩)) :=
+        eq_neg_of_add_eq_zero_left (ExteriorAlgebra.ι_add_mul_swap _ _)
+      simp only [v, w, map_add, map_sub, map_smul, add_mul, mul_sub,
+        smul_mul_assoc, mul_smul_comm, ExteriorAlgebra.ι_sq_zero, smul_zero, hc]
+      match_scalars
+      ring_nf
+      rw [Complex.I_sq]
+      ring
+    rw [key]
+    refine Submodule.smul_mem _ _ (Submodule.subset_span ⟨![v], ![w], ?_, ?_, ?_⟩)
+    · intro j; fin_cases j; exact s8_mem_H10_J0 n i
+    · intro j; fin_cases j; exact s8_mem_H01_J0 n i
+    · simp [ExteriorAlgebra.ιMulti_apply]
+  · have hsum : eval2 ℝ n (ThetaStd ℝ n) a (a ∘ₗ s8_J0 n) =
+        ∑ i : Fin n, ((a (e ℝ n ⟨2 * i, by omega⟩)) ^ 2 +
+          (a (e ℝ n ⟨2 * i + 1, by omega⟩)) ^ 2) := by
+      have hlin : ∀ ξ : S ℝ n, eval2 ℝ n ξ a (a ∘ₗ s8_J0 n) =
+          ((basisS ℝ n).coord ∅ ∘ₗ D ℝ n (a ∘ₗ s8_J0 n) ∘ₗ D ℝ n a) ξ := fun ξ => rfl
+      rw [hlin, ThetaStd, map_sum]
+      refine Finset.sum_congr rfl fun i _ => ?_
+      rw [← hlin, s8_eval2_ι_mul_ι]
+      simp only [LinearMap.comp_apply, s8_J0_e_even, s8_J0_e_odd, map_neg]
+      ring
+    rw [s8_bcS_ThetaStd, hsum]
+    obtain ⟨k, hk⟩ : ∃ k, a (e ℝ n k) ≠ 0 := by
+      by_contra! h
+      exact ha ((Pi.basisFun ℝ (Fin (2 * n))).ext fun k => by simpa [e] using h k)
+    refine Finset.sum_pos' (fun i _ => by positivity)
+      ⟨⟨k.val / 2, by omega⟩, Finset.mem_univ _, ?_⟩
+    rcases Nat.mod_two_eq_zero_or_one k.val with h | h
+    · have hk' : k = ⟨2 * (k.val / 2), by omega⟩ := Fin.ext (by simp; omega)
+      rw [← hk']
+      have := sq_pos_of_ne_zero hk
+      positivity
+    · have hk' : k = ⟨2 * (k.val / 2) + 1, by omega⟩ := Fin.ext (by simp; omega)
+      rw [← hk']
+      have := sq_pos_of_ne_zero hk
+      positivity
+
+end S8J0
 
 /-! ## The classes of §8.2 (`n = 3`) -/
 

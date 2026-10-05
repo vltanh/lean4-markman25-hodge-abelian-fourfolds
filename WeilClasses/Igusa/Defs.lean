@@ -25,9 +25,7 @@ stands for the paper's `i + 1`; e.g. `eStar F 0 3` is the paper's `e₁₄^*`.
   `e_i ∧ e_j ∧ e_ij^* = [pt_X]`; the alternating matrices `xMat x = (x_ij)`, `yMat x = (y_ij)`.
 * `WeilClasses.J`: the Igusa quartic (10.1.1), as a function `S_F → F` (it only reads the even
   coordinates; the paper's `J` is its restriction to `S⁺_F`).
-* `WeilClasses.Jcone`: the cone `Ṽ(J) ⊆ S⁺_F`; `WeilClasses.VJ`: the quartic `V(J) ⊆ ℙ(S⁺_F)`.
-* `WeilClasses.evenCoords`: the `32` coordinates of `S⁺_F`, so that `MvPolynomial EvenIdx F` is the
-  coordinate ring `Sym((S⁺_F)*)`.
+* `WeilClasses.VJ`: the quartic `V(J) ⊆ ℙ(S⁺_F)` (`mk_mem_VJ_iff`: `[w] ∈ V(J) ↔ J(w) = 0`).
 
 Reading: the paper's "alternating matrix `A` of rank `2r`" in the normalization of `Pf` means a
 `2r × 2r` alternating matrix (the normalization is stated on `[[0, I_r], [-I_r, 0]]`); only
@@ -363,17 +361,6 @@ noncomputable def J (x : S F 3) : F :=
       ∑ p : Pair6, pf4 (crossOut (xMat F x) p) * pf4 (crossOut (yMat F x) p) -
     (1 / 4 : F) *
       (x0 F x * y0 F x - ∑ p : Pair6, xCoord F x p.1.1 p.1.2 * yCoord F x p.1.1 p.1.2) ^ 2
-
-/-- The index set `{K ⊆ {1, …, 6} : |K| even}` of the `32` coordinates of `S⁺`. -/
-abbrev EvenIdx : Type := {K : Finset (Fin 6) // Even K.card}
-
-/-- The coordinates of `x ∈ S_F` along `S⁺_F`: its coefficients on the `e_K` with `|K|` even. A
-polynomial in these coordinates, `p : MvPolynomial EvenIdx F`, is an element of `Sym((S⁺_F)*)`
-(§10.1), with value `MvPolynomial.eval (evenCoords F x) p` at `x`. -/
-noncomputable def evenCoords (x : S F 3) : EvenIdx → F := fun K => (basisS F 3).repr x K.1
-
-/-- The cone `Ṽ(J) = {x ∈ S⁺_F : J(x) = 0}` over the quartic `V(J)` (§10.1). -/
-def Jcone : Set (S F 3) := {x | x ∈ Splus F 3 ∧ J F x = 0}
 
 /-- The quartic hypersurface `V(J) ⊆ ℙ(S⁺_F)` (§10.1; the paper calls it a hyperplane). -/
 def VJ : Set (Projectivization F (Splus F 3)) := {p | J F (p.rep : S F 3) = 0}

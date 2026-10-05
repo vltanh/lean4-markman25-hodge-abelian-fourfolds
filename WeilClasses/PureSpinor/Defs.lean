@@ -18,6 +18,12 @@ public import WeilClasses.Basic.Field
 * The stabilizers `Spin(V_K)_{ℓᵢ}`, `Spin(V_K)_{ℓ₁,ℓ₂}` (2.2.1), `Spin(V_K)_P`, `Spin(V_ℚ)_P` (2.2.2),
   the characters `detᵢ` and `χᵢ` (the action on `ℓ̃ᵢ`), the similarity group `Õ(V_ℚ)` (2.2.3) and
   the action `η : K^× → GL(V_ℚ)` (2.2.4).
+* The restriction maps of [Igusa, Lemma 1], over any field `F` of characteristic zero:
+  `annRestrict F n u : Spin(V_F)_{[u]} → End(ker m_u)` and
+  `pairRestrict F n u₁ u₂ : Spin(V_F)_{[u₁]} ∩ Spin(V_F)_{[u₂]} → GL(ker m_{u₁})`, `g ↦ ρ(g)|_{W₁}`,
+  and `specialLinearUnits F W = SL(W) ⊆ GL(W)`. They are used both by the statements of record
+  `WeilClasses.igusa_lemma1_*` (`WeilClasses.External.Igusa.Sec2_2`) and by §2.2
+  (`WeilClasses.PureSpinor.Stabilizer`, which cites those statements).
 -/
 
 @[expose] public section
@@ -79,16 +85,47 @@ def fixingSpin (P : Submodule F (S F n)) : Subgroup (Spin F n) where
     conv_lhs => rw [← hg p hp]
     exact fnd_m_inv_m F n g p
 
-/-- For `g` in the stabilizer of the line `F u`, `ρ(g)` preserves `ker m_u`: if `m_v u = 0` then
-`m_{ρ(g) v} u = m_g m_v m_{g⁻¹} u ∈ m_g m_v (F u) = 0`. -/
-theorem fnd_rho_mem_ann {u : S F n} (g : Spin F n) (hg : g ∈ lineStabilizer F n u)
-    (v : V F n) (hv : v ∈ ann F n u) : rho F n g v ∈ ann F n u := by
+/-- The stabilizer of the line `[u]` preserves `ker m_u`: if `m_v u = 0` and `g⁻¹ u = c u`, then
+`m_{ρ(g) v} u = m_g m_v m_{g⁻¹} u = c m_g m_v u = 0`. -/
+theorem rho_mem_ann_of_mem_lineStabilizer (u : S F n) (g : Spin F n)
+    (hg : g ∈ lineStabilizer F n u) (v : V F n) (hv : v ∈ ann F n u) :
+    rho F n g v ∈ ann F n u := by
   obtain ⟨c, hc⟩ := (lineStabilizer F n u).inv_mem hg
   simp only [ann, LinearMap.mem_ker, mOf, LinearMap.coe_comp, Function.comp_apply,
     AlgHom.toLinearMap_apply, LinearMap.applyₗ_apply_apply] at hv ⊢
   rw [ι_rho, map_mul, map_mul, Module.End.mul_apply, Module.End.mul_apply]
   have hs : star (g : C F n) = ((g⁻¹ : Spin F n) : C F n) := rfl
   rw [hs, hc, map_smul, hv, smul_zero, map_zero]
+
+/-- The action `Spin(V_F)_{[u]} → End(ker m_u)` of the stabilizer of the line `[u]` on the isotropic
+subspace `W = ker m_u`, by restriction of `ρ`. -/
+noncomputable def annRestrict (u : S F n) : lineStabilizer F n u →* Module.End F (ann F n u) where
+  toFun g := (rho F n (g : Spin F n)).toLinearMap.restrict
+    (rho_mem_ann_of_mem_lineStabilizer F n u g g.2)
+  map_one' := by
+    apply LinearMap.ext
+    intro v
+    apply Subtype.ext
+    simp only [LinearMap.restrict_apply, OneMemClass.coe_one, LinearEquiv.coe_coe, rho,
+      spinVectorAction_one, LinearEquiv.refl_apply, Module.End.one_apply]
+  map_mul' := by
+    intro g h
+    apply LinearMap.ext
+    intro v
+    apply Subtype.ext
+    simp only [LinearMap.restrict_apply, Subgroup.coe_mul, LinearEquiv.coe_coe, rho,
+      spinVectorAction_mul, LinearEquiv.mul_apply, Module.End.mul_apply]
+
+/-- The homomorphism `Spin(V_F)_{[u₁]} ∩ Spin(V_F)_{[u₂]} → GL(ker m_{u₁})`, `g ↦ ρ(g)|_{W₁}`. -/
+noncomputable def pairRestrict (u₁ u₂ : S F n) :
+    (lineStabilizer F n u₁ ⊓ lineStabilizer F n u₂ : Subgroup (Spin F n)) →*
+      (Module.End F (ann F n u₁))ˣ :=
+  ((annRestrict F n u₁).comp (Subgroup.inclusion inf_le_left)).toHomUnits
+
+/-- `SL(W)`: the automorphisms of determinant one, as a subgroup of `GL(W) = (End W)ˣ`. -/
+noncomputable def specialLinearUnits (W : Type*) [AddCommGroup W] [Module F W] :
+    Subgroup (Module.End F W)ˣ :=
+  (Units.map (LinearMap.det : Module.End F W →* F)).ker
 
 end General
 
@@ -146,12 +183,14 @@ noncomputable def spinPK : Subgroup (Spin (Kd d) n) := fixingSpin (Kd d) n P.PK
 noncomputable def spinPℚ : Subgroup (Spin ℚ n) := fixingSpin ℚ n P.Pℚ
 
 theorem rho_mem_W₁ (g : P.spinL₁L₂) (v : V (Kd d) n) (hv : v ∈ P.W₁) :
-    rho (Kd d) n g v ∈ P.W₁ := by
-  exact fnd_rho_mem_ann (Kd d) n (g : Spin (Kd d) n) (Subgroup.mem_inf.mp g.2).1 v hv
+    rho (Kd d) n g v ∈ P.W₁ :=
+  rho_mem_ann_of_mem_lineStabilizer (Kd d) n P.u₁ (g : Spin (Kd d) n)
+    (Subgroup.mem_inf.mp g.2).1 v hv
 
 theorem rho_mem_W₂ (g : P.spinL₁L₂) (v : V (Kd d) n) (hv : v ∈ P.W₂) :
-    rho (Kd d) n g v ∈ P.W₂ := by
-  exact fnd_rho_mem_ann (Kd d) n (g : Spin (Kd d) n) (Subgroup.mem_inf.mp g.2).2 v hv
+    rho (Kd d) n g v ∈ P.W₂ :=
+  rho_mem_ann_of_mem_lineStabilizer (Kd d) n P.u₂ (g : Spin (Kd d) n)
+    (Subgroup.mem_inf.mp g.2).2 v hv
 
 /-- The character `det₁ : Spin(V_K)_{ℓ₁,ℓ₂} → K^×`, the determinant of the action on `W₁`. -/
 noncomputable def det₁ (g : P.spinL₁L₂) : Kd d :=

@@ -29,7 +29,8 @@ Statements of the introduction's results on secant classes (TeX lines 311–532)
 * §1.3, before Corollary 1.3.2: `H²(X × X̂, ℚ)^{Spin(V)_P}` is the line spanned by `h = Ξ_P^♯`
   (`intro_invQ_two`), `h` is ample (`intro_hClass_isAmple`, for the standard complex structure
   `-I_{V_ℝ}` of `X × X̂`, transported to the model `H¹(X × X̂) = ℚ^{4n}` by `coordV`), and
-  `η(k) h = Nm(k) h` (`intro_eta_hClass`).
+  `η(k) h = Nm(k) h` (`intro_eta_hClass`), with `Nm(a + b√-d) = a² + d b²` (`Kd_Nm`, a compared
+  theorem of `Challenge.lean`).
 * **Corollary 1.3.2** (`corollary1_3_2`, `corollary1_3_2_hodge`; and `corollary1_3_2_field`,
   `corollary1_3_2_baseChange`: the invariance holds for `Spin(V_F)_P` for every field `F`) is stated
   and proved in `WeilClasses.Orlov.Cor1_3_2`, imported here: its proof uses only Proposition 6.1.2
@@ -44,7 +45,8 @@ for the complex structure `J`; `d ≥ 3`; `ch(F₁) = ch(F₂) = w = chF1 d` (`F
 `Φ(F₂ ⊠ F₁)^∨ ≅ E[-2]`, `ch(E) = τ(φ(w ⊗ w))` (`chE`), `κ₃(E) = kappa3E d`; `P = P_Θ` (`PJac`).
 
 * (1) `theorem1_4_1_1`; (3) `theorem1_4_1_3`; (4) `theorem1_4_1_4`, `theorem1_4_1_4_finrank`;
-  the cohomological part of (2): the rank of `E` is `8d` (`theorem1_4_1_2_rank`);
+  the cohomological part of (2): the rank of `E` is `8d` (`theorem1_4_1_2_rank`, from `rank_chE`,
+  a compared theorem of `Challenge.lean`, for every `d`);
   `κ₃(E) = -κ₃(Φ(F₂ ⊠ F₁))` (`kappa3E_eq_neg`), relating (4) to Lemma 8.3.1.
 * **Left out (sheaf-theoretic):** item (2) (`Φ(F₂ ⊠ F₁)^∨ ≅ E[-2]` with `E` a simple reflexive sheaf)
   except the value of the rank, and item (5) (first-order deformations of `E` as a twisted sheaf).
@@ -178,23 +180,6 @@ theorem main_eq_of_pairing_dc {ξ η : ExtV F n} (hξ : ξ ∈ ⋀[F]^2 (V F n))
   obtain ⟨x, rfl⟩ := main_pairing_surjective F n a
   obtain ⟨y, rfl⟩ := main_pairing_surjective F n b
   exact h x y
-
-omit [CharZero F] in
-theorem main_dc_smul (c : F) (a b : Module.Dual F (V F n)) (ξ : ExtV F n) :
-    ExteriorAlgebra.algebraMapInv (contractLeft (Q := 0) b (contractLeft (Q := 0) a (c • ξ))) =
-      c * ExteriorAlgebra.algebraMapInv (contractLeft (Q := 0) b (contractLeft (Q := 0) a ξ)) := by
-  rw [map_smul, map_smul, map_smul, smul_eq_mul]
-
-/-- `ρ(g)` is an isometry of the pairing (1.2.2). -/
-theorem main_pairing_rho (g : Spin F n) (x y : V F n) :
-    pairing F n (rho F n g x) (rho F n g y) = pairing F n x y := by
-  simp only [pairing, QuadraticMap.polarBilin_apply_apply, QuadraticMap.polar, rho, ← map_add,
-    spinVectorAction_map_app]
-
-theorem main_rho_inv_rho (g : Spin F n) (x : V F n) : rho F n g⁻¹ (rho F n g x) = x := by
-  have := congrArg (fun T : V F n ≃ₗ[F] V F n => T x) (spinVectorAction_mul (Q F n) g⁻¹ g)
-  simp only [inv_mul_cancel, spinVectorAction_one, LinearEquiv.refl_apply] at this
-  exact this.symm
 
 end SharpHelpers
 
@@ -583,7 +568,8 @@ theorem main_contractOne_ThetaStd_injective :
 
 end PureHelpers
 
-theorem main_Kd_Nm (d : ℚ) (hd : 0 < d) (a b : ℚ) :
+/-- `Nm(a + b√-d) = a² + d b²` (a compared theorem of `Challenge.lean`). -/
+theorem Kd_Nm (d : ℚ) (hd : 0 < d) (a b : ℚ) :
     Kd.Nm d ((a : Kd d) + (b : Kd d) * Kd.sqrtNeg d) = a ^ 2 + d * b ^ 2 := by
   have h := Kd.coe_Nm hd ((a : Kd d) + (b : Kd d) * Kd.sqrtNeg d)
   apply_fun ((↑) : ℚ → ℂ) using Rat.cast_injective
@@ -596,19 +582,6 @@ theorem main_Kd_Nm (d : ℚ) (hd : 0 < d) (a b : ℚ) :
   push_cast
   linear_combination (b : ℂ) ^ 2 * hs -
     (b : ℂ) ^ 2 * ((Real.sqrt (d : ℝ) : ℝ) : ℂ) ^ 2 * Complex.I_sq
-
-/-- `η_k = a + b f` for `k = a + b√-d`. -/
-theorem main_η_eq {d : ℚ} (P : KSecant n d) (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) (k : Kd d) :
-    P.η hW k = Kd.ratPart d k • LinearMap.id + Kd.sqrtNegCoeff d k • P.fη hW := by
-  have hk := Kd.eq_ratPart_add_sqrtNegCoeff hd k
-  have hq : ∀ q : ℚ, P.ηHom hd hW (algebraMap ℚ (Kd d) q) =
-      algebraMap ℚ (Module.End ℚ (V ℚ n)) q := fun q => by
-    rw [← RingHom.comp_apply]; congr 1; exact RingHom.ext_rat _ _
-  have h := congrArg (P.ηHom hd hW) hk
-  rw [map_add, map_mul, hq, hq] at h
-  rw [show P.η hW k = P.ηHom hd hW k from rfl, h, Algebra.algebraMap_eq_smul_one,
-    ← Algebra.smul_def]
-  rfl
 
 /-! ## Proposition 1.2.1 -/
 
@@ -662,7 +635,9 @@ theorem proposition1_2_1_rational (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComple
 `H²(X × X̂, ℚ)^{Spin(V)_P}` is one-dimensional spanned by an ample class `h`": the
 `Spin(V)_P`-invariants of `⋀² V_ℚ` (integral `Spin(V)_P`) are spanned by `h = Ξ_P^♯` (`hClass`; its
 ampleness is `intro_hClass_isAmple`). Needs `n ≥ 2` (the intro's standing assumption): for `n = 1`
-the invariants of `⋀² V_ℚ` are three-dimensional. -/
+the invariants of `⋀² V_ℚ` are three-dimensional. Proof: `h` is invariant, as `ρ(Spin(V_ℚ)_P)`
+preserves `(·,·)_V` and commutes with `f` by Lemma 2.2.4 (TeX line 1240; `s8_rhoExt_hClass`), and
+the invariants form a line by Lemma 2.2.7 (`lemma2_2_7_even`). -/
 theorem intro_invQ_two (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (Θ : S ℚ n)
     (hΘ : IsAmple n J Θ) (hn : 2 ≤ n) (d : ℚ) (hd : 0 < d) :
     (PAmple hΘ (by omega) d hd).invQ 2 =
@@ -672,27 +647,10 @@ theorem intro_invQ_two (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure 
   set hW := PAmple_isCompl hΘ hn0 d hd
   have hP : Assumption2_4_1 P J := PTheta_assumption2_4_1 n d hd hn0 J hJ Θ hΘ
   have hh : P.hClass hW ∈ ⋀[ℚ]^2 (V ℚ n) := formToExt2_mem ℚ n _
-  -- `ρ(Spin(V_ℚ)_P) = SO_+(V_ℚ)_f` commutes with `f` (Lemma 3.1.1)
-  have hcomm : ∀ g ∈ P.spinPℚ, ∀ x, rho ℚ n g (P.fη hW x) = P.fη hW (rho ℚ n g x) := by
-    intro g hg x
-    have hmem : (rho ℚ n g : V ℚ n ≃ₗ[ℚ] V ℚ n) ∈ P.SOplusf hP.isCompl := by
-      rw [← SetLike.mem_coe, ← (lemma3_1_1 P J hP).2]; exact ⟨g, hg, rfl⟩
-    exact hmem.2.1 x
-  -- `h = Ξ_P^♯` is `Spin(V)_P`-invariant: `ρ_g` preserves `(·,·)_V` and commutes with `f`
-  have hinv : P.hClass hW ∈ P.invQ 2 := by
-    refine ⟨hh, fun g hg => ?_⟩
-    have hgP : g ∈ P.spinPℚ := (Subgroup.mem_inf.mp hg).2
-    have hgP' : g⁻¹ ∈ P.spinPℚ := P.spinPℚ.inv_mem hgP
-    have hadj : ∀ x, pairing ℚ n x ∘ₗ (rho ℚ n g : V ℚ n →ₗ[ℚ] V ℚ n) =
-        pairing ℚ n (rho ℚ n g⁻¹ x) := fun x => LinearMap.ext fun z => by
-      rw [LinearMap.comp_apply, LinearEquiv.coe_coe, ← main_pairing_rho ℚ n g⁻¹ x,
-        main_rho_inv_rho]
-    refine main_eq_of_pairing_dc ℚ n
-      (by rw [main_rhoExt_eq]; exact main_map_mem_exteriorPower _ 2 hh)
-      hh fun x y => ?_
-    rw [main_rhoExt_eq, main_dc_map, hadj, hadj, P.hClass_spec hW, P.hClass_spec hW]
-    simp only [KSecant.XiQ, LinearMap.BilinForm.compLeft_apply]
-    rw [← hcomm _ hgP', main_pairing_rho]
+  -- `h = Ξ_P^♯` is `Spin(V)_P`-invariant: `ρ_g` preserves `(·,·)_V` and commutes with `f = η_{√-d}`
+  -- (Lemma 2.2.4, TeX line 1240: `f` lies in the centralizer of `ρ(Spin(V_ℚ)_P)`)
+  have hinv : P.hClass hW ∈ P.invQ 2 :=
+    ⟨hh, fun g hg => s8_rhoExt_hClass P hd hn hP.nonIsotropic hW g (Subgroup.mem_inf.mp hg).2⟩
   -- `h ≠ 0` (`Ξ_P` is nondegenerate)
   have hne : P.hClass hW ≠ 0 := by
     intro h0
@@ -773,37 +731,15 @@ theorem intro_hClass_isAmple (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStru
 
 /-- (§1.3, TeX lines 447–448) "Given an element `k ∈ K`, the rational endomorphism `η(k)` maps `h` to
 `Nm(k) h`", `η(k)` acting on `H²(X × X̂, ℚ) = ⋀² V_ℚ` by `⋀² η_k`. (Checked numerically, `n = 3`.)
-Stated for every `K`-secant `P` with `V_K = W₁ ⊕ W₂` (the paper: `P = P_Θ`). -/
+Stated for every `K`-secant `P` with `V_K = W₁ ⊕ W₂` (the paper: `P = P_Θ`). The paper gives no
+proof. Here: `(f x, f y)_V = d (x, y)_V` (TeX line 1240) gives `Ξ_P(f x, f y) = d Ξ_P(x, y)`, the
+condition on the polarization of [van Geemen, Def. 4.9], which gives `η(k)^* h = Nm(k) h`
+(`s24b_map_η_hClass`, also used for the Weil-type period domain in `weilDomain_eq_image_OmegaP`). -/
 theorem intro_eta_hClass {d : ℚ} (P : KSecant n d) (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
     (k : Kd d) :
-    ExteriorAlgebra.map (P.η hW k) (P.hClass hW) = (Kd.Nm d k : ℚ) • P.hClass hW := by
-  have hh : P.hClass hW ∈ ⋀[ℚ]^2 (V ℚ n) := formToExt2_mem ℚ n _
-  set a := Kd.ratPart d k
-  set b := Kd.sqrtNegCoeff d k
-  -- `k = a + b√-d`, `Nm(k) = a² + d b²`, `η_k = a + b f`
-  have hNm : Kd.Nm d k = a ^ 2 + d * b ^ 2 := by
-    conv_lhs => rw [Kd.eq_ratPart_add_sqrtNegCoeff hd k]
-    simpa only [eq_ratCast] using main_Kd_Nm d hd a b
-  have hηk := main_η_eq P hd hW k
-  -- the adjoint of `η_k` for `(·,·)_V` is `a - b f` (`f` is anti-self-dual)
-  have hadj : ∀ x, pairing ℚ n x ∘ₗ P.η hW k = pairing ℚ n (a • x - b • P.fη hW x) := fun x =>
-    LinearMap.ext fun z => by
-      rw [LinearMap.comp_apply, hηk]
-      simp only [LinearMap.add_apply, LinearMap.smul_apply, LinearMap.id_apply, map_add,
-        map_smul, map_sub, LinearMap.sub_apply, smul_eq_mul]
-      rw [P.pairing_fη_left hW x z]; ring
-  have hff : ∀ v, P.fη hW (P.fη hW v) = -(d • v) := fun v => by
-    have := congrArg (fun T => T v) (P.fη_comp_fη hW); simpa using this
-  have hxf : ∀ u v, pairing ℚ n u (P.fη hW v) = -pairing ℚ n (P.fη hW u) v := fun u v => by
-    rw [P.pairing_fη_left hW u v, neg_neg]
-  -- `Ξ_P(η_k^* x, η_k^* y) = Nm(k) Ξ_P(x, y)`
-  refine main_eq_of_pairing_dc ℚ n (main_map_mem_exteriorPower _ 2 hh)
-    (Submodule.smul_mem _ _ hh) fun x y => ?_
-  rw [main_dc_map, hadj, hadj, main_dc_smul, P.hClass_spec hW, P.hClass_spec hW]
-  simp only [KSecant.XiQ, LinearMap.BilinForm.compLeft_apply, map_sub, map_smul,
-    LinearMap.sub_apply, LinearMap.smul_apply, smul_eq_mul, hff, map_neg, LinearMap.neg_apply,
-    P.pairing_fη_fη hW, hxf, hNm]
-  ring
+    ExteriorAlgebra.map (P.η hW k) (P.hClass hW) = (Kd.Nm d k : ℚ) • P.hClass hW :=
+  -- `Ξ_P(f x, f y) = (f² x, f y)_V = d (f x, y)_V = d Ξ_P(x, y)`
+  s24b_map_η_hClass P hd hW (fun x y => P.pairing_fη_fη hW (P.fη hW x) y) k
 
 /-! ## Theorem 1.4.1 -/
 
@@ -966,13 +902,23 @@ theorem theorem1_4_1_1 (hJ : IsComplexStructure J) (hΘ : IsAmple 3 J (ThetaStd 
     rw [hb, zero_smul, add_zero]
     exact Submodule.smul_mem _ _ (Submodule.mem_span_singleton_self _)
 
-/-- **Theorem 1.4.1(2)** (`main-theorem-introduction`), cohomological part: the rank of `E` is `8d`
-(the rank of `ch(E) = τ(φ(w ⊗ w))`). The rest of (2) (`Φ(F₂ ⊠ F₁)^∨ ≅ E[-2]`, `E` simple reflexive) is
-sheaf-theoretic. (Checked numerically for `d = 1, 2, 3, 5, 7`.) -/
-theorem theorem1_4_1_2_rank (hd3 : 3 ≤ d) : rankExt ℚ 3 (chE d) = 8 * d := by
-  -- `rank(E) = rank Φ(F₂ ⊠ F₁)` (`τ` fixes the degree-`0` part), which is `8d`
-  rw [main_rankExt_apply, chE, main_tauExt_apply, main_algebraMapInv_reverse]
+/-- The sheaf `E` of Theorem 1.4.1(2) has rank `8d` (a compared theorem of `Challenge.lean`, for
+every `d`): the degree-`0` part of `ch(E) = τ(φ(w ⊗ w))` is that of `φ(w ⊗ w)` (`τ` fixes it), which
+is `8d` (`lemma8_3_1_rank_eq`). -/
+theorem rank_chE (d : ℚ) : ExteriorAlgebra.algebraMapInv (chE d) = 8 * d := by
+  rw [chE, main_tauExt_apply, main_algebraMapInv_reverse]
   exact lemma8_3_1_rank_eq d
+
+/-- **Theorem 1.4.1(2)** (`main-theorem-introduction`), cohomological part: the rank of `E` is `8d`
+(the rank of `ch(E) = τ(φ(w ⊗ w))`, `rank_chE`). The rest of (2) (`Φ(F₂ ⊠ F₁)^∨ ≅ E[-2]`, `E`
+simple reflexive) is sheaf-theoretic. (Checked numerically for `d = 1, 2, 3, 5, 7`.)
+
+Departure from the paper (reason 3): the paper reads the rank off the sheaf, `E ≅ 𝒢₁^*` for the
+reflexive sheaf `𝒢₁ = R¹π_{23,*}(π₁^*F₁ ⊗ 𝓕₂)` of rank `8d` (Proposition 9.2.2, TeX lines
+5455–5463); the model has no sheaves, and computes the rank as the degree-`0` part of `ch(E)`. -/
+theorem theorem1_4_1_2_rank (hd3 : 3 ≤ d) : rankExt ℚ 3 (chE d) = 8 * d := by
+  rw [main_rankExt_apply]
+  exact rank_chE d
 
 /-- **Theorem 1.4.1(3)** (`main-theorem-introduction`). The characteristic class
 `κ(E) = exp(-c₁(E)/rank(E)) ch(E)` remains of Hodge type under every deformation of
@@ -1006,11 +952,11 @@ theorem theorem1_4_1_3 (hJ : IsComplexStructure J) (hΘ : IsAmple 3 J (ThetaStd 
   rw [chE, main_kappa_reverse, hsec]
   exact main_tau_mem_hodgeRingV hhodge
 
-/-- **Corollary 1.3.2** (`cor-kappa-class-is-Spin-V-P-invariant`) for the sheaf `E` of
-Theorem 1.4.1, as used in the paragraph before Theorem 1.5.1 (TeX 570: "`κ(E)` remains of Hodge type
-over the locus, where `(X × X̂, η, h)` deforms as an abelian variety of Weil-type, by
-Corollary 1.3.2"): `κ(E)` is a Hodge class for every complex structure `I` in the period domain
-`Ω_P` of `P = P_Θ`. -/
+/-- Corollary 1.3.2 applied to the sheaf `E` of Theorem 1.4.1, as in the paragraph before
+Theorem 1.5.1 (TeX 570: "`κ(E)` remains of Hodge type over the locus, where `(X × X̂, η, h)` deforms
+as an abelian variety of Weil-type, by Corollary 1.3.2"): `κ(E)` is a Hodge class for every complex
+structure `I` in the period domain `Ω_P` of `P = P_Θ`. The inputs are Lemma 8.2.1
+(`ch F₁, τ ch F₁ ∈ P`) and the rank `8d ≠ 0` of `E`. -/
 theorem main_kappa_chE_hodge (hJ : IsComplexStructure J) (hΘ : IsAmple 3 J (ThetaStd ℚ 3))
     (hd3 : 3 ≤ d) (I : Module.End ℝ (V ℝ 3))
     (hI : I ∈ (PJac d hΘ (pos_of_three_le hd3)).OmegaP (PJac_isCompl d hΘ (pos_of_three_le hd3))) :
@@ -1145,7 +1091,7 @@ theorem main_theorem1_4_1_4_finrank {J : Module.End ℝ (H1 ℝ 3)} {d : ℚ}
   have hnot : P.hClass hW ^ 3 ∉ P.hwPlane := by
     intro hmem
     have h1 := main_η_sqrtNeg_hwPlane P hd hW hmem
-    have hNm : Kd.Nm d (Kd.sqrtNeg d) = d := by simpa using main_Kd_Nm d hd 0 1
+    have hNm : Kd.Nm d (Kd.sqrtNeg d) = d := by simpa using Kd_Nm d hd 0 1
     rw [map_pow, intro_eta_hClass P hd hW, smul_pow, hNm] at h1
     have h2 : (2 * d ^ 3) • P.hClass hW ^ 3 = 0 := by
       rw [show 2 * d ^ 3 = d ^ 3 - (-d) ^ 3 by ring, sub_smul, h1, sub_self]

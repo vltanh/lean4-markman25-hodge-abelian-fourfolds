@@ -13,7 +13,7 @@ their hypotheses are consistent, and the objects they quantify over exist.
   `SubalgebraClosed`, `LefschetzOneOne`, `VoisinLocus`, `SecantSheafDeformation`,
   `SchoenDegeneration` and `RamonMariProducts` holds. For `SecantSheafDeformation` this needs a
   complex structure on `ℝ⁶` for which `ThetaStd` is ample: the standard `J₀`
-  (`main_J0`, `main_ample_J0`).
+  (`s8_J0`, `s8_ample_J0`).
 * **The objects.** For every `n` and every `d > 0`, `X × X̂` (with `X = (ℝ^{2n}, J₀)`) is a
   polarized abelian `2n`-fold of Weil type for `ℚ(√-d)` with discriminant `(-1)ⁿ`
   (`XXhatWeil`, `XXhatWeil_discIs`); for `n = 3` this is a sixfold with discriminant `-1`, as in
@@ -48,7 +48,7 @@ instance CycleClasses.all_voisinLocus : VoisinLocus CycleClasses.all :=
   ⟨fun _ _ _ _ _ _ _ _ _ _ _ => Submodule.mem_top⟩
 
 instance CycleClasses.all_secantSheafDeformation : SecantSheafDeformation CycleClasses.all :=
-  ⟨fun _ _ => ⟨main_J0 3, main_J0_isComplex 3, main_ample_J0 3, fun _ _ =>
+  ⟨fun _ _ => ⟨s8_J0 3, s8_J0_isComplex 3, s8_ample_J0 3, fun _ _ =>
     Filter.Eventually.of_forall fun _ _ => Submodule.mem_top⟩⟩
 
 instance CycleClasses.all_schoenDegeneration : SchoenDegeneration CycleClasses.all :=
@@ -62,18 +62,18 @@ instance CycleClasses.all_ramonMariProducts : RamonMariProducts CycleClasses.all
 variable (n : ℕ) (d : ℚ) (hd : 0 < d)
 
 /-- The standard principally polarized abelian `n`-fold `X = (ℝ^{2n}, J₀)`. -/
-noncomputable def stdAbVar : AbVar n := ⟨main_J0 n, main_J0_isComplex n, ⟨_, main_ample_J0 n⟩⟩
+noncomputable def stdAbVar : AbVar n := ⟨s8_J0 n, s8_J0_isComplex n, ⟨_, s8_ample_J0 n⟩⟩
 
 /-- `X × X̂` for `X = (ℝ^{2n}, J₀)`, as an abelian `2n`-fold. -/
 noncomputable def XXhatAbVar : AbVar (2 * n) :=
-  have h := JX_mem_weilDomain n d hd (main_J0 n) (main_J0_isComplex n) (main_ample_J0 n)
+  have h := JX_mem_weilDomain n d hd (s8_J0 n) (s8_J0_isComplex n) (s8_ample_J0 n)
     (etaX n d hd) (etaX_sqrtNeg n d hd)
-  ⟨JX n (main_J0 n), h.1, ⟨hX n d, h.2.2.2.2.1⟩⟩
+  ⟨JX n (s8_J0 n), h.1, ⟨hX n d, h.2.2.2.2.1⟩⟩
 
 /-- `X × X̂` with the action `η` of `ℚ(√-d)` (`η(√-d) = f`) and the polarization `h = dΘ + Θ̂`:
 a polarized abelian `2n`-fold of Weil type. -/
 noncomputable def XXhatWeil : PolarizedWeilType (XXhatAbVar n d hd) d :=
-  have h := JX_mem_weilDomain n d hd (main_J0 n) (main_J0_isComplex n) (main_ample_J0 n)
+  have h := JX_mem_weilDomain n d hd (s8_J0 n) (s8_J0_isComplex n) (s8_ample_J0 n)
     (etaX n d hd) (etaX_sqrtNeg n d hd)
   { η := etaX n d hd
     isHodge := h.2.1

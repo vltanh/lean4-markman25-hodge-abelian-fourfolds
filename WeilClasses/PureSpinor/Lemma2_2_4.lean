@@ -1316,10 +1316,20 @@ printed. We add `2 ≤ n` (the paper's standing hypothesis), which the statement
 `Spin(V_K)_P ≅ SL₂(K)` and `W₁ ≅ W₁* ≅ W₂` as representations, so the commutant of
 `ρ(Spin(V_ℚ)_P)` is a quaternion algebra over `ℚ`, larger than `K`.
 
-Note for the proof: "`W₁` and `W₂` are `g`-invariant and `g` acts on `Wᵢ` by a scalar" uses that
-`W₁`, `W₂` are non-isomorphic absolutely irreducible representations of `Spin(V_ℚ)_P`, which needs
-the Zariski density of `Spin(V_ℚ)_P` in the algebraic group `Spin(V_K)_P ≅ SL(W₁)` (the paper does
-not prove it). -/
+Proof (the paper's, `s22b_lemma2_2_4`): `η(K^×)` centralizes `ρ(Spin(V_ℚ)_P)` (`s22b_η_commute`) and
+`(η_λ v, η_λ v')_V = Nm(λ)(v, v')_V` (`pairing_η`); conversely `g` acts on `W₁`, `W₂` by scalars
+`λ₁, λ₂`, and `σ g σ = g` gives `λ₂ = σ(λ₁)` (`s22b_centralizer`, steps 4–5).
+
+Gap in the paper (filled): "`W₁` and `W₂` are `g`-invariant and `g` acts on `Wᵢ` via
+multiplication by a scalar" is stated without argument. It needs that `W₁`, `W₂` are non-isomorphic
+absolutely irreducible representations of `Spin(V_ℚ)_P`, i.e. the Zariski density of `Spin(V_ℚ)_P`
+in the algebraic group `Spin(V_K)_P ≅ SL(W₁)`, which the paper does not prove. Filled in
+`s22b_centralizer` (steps 1–3): for isotropic `x ∈ V_ℚ` the unitary transvection
+`E_{x,1} = 1 + ι(f x) ι(x)` (`f = η_{√-d}`) lies in `Spin(V_ℚ)_P` (`s22b_E_mem_spinPℚ`) and acts by
+`1 + N_x`, so `g` commutes with every `N_x`; the `K`-span of the `N_x` contains the operators
+`D_{a,c}` (`a ∈ W₁`, `c ∈ W₂`, `(a, c) = 0`) (`s22b_Dop_mem_nK`); and an endomorphism of `V_K`
+commuting with all `D_{a,c}` preserves `W₁` and `W₂` and acts on each by a scalar (Schur step
+`s22b_eigen_of_commute`, then `s22b_scalar_of_eigen`). -/
 theorem _root_.WeilClasses.lemma2_2_4 (hd : 0 < d) (hn : 2 ≤ n) (hP : ¬ P.IsIsotropic)
     (g : V ℚ n ≃ₗ[ℚ] V ℚ n) :
     (g ∈ Otilde n d ∧ ∀ h ∈ P.spinPℚ, g * rho ℚ n h = rho ℚ n h * g) ↔

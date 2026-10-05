@@ -4,6 +4,7 @@ public import WeilClasses.Hermitian.ComplexStructures
 public import WeilClasses.PureSpinor.Lemma2_2_7
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.Analysis.InnerProductSpace.Projection.Basic
+import TauCeti.Topology.Algebra.CliffordAlgebra.Spin.SpinorNorm
 
 /-!
 # An adjoint orbit in `Spin(V_ℝ)_P` as a period domain (paper §4, Lemmas 4.0.1 and 4.0.2)
@@ -15,8 +16,9 @@ public import Mathlib.Analysis.InnerProductSpace.Projection.Basic
 * the Grassmannian `Gr(n, W_{1,ℂ})` (`KSecant.GrW₁`) with its classical topology, and
   `ι(I) = V^{1,0}_I ∩ W_{1,ℂ}` (`KSecant.iota`);
 * Lemma 4.0.1: `ι` is injective, with nonempty open image (and a topological embedding);
-* Lemma 4.0.2: the connected components of `Ω_P` are `SO_+(V_ℝ)_f`-adjoint orbits (to be proved by
-  the authorized departure: direct transitivity of `SO_+(V_ℝ)_f ≅ SU(n, n)`).
+* Lemma 4.0.2: the connected components of `Ω_P` are `SO_+(V_ℝ)_f`-adjoint orbits (proved by the
+  authorized departure: direct transitivity of `SO_+(V_ℝ)_f ≅ SU(n, n)` on `Ω_P`, through Cartan
+  involutions, instead of the paper's dimension count).
 
 ## Topologies
 
@@ -603,6 +605,39 @@ theorem s4_eq_of_V10_eq (I I' : Module.End ℝ (V ℝ n)) (hI : IsComplexStructu
 
 end CS
 
+theorem s4_det_extEnd (n : ℕ) (A : Module.End ℝ (V ℝ n)) :
+    LinearMap.det (s4_extEnd ℝ ℂ n A) = ((LinearMap.det A : ℝ) : ℂ) := by
+  rw [s4_extEnd, LinearMap.det_toLin, ← LinearMap.det_toMatrix (basisV ℝ n) A]
+  exact ((algebraMap ℝ ℂ).map_det _).symm
+
+/-- A complex structure `I` of `V_ℝ` has determinant `1`: `I_ℂ` is `i` on `V^{1,0}` and `-i` on
+`V^{0,1} = conj(V^{1,0})`, two subspaces of the same dimension. -/
+theorem s4_det_of_cs (n : ℕ) (I : Module.End ℝ (V ℝ n)) (hI : IsComplexStructure I) :
+    LinearMap.det I = 1 := by
+  have h := s4_det_of_isCompl (s4_extEnd ℝ ℂ n I) (V10 n I) (V01 n I) (s4_isCompl_V10_V01 n I hI)
+    Complex.I (-Complex.I) (fun x hx => Module.End.mem_eigenspace_iff.mp hx)
+    (fun x hx => Module.End.mem_eigenspace_iff.mp hx)
+  have hdim : Module.finrank ℂ (V01 n I) = Module.finrank ℂ (V10 n I) := by
+    rw [← s4_map_conjL_V10 n I, s4_finrank_map_conjL]
+  rw [hdim, ← mul_pow, mul_neg, Complex.I_mul_I, neg_neg, one_pow, s4_det_extEnd] at h
+  exact_mod_cast h
+
+/-- The squares are open in `ℝ^×` (the positive reals). -/
+theorem s4_isOpen_square_real : IsOpen (Subgroup.square ℝˣ : Set ℝˣ) := by
+  have h : (Subgroup.square ℝˣ : Set ℝˣ) = Units.val ⁻¹' Set.Ioi 0 := by
+    ext u
+    simp only [SetLike.mem_coe, Subgroup.mem_square, Set.mem_preimage, Set.mem_Ioi]
+    constructor
+    · rintro ⟨v, rfl⟩
+      simp only [Units.val_mul]
+      exact mul_self_pos.mpr v.ne_zero
+    · intro hu
+      have hs : 0 < Real.sqrt (u : ℝ) := Real.sqrt_pos.mpr hu
+      refine ⟨Units.mk0 _ hs.ne', Units.ext ?_⟩
+      simp [Real.mul_self_sqrt hu.le]
+  rw [h]
+  exact isOpen_Ioi.preimage Units.continuous_val
+
 theorem s4_sqrtNeg_ne_zero {d : ℚ} (hd : 0 < d) : sqrtNeg d ≠ 0 := by
   have : 0 < Real.sqrt (d : ℝ) := Real.sqrt_pos.mpr (by exact_mod_cast hd)
   simp [sqrtNeg, this.ne']
@@ -628,40 +663,6 @@ theorem s4_map_conjL_V01 (n : ℕ) (I : Module.End ℝ (V ℝ n)) :
 
 namespace KSecant
 
-/-- A rational `K`-secant exists only for `d > 0` (the upstream `KSecant.d_pos` omits `P` from its
-statement, so it asserts `0 < d` for every `d`; we prove the intended statement here). For
-`d ≤ 0`, `√-d = 0`, so `K = ℚ`, `σ = id` and `u₂ = u₁`, contradicting `linIndep`. -/
-theorem s4_d_pos {n : ℕ} {d : ℚ} (P : KSecant n d) : 0 < d := by
-  by_contra hd
-  push Not at hd
-  have h0 : sqrtNeg d = 0 := by
-    have : Real.sqrt (d : ℝ) = 0 := Real.sqrt_eq_zero_of_nonpos (by exact_mod_cast hd)
-    simp [sqrtNeg, this]
-  -- every element of `K` is real, so `σ = id`
-  have hσ : ∀ z : Kd d, Kd.σ d z = z := by
-    let R : Subfield ℂ :=
-      { carrier := {z | (starRingEnd ℂ) z = z}
-        mul_mem' := fun {a b} ha hb => by simp_all
-        one_mem' := by simp
-        add_mem' := fun {a b} ha hb => by simp_all
-        zero_mem' := by simp
-        neg_mem' := fun {a} ha => by simp_all
-        inv_mem' := fun a ha => by simp_all }
-    have hle : Kd d ≤ R := Subfield.closure_le.mpr (by
-      rintro _ rfl
-      show (starRingEnd ℂ) (sqrtNeg d) = sqrtNeg d
-      rw [h0, map_zero])
-    intro z
-    exact Subtype.ext (hle z.2)
-  have hu : σS n d P.u₁ = P.u₁ := by
-    show (∑ K, Kd.σ d ((basisS (Kd d) n).repr P.u₁ K) • basisS (Kd d) n K) = P.u₁
-    simp only [hσ]
-    exact (basisS (Kd d) n).sum_repr P.u₁
-  have := P.linIndep
-  rw [hu, LinearIndependent.pair_iff] at this
-  have := this 1 (-1) (by simp)
-  simp at this
-
 variable {n : ℕ} {d : ℚ} (P : KSecant n d)
 
 theorem s4_extEnd_fR (hW : IsCompl P.W₁ P.W₂) :
@@ -681,7 +682,7 @@ theorem s4_ηK_W₂ (hW : IsCompl P.W₁ P.W₂) (l : Kd d) (w : V (Kd d) n) (hw
 theorem s4_extEnd_fη_K (hW : IsCompl P.W₁ P.W₂) :
     s4_extEnd ℚ (Kd d) n (P.fη hW) = P.ηK hW (Kd.sqrtNeg d) := by
   refine (basisV (Kd d) n).ext fun j => ?_
-  rw [← s4_bcV_basisV ℚ (Kd d) n, s4_extEnd_bcV, ηK_bcV P (s4_d_pos P) hW]
+  rw [← s4_bcV_basisV ℚ (Kd d) n, s4_extEnd_bcV, ηK_bcV P P.d_pos hW]
   rfl
 
 theorem s4_fC_bcV_W₁ (hW : IsCompl P.W₁ P.W₂) (w : V (Kd d) n) (hw : w ∈ P.W₁) :
@@ -729,7 +730,7 @@ theorem s4_W₁ℂ_eq (hW : IsCompl P.W₁ P.W₂) :
     have := Submodule.sub_mem _ hx (s4_W₁ℂ_le P hW ha)
     rwa [add_sub_cancel_left] at this
   have hb0 : b = 0 := by
-    have := (s4_disjoint_eigenspace _ (s4_sqrtNeg_ne_neg (s4_d_pos P))).le_bot
+    have := (s4_disjoint_eigenspace _ (s4_sqrtNeg_ne_neg P.d_pos)).le_bot
       ⟨hb', s4_W₂ℂ_le P hW hb⟩
     simpa using this
   rw [hb0, add_zero]
@@ -744,7 +745,7 @@ theorem s4_W₂ℂ_eq (hW : IsCompl P.W₁ P.W₂) :
     have := Submodule.sub_mem _ hx (s4_W₂ℂ_le P hW hb)
     rwa [add_sub_cancel_right] at this
   have ha0 : a = 0 := by
-    have := (s4_disjoint_eigenspace _ (s4_sqrtNeg_ne_neg (s4_d_pos P))).le_bot
+    have := (s4_disjoint_eigenspace _ (s4_sqrtNeg_ne_neg P.d_pos)).le_bot
       ⟨s4_W₁ℂ_le P hW ha, ha'⟩
     simpa using this
   rw [ha0, zero_add]
@@ -753,7 +754,7 @@ theorem s4_W₂ℂ_eq (hW : IsCompl P.W₁ P.W₂) :
 theorem s4_isCompl_Wℂ (hW : IsCompl P.W₁ P.W₂) : IsCompl P.W₁ℂ P.W₂ℂ := by
   refine ⟨?_, codisjoint_iff.mpr (s4_W₁ℂ_sup_W₂ℂ P hW)⟩
   rw [s4_W₁ℂ_eq P hW, s4_W₂ℂ_eq P hW]
-  exact s4_disjoint_eigenspace _ (s4_sqrtNeg_ne_neg (s4_d_pos P))
+  exact s4_disjoint_eigenspace _ (s4_sqrtNeg_ne_neg P.d_pos)
 
 theorem s4_map_conjL_W₁ℂ (hW : IsCompl P.W₁ P.W₂) :
     P.W₁ℂ.map (s4_conjL n).toLinearMap = P.W₂ℂ := by
@@ -806,10 +807,10 @@ theorem s4_eigenspace_fI (hW : IsCompl P.W₁ P.W₂) (I : Module.End ℝ (V ℝ
     simp only [Ic, Fc, ← s4_extEnd_mul, hc]
   have hFI : s4_extEnd ℝ ℂ n (P.fR hW * I) = Fc * Ic := s4_extEnd_mul ℝ ℂ n _ _
   rw [hFI]
-  have hs0 : sqrtNeg d ≠ 0 := s4_sqrtNeg_ne_zero (s4_d_pos P)
+  have hs0 : sqrtNeg d ≠ 0 := s4_sqrtNeg_ne_zero P.d_pos
   have hcomm : Fc * (Fc * Ic) = (Fc * Ic) * Fc := by rw [mul_assoc, ← hcC, ← mul_assoc]
   have hsplit := fun c => s4_eigenspace_split Fc (Fc * Ic) hcomm (sqrtNeg d) (-sqrtNeg d) c
-    (s4_sqrtNeg_ne_neg (s4_d_pos P)) (s4_fC_quad P hW)
+    (s4_sqrtNeg_ne_neg P.d_pos) (s4_fC_quad P hW)
   -- `Ic` preserves `W_{1,ℂ}` and `W_{2,ℂ}`
   have hIW : ∀ μ : ℂ, ∀ x ∈ Module.End.eigenspace Fc μ, Ic x ∈ Module.End.eigenspace Fc μ := by
     intro μ x hx
@@ -947,30 +948,9 @@ theorem s4_V10_split (hW : IsCompl P.W₁ P.W₂) (I : Module.End ℝ (V ℝ n))
       s4_extEnd ℝ ℂ n I * s4_extEnd ℝ ℂ n (P.fR hW) := by
     rw [← s4_extEnd_mul, ← s4_extEnd_mul, hc]
   have := s4_eigenspace_split _ _ hcC (sqrtNeg d) (-sqrtNeg d) Complex.I
-    (s4_sqrtNeg_ne_neg (s4_d_pos P)) (s4_fC_quad P hW)
+    (s4_sqrtNeg_ne_neg P.d_pos) (s4_fC_quad P hW)
   rw [← s4_W₁ℂ_eq P hW, ← s4_W₂ℂ_eq P hW] at this
   exact this
-
-/-- Dimension count: if `dim_ℝ E(f ∘ I, -√d) = 2n`, then `dim (V^{1,0} ∩ W_{1,ℂ}) = n`. -/
-theorem s4_finrank_V10_W₁ℂ (hW : IsCompl P.W₁ P.W₂) (I : Module.End ℝ (V ℝ n))
-    (hc : I * P.fR hW = P.fR hW * I)
-    (hE : Module.finrank ℝ (Module.End.eigenspace (P.fR hW * I) (-Real.sqrt d)) = 2 * n) :
-    Module.finrank ℂ ↥(V10 n I ⊓ P.W₁ℂ) = n := by
-  have h1 := s4_finrank_eigenspace_extEnd n (P.fR hW * I) (-Real.sqrt d)
-  rw [hE, (s4_eigenspace_fI P hW I hc).1] at h1
-  have hconj : (V10 n I ⊓ P.W₁ℂ).map (s4_conjL n).toLinearMap = V01 n I ⊓ P.W₂ℂ := by
-    rw [Submodule.map_inf _ (s4_conjL n).injective, s4_map_conjL_V10, s4_map_conjL_W₁ℂ P hW]
-  have h2 := s4_finrank_map_conjL n (V10 n I ⊓ P.W₁ℂ)
-  rw [hconj] at h2
-  have hdisj : V10 n I ⊓ P.W₁ℂ ⊓ (V01 n I ⊓ P.W₂ℂ) = ⊥ := by
-    have := (s4_isCompl_Wℂ P hW).1
-    rw [eq_bot_iff]
-    intro x hx
-    exact this.le_bot ⟨hx.1.2, hx.2.2⟩
-  have h3 := Submodule.finrank_sup_add_finrank_inf_eq (V10 n I ⊓ P.W₁ℂ) (V01 n I ⊓ P.W₂ℂ)
-  rw [hdisj, finrank_bot] at h3
-  omega
-
 
 theorem s4_fR_bcV (hW : IsCompl P.W₁ P.W₂) (v : V ℚ n) :
     P.fR hW (bcV ℚ ℝ n v) = bcV ℚ ℝ n (P.fη hW v) :=
@@ -1053,25 +1033,18 @@ theorem s4_n_pos {n : ℕ} {d : ℚ} (P : KSecant n d) : 0 < n := by
     simp at h1
   · exact h
 
-/-- The four summands `V^{1,0} ∩ W_{i,ℂ}`, `V^{0,1} ∩ W_{i,ℂ}` are `n`-dimensional when both
-eigenspaces of `f ∘ I` are `2n`-dimensional. -/
+/-- Lemma 3.2.1 for `I` a complex structure commuting with `f` with `dim E(f ∘ I, √d) = 2n` (that
+is, `ν(I) = 2n`): the four summands `V^{1,0} ∩ W_{i,ℂ}`, `V^{0,1} ∩ W_{i,ℂ}` are `n`-dimensional.
+This is `KSecant.s3_core`, the paper's proof of Lemma 3.2.1 for the general case (TeX 1639–1651),
+which uses only that `I` commutes with `f` (for `I ∈ ρ(Spin(V_ℝ)_P)`, Lemma 3.1.1). -/
 theorem s4_finrank_four (hW : IsCompl P.W₁ P.W₂) (I : Module.End ℝ (V ℝ n))
-    (hc : I * P.fR hW = P.fR hW * I)
-    (hE1 : Module.finrank ℝ (Module.End.eigenspace (P.fR hW * I) (Real.sqrt d)) = 2 * n)
-    (hE2 : Module.finrank ℝ (Module.End.eigenspace (P.fR hW * I) (-Real.sqrt d)) = 2 * n) :
+    (hc : I * P.fR hW = P.fR hW * I) (hcs : IsComplexStructure I)
+    (hE1 : Module.finrank ℝ (Module.End.eigenspace (P.fR hW * I) (Real.sqrt d)) = 2 * n) :
     Module.finrank ℂ ↥(V10 n I ⊓ P.W₁ℂ) = n ∧ Module.finrank ℂ ↥(V01 n I ⊓ P.W₁ℂ) = n ∧
       Module.finrank ℂ ↥(V10 n I ⊓ P.W₂ℂ) = n ∧ Module.finrank ℂ ↥(V01 n I ⊓ P.W₂ℂ) = n := by
-  have h4 := P.s4_finrank_eig_fI hW I hc
-  rw [hE1, hE2] at h4
-  have hc1 : (V10 n I ⊓ P.W₁ℂ).map (s4_conjL n).toLinearMap = V01 n I ⊓ P.W₂ℂ := by
-    rw [Submodule.map_inf _ (s4_conjL n).injective, s4_map_conjL_V10, s4_map_conjL_W₁ℂ P hW]
-  have hc2 : (V01 n I ⊓ P.W₁ℂ).map (s4_conjL n).toLinearMap = V10 n I ⊓ P.W₂ℂ := by
-    rw [Submodule.map_inf _ (s4_conjL n).injective, s4_map_conjL_W₁ℂ P hW, s4_map_conjL_V01]
-  have e1 := s4_finrank_map_conjL n (V10 n I ⊓ P.W₁ℂ)
-  have e2 := s4_finrank_map_conjL n (V01 n I ⊓ P.W₁ℂ)
-  rw [hc1] at e1
-  rw [hc2] at e2
-  omega
+  have hν : P.nu hW I = 2 * n := by rw [nu, hc]; exact hE1
+  obtain ⟨h1, h2, h3, h4⟩ := P.s3_core hW I hc hcs hν
+  exact ⟨h1, h3, h2, h4⟩
 
 end KSecant
 
@@ -1902,6 +1875,102 @@ theorem s4_continuousAt_KOp_end (T₀ : EuclideanSpace ℂ (Fin (2 * n + 2 * n))
     (LinearMap.toMatrix (basisV ℝ n) (basisV ℝ n))).continuousAt_iff.mpr
     (s4_continuousAt_KOp n T₀ hA)
 
+/-- The orientation condition in the proof of Lemma 4.0.1 is open (TeX 1739–1740: "… is open, as is
+the condition that `I_U` preserves the orientation of the positive cone in `V_ℝ`"). The subgroup
+`SO_+(V_ℝ) = ρ(Spin(V_ℝ))` of `SO(V_ℝ)` (the kernel of the spinor norm) is open in `SO(V_ℝ)` (Tau
+Ceti, `CliffordAlgebra.isOpen_range_spinToSpecialOrthogonal`). So if `x ↦ F x ∈ End(V_ℝ)` is
+continuous at `x₀` and the complex structure `F x₀` lies in `SO_+(V_ℝ)`, then for `x` near `x₀`,
+every `F x` which is an isometric complex structure (hence in `SO(V_ℝ)`: `det F x = 1`,
+`s4_det_of_cs`) lies in `SO_+(V_ℝ)`. `SO(V_ℝ)` carries Tau Ceti's topology, induced by
+`g ↦ (g, g⁻¹)` from the module topology of `End(V_ℝ)`, which `endTopology` refines. -/
+theorem s4_eventually_mem_SOplus {X : Type*} [TopologicalSpace X] (F : X → Module.End ℝ (V ℝ n))
+    (x₀ : X) (hF : @ContinuousAt _ _ _ (endTopology n) F x₀) (hcs₀ : IsComplexStructure (F x₀))
+    (h₀ : ∃ g ∈ SOplus ℝ n, (g : Module.End ℝ (V ℝ n)) = F x₀) :
+    ∀ᶠ x in 𝓝 x₀, IsComplexStructure (F x) →
+      (∀ a b, pairing ℝ n (F x a) (F x b) = pairing ℝ n a b) →
+        ∃ g ∈ SOplus ℝ n, (g : Module.End ℝ (V ℝ n)) = F x := by
+  -- `F` is also continuous at `x₀` for Tau Ceti's module topology of `End(V_ℝ)` (coarser than
+  -- `endTopology`): `F = e⁻¹ ∘ (e ∘ F)` with `e` the matrix in the basis `basisV`
+  have hF' : ContinuousAt F x₀ := by
+    let e := LinearMap.toMatrix (basisV ℝ n) (basisV ℝ n)
+    have hEF : ContinuousAt (fun x => e (F x)) x₀ := by
+      let := endTopology n
+      exact (Topology.IsInducing.induced e).continuousAt_iff.mp hF
+    have h2 : Continuous e.symm := LinearMap.continuous_of_finiteDimensional e.symm.toLinearMap
+    have h3 : F = fun x => e.symm (e (F x)) := by
+      funext x
+      simp
+    rw [h3]
+    exact h2.continuousAt.comp hEF
+  -- the topology of `SO(V_ℝ)` is induced by `ψ : g ↦ (g, (g⁻¹)ᵐᵒᵖ)`; `ρ(Spin(V_ℝ))` is open
+  set SO := TauCeti.QuadraticMap.specialOrthogonalGroup (Q ℝ n) with hSO_def
+  set H := (CliffordAlgebra.spinToSpecialOrthogonal (Q ℝ n)).range with hH_def
+  have hopen : IsOpen (H : Set SO) :=
+    CliffordAlgebra.isOpen_range_spinToSpecialOrthogonal (Q ℝ n) s3_Q_nondegenerate
+      s4_isOpen_square_real
+  let ψ : SO → Module.End ℝ (V ℝ n) × (Module.End ℝ (V ℝ n))ᵐᵒᵖ := fun g =>
+    (((g : V ℝ n ≃ₗ[ℝ] V ℝ n) : Module.End ℝ (V ℝ n)),
+      MulOpposite.op ((((g : V ℝ n ≃ₗ[ℝ] V ℝ n))⁻¹ : V ℝ n ≃ₗ[ℝ] V ℝ n) : Module.End ℝ (V ℝ n)))
+  have hψ : Topology.IsInducing ψ :=
+    (Units.isInducing_embedProduct.comp
+      (⟨rfl⟩ : Topology.IsInducing
+        (LinearMap.GeneralLinearGroup.generalLinearEquiv ℝ (V ℝ n)).symm)).comp
+      Topology.IsInducing.subtypeVal
+  obtain ⟨O, hO, hOH⟩ := hψ.isOpen_iff.mp hopen
+  -- an isometric complex structure `A` is an element `g` of `SO(V_ℝ)` with `ψ g = (A, (-A)ᵐᵒᵖ)`
+  have key : ∀ A : Module.End ℝ (V ℝ n), IsComplexStructure A →
+      (∀ a b, pairing ℝ n (A a) (A b) = pairing ℝ n a b) →
+      ∃ g : SO, ((g : V ℝ n ≃ₗ[ℝ] V ℝ n) : Module.End ℝ (V ℝ n)) = A ∧
+        ψ g = (A, MulOpposite.op (-A)) := by
+    intro A hA hiso
+    have hAA : A * A = -1 := hA
+    let e : V ℝ n ≃ₗ[ℝ] V ℝ n := LinearEquiv.ofLinearMap A (-A)
+      (by rw [← Module.End.mul_eq_comp, mul_neg, hAA, neg_neg]; rfl)
+      (by rw [← Module.End.mul_eq_comp, neg_mul, hAA, neg_neg]; rfl)
+    have he : e ∈ SO := by
+      refine TauCeti.QuadraticMap.mem_specialOrthogonalGroup_iff.mpr ⟨?_, ?_⟩
+      · rw [TauCeti.QuadraticMap.mem_orthogonalGroup_iff_polar
+          (IsSMulRegular.of_ne_zero two_ne_zero)]
+        exact hiso
+      · apply Units.ext
+        rw [LinearEquiv.coe_det]
+        exact s4_det_of_cs n A hA
+    exact ⟨⟨e, he⟩, rfl, rfl⟩
+  -- `ψ` maps `ρ(Spin(V_ℝ)) ∩ SO(V_ℝ)` into `O`; in particular `(F x₀, (-F x₀)ᵐᵒᵖ) ∈ O`
+  have hmemO : ∀ g : SO, g ∈ H → ψ g ∈ O := fun g hg => by
+    have : g ∈ ψ ⁻¹' O := by rw [hOH]; exact hg
+    exact this
+  have hx₀ : (F x₀, MulOpposite.op (-F x₀)) ∈ O := by
+    obtain ⟨g₀, hg₀, hg₀F⟩ := h₀
+    obtain ⟨s₀, hs₀⟩ := (mem_SOplus_iff ℝ n g₀).mp hg₀
+    have hiso₀ : ∀ a b, pairing ℝ n (F x₀ a) (F x₀ b) = pairing ℝ n a b := fun a b => by
+      rw [← hg₀F, ← hs₀]
+      exact s3_pairing_rho s₀ a b
+    obtain ⟨g, hgA, hgψ⟩ := key (F x₀) hcs₀ hiso₀
+    have hgH : g ∈ H := by
+      refine ⟨s₀, Subtype.ext (LinearEquiv.toLinearMap_injective ?_)⟩
+      rw [hgA, ← hg₀F, ← hs₀]
+      refine LinearMap.ext fun v => ?_
+      rw [LinearEquiv.coe_coe, LinearEquiv.coe_coe, coe_spinToSpecialOrthogonal_apply]
+      rfl
+    rw [← hgψ]
+    exact hmemO g hgH
+  -- for `x` near `x₀`, `(F x, (-F x)ᵐᵒᵖ) ∈ O`
+  have hG : ContinuousAt (fun x => (F x, MulOpposite.op (-F x))) x₀ :=
+    hF'.prodMk ((MulOpposite.continuous_op.comp continuous_neg).continuousAt.comp hF')
+  filter_upwards [hG.preimage_mem_nhds (hO.mem_nhds hx₀)] with x hx hcs hiso
+  obtain ⟨g, hgA, hgψ⟩ := key (F x) hcs hiso
+  have hgH : g ∈ (H : Set SO) := by
+    rw [← hOH]
+    show ψ g ∈ O
+    rw [hgψ]
+    exact hx
+  obtain ⟨s, hs⟩ := hgH
+  refine ⟨rho ℝ n s, (mem_SOplus_iff ℝ n _).mpr ⟨s, rfl⟩, ?_⟩
+  rw [← hgA, ← hs]
+  refine LinearMap.ext fun v => ?_
+  rw [LinearEquiv.coe_coe, LinearEquiv.coe_coe, coe_spinToSpecialOrthogonal_apply]
+  rfl
 
 end Topo
 
@@ -1990,12 +2059,12 @@ theorem s4_comm_OmegaP (hW : IsCompl P.W₁ P.W₂) (I : Module.End ℝ (V ℝ n
   obtain ⟨⟨g, hg, rfl⟩, -⟩ := hI
   exact P.s4_comm_of_mem_SOplusfR hW g hg
 
-/-- For `I ∈ Ω_P`, `V^{1,0}_I ∩ W_{1,ℂ}` is `n`-dimensional (Lemma 3.2.1; "The map `ι` is well
-defined, by Lemma 3.2.1"). -/
+/-- For `I ∈ Ω_P`, `V^{1,0}_I ∩ W_{1,ℂ}` is `n`-dimensional ("The map `ι` is well defined, by
+Lemma 3.2.1", TeX 1721): Lemma 3.2.1 in the form `KSecant.s3_core` (its proof for the general case,
+which uses only that `I ∈ Ω_P ⊆ SO_+(V_ℝ)_f` commutes with `f`), with `ν(I) = 2n`. -/
 theorem finrank_V10_inf_W₁ℂ (hW : IsCompl P.W₁ P.W₂) (I : Module.End ℝ (V ℝ n))
-    (hI : I ∈ P.OmegaP hW) : Module.finrank ℂ ↥(V10 n I ⊓ P.W₁ℂ) = n := by
-  obtain ⟨⟨g, hg, rfl⟩, -, -, hE, -⟩ := hI
-  exact P.s4_finrank_V10_W₁ℂ hW _ (P.s4_comm_of_mem_SOplusfR hW g hg) hE
+    (hI : I ∈ P.OmegaP hW) : Module.finrank ℂ ↥(V10 n I ⊓ P.W₁ℂ) = n :=
+  (P.s3_core hW I (P.s4_comm_OmegaP hW I hI) hI.2.1 (P.s4_nu_OmegaP hW I hI)).1
 
 /-- **The map `ι : Ω_P → Gr(n, W_{1,ℂ})`**, `ι(I) = V^{1,0}_I ∩ W_{1,ℂ}` (§4, after (4.0.1)). -/
 noncomputable def iota (hW : IsCompl P.W₁ P.W₂) (I : P.OmegaP hW) : P.GrW₁ :=
@@ -2342,7 +2411,7 @@ theorem s4_exists_mem_OmegaP_adapted (J : Module.End ℝ (H1 ℝ n)) (hP : Assum
     linarith
   -- assembling: `I ∈ Ω_P`
   obtain ⟨xs, hxs⟩ := remark2_4_3_exists_lift I hcs hiso
-  have hfr4 := P.s4_finrank_four hW I hc hE1 hE2
+  have hfr4 := P.s4_finrank_four hW I hc hcs hE1
   have hmem : I ∈ P.OmegaP hW := by
     refine ⟨⟨rho ℝ n xs, P.s4_mem_SOplusfR_of_cs hW _ (s4_rho_mem_SOplus xs) (hxs ▸ hcs)
       (hxs ▸ hc) ?_ ?_, hxs⟩, hcs, hE1, hE2, ?_⟩
@@ -2375,11 +2444,15 @@ def s4_IsCartan (hW : IsCompl P.W₁ P.W₂) (K : Module.End ℝ (V ℝ n)) : Pr
   K * K = 1 ∧ K * P.fR hW = P.fR hW * K ∧ (∀ x y, pairing ℝ n (K x) (K y) = pairing ℝ n x y) ∧
     ∀ x, x ≠ 0 → pairing ℝ n x (K x) < 0
 
-/-- From a Cartan involution `K` to a point `I = -f K/√d` of `Ω_P`. -/
-theorem s4_mem_OmegaP_of_cartan (hW : IsCompl P.W₁ P.W₂) (K : Module.End ℝ (V ℝ n))
-    (hK : P.s4_IsCartan hW K) : (-(Real.sqrt d)⁻¹) • (P.fR hW * K) ∈ P.OmegaP hW := by
-  obtain ⟨hKK, hKf, hKiso, hKneg⟩ := hK
-  have hd : 0 < d := s4_d_pos P
+/-- From an `f`-linear isometric involution `K`: `I = -f K/√d` is a complex structure of `V_ℝ` which
+is an isometry of `(·,·)_V`. -/
+theorem s4_cs_of_cartan (hW : IsCompl P.W₁ P.W₂) (K : Module.End ℝ (V ℝ n)) (hKK : K * K = 1)
+    (hKf : K * P.fR hW = P.fR hW * K)
+    (hKiso : ∀ x y, pairing ℝ n (K x) (K y) = pairing ℝ n x y) :
+    IsComplexStructure ((-(Real.sqrt d)⁻¹) • (P.fR hW * K)) ∧
+      ∀ x y, pairing ℝ n (((-(Real.sqrt d)⁻¹) • (P.fR hW * K)) x)
+        (((-(Real.sqrt d)⁻¹) • (P.fR hW * K)) y) = pairing ℝ n x y := by
+  have hd : 0 < d := P.d_pos
   have hdR : (0 : ℝ) < d := by exact_mod_cast hd
   set sd := Real.sqrt (d : ℝ) with hsd_def
   have hsd : 0 < sd := Real.sqrt_pos.mpr hdR
@@ -2396,19 +2469,41 @@ theorem s4_mem_OmegaP_of_cartan (hW : IsCompl P.W₁ P.W₂) (K : Module.End ℝ
   have hIx : ∀ x, I x = (-(sd⁻¹)) • f (K x) := fun x => rfl
   have hc1 : -(sd⁻¹) * -(sd⁻¹) * (d : ℝ) = 1 := by
     rw [← hsd2]; field_simp
-  have hcs : IsComplexStructure I := by
-    show I * I = -1
+  refine ⟨?_, fun x y => ?_⟩
+  · show I * I = -1
     refine LinearMap.ext fun x => ?_
     rw [Module.End.mul_apply, hIx, hIx, map_smul, map_smul, hKfx, hKKx, hff, smul_smul,
       smul_neg, smul_smul, hc1, one_smul, LinearMap.neg_apply, Module.End.one_apply]
+  · rw [hIx, hIx, map_smul, map_smul, LinearMap.smul_apply, P.s4_pairing_fR_fR hW, hKiso,
+      smul_eq_mul, smul_eq_mul]
+    linear_combination pairing ℝ n x y * hc1
+
+/-- From a Cartan involution `K` to a point `I = -f K/√d` of `Ω_P`, given that `I ∈ SO_+(V_ℝ)`:
+`I` is an orthogonal complex structure commuting with `f` (`KSecant.s4_cs_of_cartan`); the
+eigenspaces of `K = f I/√d` are definite, hence both `2n`-dimensional, so `ν(I) = 2n`; `I` has
+determinant `1` on `W_{1,ℂ}` and `W_{2,ℂ}` by Lemma 3.2.1 (`KSecant.s4_finrank_four`), so
+`I ∈ SO_+(V_ℝ)_f`; and `g_I(x, x) = -√d (x, K x)_V > 0` for `x ≠ 0`. -/
+theorem s4_mem_OmegaP_of_cartan_of_SOplus (hW : IsCompl P.W₁ P.W₂) (K : Module.End ℝ (V ℝ n))
+    (hK : P.s4_IsCartan hW K)
+    (hSO : ∃ g ∈ SOplus ℝ n, (g : Module.End ℝ (V ℝ n)) = (-(Real.sqrt d)⁻¹) • (P.fR hW * K)) :
+    (-(Real.sqrt d)⁻¹) • (P.fR hW * K) ∈ P.OmegaP hW := by
+  obtain ⟨hKK, hKf, hKiso, hKneg⟩ := hK
+  obtain ⟨hcs, -⟩ := P.s4_cs_of_cartan hW K hKK hKf hKiso
+  have hd : 0 < d := P.d_pos
+  have hdR : (0 : ℝ) < d := by exact_mod_cast hd
+  set sd := Real.sqrt (d : ℝ) with hsd_def
+  have hsd : 0 < sd := Real.sqrt_pos.mpr hdR
+  have hsd2 : sd * sd = d := Real.mul_self_sqrt hdR.le
+  set f := P.fR hW with hf
+  set I : Module.End ℝ (V ℝ n) := (-(sd⁻¹)) • (f * K) with hI
+  have hff : ∀ x, f (f x) = -((d : ℝ) • x) := P.s4_fR_fR hW
+  have hKfx : ∀ x, K (f x) = f (K x) := fun x => by
+    have := congrArg (fun F => F x) hKf
+    simpa using this
+  have hIx : ∀ x, I x = (-(sd⁻¹)) • f (K x) := fun x => rfl
   have hc : I * f = f * I := by
     refine LinearMap.ext fun x => ?_
     rw [Module.End.mul_apply, Module.End.mul_apply, hIx, hIx, hKfx, map_smul]
-  have hiso : ∀ x y, pairing ℝ n (I x) (I y) = pairing ℝ n x y := by
-    intro x y
-    rw [hIx, hIx, map_smul, map_smul, LinearMap.smul_apply, P.s4_pairing_fR_fR hW, hKiso,
-      smul_eq_mul, smul_eq_mul]
-    linear_combination pairing ℝ n x y * hc1
   have hfI : f * I = sd • K := by
     refine LinearMap.ext fun x => ?_
     rw [Module.End.mul_apply, hIx, map_smul, hff, LinearMap.smul_apply, smul_neg, smul_smul,
@@ -2442,18 +2537,28 @@ theorem s4_mem_OmegaP_of_cartan (hW : IsCompl P.W₁ P.W₂) (K : Module.End ℝ
   have hE2 : Module.finrank ℝ (Module.End.eigenspace (P.fR hW * I) (-Real.sqrt d)) = 2 * n := by
     rw [hfI, ← mul_neg_one (Real.sqrt (d : ℝ)), hsmul_eig]; omega
   -- assembling: `I ∈ Ω_P`
-  obtain ⟨xs, hxs⟩ := remark2_4_3_exists_lift I hcs hiso
-  have hfr4 := P.s4_finrank_four hW I hc hE1 hE2
-  refine ⟨⟨rho ℝ n xs, P.s4_mem_SOplusfR_of_cs hW _ (s4_rho_mem_SOplus xs) (hxs ▸ hcs)
-    (hxs ▸ hc) ?_ ?_, hxs⟩, hcs, hE1, hE2, ?_⟩
-  · rw [hxs, inf_comm, hfr4.1, inf_comm, hfr4.2.1]
-  · rw [hxs, inf_comm, hfr4.2.2.1, inf_comm, hfr4.2.2.2]
+  obtain ⟨g, hg, hgI⟩ := hSO
+  have hfr4 := P.s4_finrank_four hW I hc hcs hE1
+  refine ⟨⟨g, P.s4_mem_SOplusfR_of_cs hW g hg (hgI ▸ hcs) (hgI ▸ hc) ?_ ?_, hgI⟩, hcs, hE1, hE2,
+    ?_⟩
+  · rw [hgI, inf_comm, hfr4.1, inf_comm, hfr4.2.1]
+  · rw [hgI, inf_comm, hfr4.2.2.1, inf_comm, hfr4.2.2.2]
   · intro x hx
-    have := hKneg x hx
+    have h1 := hKneg x hx
     simp only [gI, XiR, LinearMap.BilinForm.compRight_apply, LinearMap.BilinForm.compLeft_apply]
-    rw [hIx, map_smul, P.s4_pairing_fR_fR hW, smul_eq_mul]
-    have : 0 < sd⁻¹ := inv_pos.mpr hsd
-    nlinarith
+    rw [hIx, map_smul, P.s4_pairing_fR_fR hW, smul_eq_mul,
+      show -(sd⁻¹) * ((d : ℝ) * pairing ℝ n x (K x)) = sd⁻¹ * ((d : ℝ) * -pairing ℝ n x (K x))
+        by ring]
+    exact mul_pos (inv_pos.mpr hsd) (mul_pos hdR (neg_pos.mpr h1))
+
+/-- From a Cartan involution `K` to a point `I = -f K/√d` of `Ω_P`, with `I ∈ SO_+(V_ℝ)` by
+Remark 2.4.3 (`remark2_4_3_exists_lift`). Used in the departure for Lemma 4.0.2
+(`KSecant.s4_OmegaP_join`). -/
+theorem s4_mem_OmegaP_of_cartan (hW : IsCompl P.W₁ P.W₂) (K : Module.End ℝ (V ℝ n))
+    (hK : P.s4_IsCartan hW K) : (-(Real.sqrt d)⁻¹) • (P.fR hW * K) ∈ P.OmegaP hW := by
+  obtain ⟨hcs, hiso⟩ := P.s4_cs_of_cartan hW K hK.1 hK.2.1 hK.2.2.1
+  obtain ⟨xs, hxs⟩ := remark2_4_3_exists_lift _ hcs hiso
+  exact P.s4_mem_OmegaP_of_cartan_of_SOplus hW K hK ⟨rho ℝ n xs, s4_rho_mem_SOplus xs, hxs⟩
 
 /-- The Cartan involution `K = f I/√d` of `I ∈ Ω_P`; `I = -f K/√d`. -/
 theorem s4_cartan_of_mem_OmegaP (hW : IsCompl P.W₁ P.W₂) (I : Module.End ℝ (V ℝ n))
@@ -2462,7 +2567,7 @@ theorem s4_cartan_of_mem_OmegaP (hW : IsCompl P.W₁ P.W₂) (I : Module.End ℝ
       I = (-(Real.sqrt d)⁻¹) • (P.fR hW * ((Real.sqrt d)⁻¹ • (P.fR hW * I))) := by
   have hc := P.s4_comm_OmegaP hW I hI
   obtain ⟨⟨g, hg, hgI⟩, hcs, -, -, hpos⟩ := hI
-  have hd : 0 < d := s4_d_pos P
+  have hd : 0 < d := P.d_pos
   have hdR : (0 : ℝ) < d := by exact_mod_cast hd
   set sd := Real.sqrt (d : ℝ) with hsd_def
   have hsd : 0 < sd := Real.sqrt_pos.mpr hdR
@@ -2641,7 +2746,7 @@ theorem s4_OmegaP_join (hW : IsCompl P.W₁ P.W₂) (I₀ I₁ : Module.End ℝ 
     obtain ⟨⟨h, hh, hhI⟩, hcsm, -⟩ := P.s4_mem_OmegaP_of_cartan hW (Kt (1 / 2)) (hcart (1 / 2))
     obtain ⟨-, hKmf, -, -⟩ := hcart (1 / 2)
     obtain ⟨-, hK0f, -, -⟩ := hc₀
-    have hd : 0 < d := s4_d_pos P
+    have hd : 0 < d := P.d_pos
     have hdR : (0 : ℝ) < d := by exact_mod_cast hd
     have hsd2 : Real.sqrt (d : ℝ) * Real.sqrt (d : ℝ) = d := Real.mul_self_sqrt hdR.le
     have hcc : c * c * (d : ℝ) = 1 := by
@@ -2710,7 +2815,7 @@ theorem s4_pairing_fC_fC (hW : IsCompl P.W₁ P.W₂) (a b : V ℂ n) :
 
 theorem s4_W₁ℂ_isotropic (hW : IsCompl P.W₁ P.W₂) (a b : V ℂ n) (ha : a ∈ P.W₁ℂ)
     (hb : b ∈ P.W₁ℂ) : pairing ℂ n a b = 0 := by
-  have hd := s4_d_pos P
+  have hd := P.d_pos
   rw [s4_W₁ℂ_eq P hW, Module.End.mem_eigenspace_iff] at ha hb
   have h := P.s4_pairing_fC_fC hW a b
   rw [ha, hb] at h
@@ -2722,7 +2827,7 @@ theorem s4_W₁ℂ_isotropic (hW : IsCompl P.W₁ P.W₂) (a b : V ℂ n) (ha : 
 
 theorem s4_W₂ℂ_isotropic (hW : IsCompl P.W₁ P.W₂) (a b : V ℂ n) (ha : a ∈ P.W₂ℂ)
     (hb : b ∈ P.W₂ℂ) : pairing ℂ n a b = 0 := by
-  have hd := s4_d_pos P
+  have hd := P.d_pos
   rw [s4_W₂ℂ_eq P hW, Module.End.mem_eigenspace_iff] at ha hb
   have h := P.s4_pairing_fC_fC hW a b
   rw [ha, hb] at h
@@ -2851,17 +2956,18 @@ noncomputable def s4_PsiOp (hW : IsCompl P.W₁ P.W₂) (T : EuclideanSpace ℂ 
     EuclideanSpace ℂ (Fin (2 * n + 2 * n))) : Module.End ℝ (V ℝ n) :=
   (-(Real.sqrt (d : ℝ))⁻¹) • (P.fR hW * s4_KOp n T)
 
-/-- For `U ⊆ W_{1,ℂ}` of dimension `n` with `A(π_U)` invertible and `K(π_U)` negative,
-`Ψ(π_U) ∈ Ω_P` and `ι(Ψ(π_U)) = U`. -/
+/-- For `U ⊆ W_{1,ℂ}` of dimension `n` with `A(π_U)` invertible, `K(π_U)` negative and
+`Ψ(π_U) ∈ SO_+(V_ℝ)`: `Ψ(π_U) ∈ Ω_P` and `ι(Ψ(π_U)) = U`. -/
 theorem s4_PsiOp_mem (hW : IsCompl P.W₁ P.W₂) (U : Submodule ℂ (V ℂ n)) (hU : U ≤ P.W₁ℂ)
     (hUn : Module.finrank ℂ U = n) (hA : IsUnit (s4_AOp (projV U) (s4_HE n)))
-    (hneg : ∀ x, x ≠ 0 → pairing ℝ n x (s4_KOp n (projV U) x) < 0) :
+    (hneg : ∀ x, x ≠ 0 → pairing ℝ n x (s4_KOp n (projV U) x) < 0)
+    (hSO : ∃ g ∈ SOplus ℝ n, (g : Module.End ℝ (V ℝ n)) = P.s4_PsiOp hW (projV U)) :
     P.s4_PsiOp hW (projV U) ∈ P.OmegaP hW ∧ V10 n (P.s4_PsiOp hW (projV U)) ⊓ P.W₁ℂ = U := by
   obtain ⟨hKK, hKf, hKiso, hKu⟩ := P.s4_cartan_KOp hW U hU hA
   have hmem : P.s4_PsiOp hW (projV U) ∈ P.OmegaP hW :=
-    P.s4_mem_OmegaP_of_cartan hW _ ⟨hKK, hKf, hKiso, hneg⟩
+    P.s4_mem_OmegaP_of_cartan_of_SOplus hW _ ⟨hKK, hKf, hKiso, hneg⟩ hSO
   refine ⟨hmem, ?_⟩
-  have hd := s4_d_pos P
+  have hd := P.d_pos
   have hsd : 0 < Real.sqrt (d : ℝ) := Real.sqrt_pos.mpr (by exact_mod_cast hd)
   have hle : U ≤ V10 n (P.s4_PsiOp hW (projV U)) ⊓ P.W₁ℂ := by
     intro u hu
@@ -2901,7 +3007,7 @@ theorem s4_extEnd_cartan_W₁ℂ (hW : IsCompl P.W₁ P.W₂) (I : Module.End �
       s4_extEnd ℝ ℂ n ((Real.sqrt (d : ℝ))⁻¹ • (P.fR hW * I)) u = -u) ∧
     (∀ u ∈ V01 n I ⊓ P.W₁ℂ,
       s4_extEnd ℝ ℂ n ((Real.sqrt (d : ℝ))⁻¹ • (P.fR hW * I)) u = u) := by
-  have hd := s4_d_pos P
+  have hd := P.d_pos
   have hsd : 0 < Real.sqrt (d : ℝ) := Real.sqrt_pos.mpr (by exact_mod_cast hd)
   have hsdC : ((Real.sqrt (d : ℝ) : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hsd.ne'
   have hf : ∀ u ∈ P.W₁ℂ, s4_extEnd ℝ ℂ n (P.fR hW) u = sqrtNeg d • u := fun u hu => by
@@ -3062,7 +3168,7 @@ theorem s4_fC_fC (hW : IsCompl P.W₁ P.W₂) (y : V ℂ n) :
   rw [this, Complex.coe_algebraMap, Complex.ofReal_ratCast]
 
 theorem s4_FV_mem (hW : IsCompl P.W₁ P.W₂) (y : V ℂ n) : P.s4_FV hW y ∈ P.W₁ℂ := by
-  have hd := s4_d_pos P
+  have hd := P.d_pos
   have hsd : 0 < Real.sqrt (d : ℝ) := Real.sqrt_pos.mpr (by exact_mod_cast hd)
   have hsdC : ((Real.sqrt (d : ℝ) : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hsd.ne'
   have hsd2 : ((Real.sqrt (d : ℝ) : ℝ) : ℂ) * ((Real.sqrt (d : ℝ) : ℝ) : ℂ) = (d : ℂ) := by
@@ -3099,7 +3205,7 @@ theorem s4_EV_fix (hW : IsCompl P.W₁ P.W₂) (I : Module.End ℝ (V ℝ n)) (u
   obtain ⟨h10, h1⟩ := Submodule.mem_inf.mp hu
   rw [V10, Module.End.mem_eigenspace_iff, s4_complexifyV_eq] at h10
   rw [s4_W₁ℂ_eq P hW, Module.End.mem_eigenspace_iff] at h1
-  have hd := s4_d_pos P
+  have hd := P.d_pos
   have hsd : 0 < Real.sqrt (d : ℝ) := Real.sqrt_pos.mpr (by exact_mod_cast hd)
   have hsdC : ((Real.sqrt (d : ℝ) : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hsd.ne'
   have hF : P.s4_FV hW u = (2 : ℂ) • u := by
@@ -3203,29 +3309,38 @@ maximal negative definite subspace `V₋` (for `(·,·)_V`); with `f̃ = f/√d`
 `K = -1` on `V₋^⊥`, `I = -f̃ K` lies in `Ω_P` (`g_I(x, x) = -√d (x, K x)_V`; `SO_+` by
 Remark 2.4.3).
 
-Departure from the paper: the paper shows `I_{V_ℝ} ∈ Ω_P` using Proposition 2.4.4, which is about
-`P = P_Θ` (that case is `productStructure_mem_OmegaP`); for a general `P` satisfying Assumption 2.4.1
-the form `g_{I_{V_ℝ}} = -g_P` need not be definite. We use instead the `H`-orthogonal `K`-basis
-`b₁, …, b_{2n}` of Lemma 3.1.2 (signature `(n, n)`): `bᵢ, f bᵢ` is a `(·,·)_V`-orthogonal basis of
-`V_ℝ`, `K = 1` on `span(bᵢ, f bᵢ)` when `(bᵢ, bᵢ)_V < 0` and `K = -1` otherwise, and
-`I = -f K/√d` (`KSecant.s4_exists_mem_OmegaP`). -/
+Gap in the paper (reason 1): the paper shows `I_{V_ℝ} ∈ Ω_P` using Proposition 2.4.4 (TeX
+1743–1747), which is about the plane `P = P_Θ` of (2.4.5) only (TeX 1370; that case is
+`productStructure_mem_OmegaP`, which follows the paper: Proposition 2.4.4, Lemma 2.2.6,
+Remark 2.4.3); for a general `P` satisfying Assumption 2.4.1 the form `g_{I_{V_ℝ}} = -g_P` need not
+be definite. Here we use instead the `H`-orthogonal `K`-basis `b₁, …, b_{2n}` of Lemma 3.1.2
+(signature `(n, n)`): `bᵢ, f bᵢ` is a `(·,·)_V`-orthogonal basis of `V_ℝ`, `K = 1` on
+`span(bᵢ, f bᵢ)` when `(bᵢ, bᵢ)_V < 0` and `K = -1` otherwise, and `I = -f K/√d`
+(`KSecant.s4_exists_mem_OmegaP`; `I ∈ SO_+(V_ℝ)` by Remark 2.4.3, as in the paper). -/
 theorem lemma4_0_1_nonempty (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
     (hP : Assumption2_4_1 P J) : (P.OmegaP hP.isCompl).Nonempty :=
   P.s4_exists_mem_OmegaP J hP
 
 open scoped Topology in
-/-- **Lemma 4.0.1** (`lemma-coadjoint-orbit-embedds-as-open-subset-of-Grassmannian`): the image of `ι` is open in the classical topology of `Gr(n, W_{1,ℂ})`.
+/-- **Lemma 4.0.1** (`lemma-coadjoint-orbit-embedds-as-open-subset-of-Grassmannian`): the image of
+`ι` is open in the classical topology of `Gr(n, W_{1,ℂ})`.
 
-Following the paper, for `U` near `ι(I₀)` we construct `I_U ∈ Ω_P` with `ι(I_U) = U`; the paper's
-`V^{1,0}_{I_U} = U ⊕ (U^⊥ ∩ W_{2,ℂ})` is made explicit by the Cartan involution
-`K_U = (f I_U)/√d = 1 - 2(Π_U + Π̄_U)` on `V_ℂ`, where `Π_U` is the projection onto `U` orthogonal for
-the Hermitian form `h(x, y) = (x, ȳ)_V`, computed from the orthogonal projection `π_U` defining the
-topology as `Π_U = A(π_U)⁻¹ π_U H`, `A(π) = π H π + 1 - π` (`KSecant.s4_PsiOp`). The paper's
-"open conditions" are: `A(π_U)` invertible (open), and `(x, K_U x)_V < 0` for `x ≠ 0`, which is open
-by continuity of `π ↦ K_π` (`s4_eventually_neg`, `s4_continuousAt_KOp_end`); the other conditions
-(`K_U² = 1`, `K_U f = f K_U`, `K_U` orthogonal) hold identically (`KSecant.s4_cartan_KOp`), and
-`I_U = -f K_U/√d ∈ Ω_P` (`KSecant.s4_mem_OmegaP_of_cartan`; `SO_+(V_ℝ)_f` by Remark 2.4.3 and the
-determinants on `W_{i,ℂ}`). -/
+As in the paper (TeX 1729–1741), for `U` near `ι(I₀)` we construct `I_U ∈ Ω_P` with `ι(I_U) = U`.
+The paper's `V^{1,0}_{I_U} = U ⊕ (U^⊥ ∩ W_{2,ℂ})` is made explicit by the Cartan involution
+`K_U = (f I_U)/√d = 1 - 2(Π_U + Π̄_U)` on `V_ℂ`, where `Π_U` is the projection onto `U` orthogonal
+for the Hermitian form `h(x, y) = (x, ȳ)_V`, computed from the orthogonal projection `π_U` defining
+the topology as `Π_U = A(π_U)⁻¹ π_U H`, `A(π) = π H π + 1 - π`; then `I_U = Ψ(π_U) = -f K_U/√d`
+(`KSecant.s4_PsiOp`). The paper's open conditions: `V^{1,0}_U` and `V^{0,1}_U` transversal (here:
+`A(π_U)` invertible, an open condition); `g_{I_U}` positive definite (here: `(x, K_U x)_V < 0` for
+`x ≠ 0`, open by continuity of `π ↦ K_π`: `s4_eventually_neg`, `s4_continuousAt_KOp_end`); and
+`I_U` preserves the orientation of the positive cone, i.e. `I_U ∈ SO_+(V_ℝ) = ρ(Spin(V_ℝ))` (open:
+`ρ(Spin(V_ℝ))` is open in `SO(V_ℝ)` and `π ↦ I_π` is continuous; `s4_eventually_mem_SOplus`,
+`KSecant.s4_continuousAt_PsiOp`). The conditions `K_U² = 1`, `K_U f = f K_U` and `K_U` orthogonal
+hold identically (`KSecant.s4_cartan_KOp`), so `I_U` is an orthogonal complex structure commuting
+with `f` (`KSecant.s4_cs_of_cartan`); it lies in `SO_+(V_ℝ)_f` (determinant `1` on `W_{i,ℂ}` by
+Lemma 3.2.1) and in `Ω_P` (`KSecant.s4_mem_OmegaP_of_cartan_of_SOplus`). The paper gets
+`ν(I_U) = 2n` from `E_{-√d}(I_U ∘ f) = U ⊕ Ū`; here both eigenspaces of `f ∘ I_U = √d K_U` are
+`2n`-dimensional because those of `K_U` are definite (mechanics). -/
 theorem lemma4_0_1_isOpen (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
     (hP : Assumption2_4_1 P J) : IsOpen (Set.range (P.iota hP.isCompl)) := by
   set hW := hP.isCompl
@@ -3233,21 +3348,46 @@ theorem lemma4_0_1_isOpen (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
   rintro _ ⟨I₀, rfl⟩
   set T₀ := projV (P.iota hW I₀).1 with hT₀
   have hA₀ : IsUnit (s4_AOp T₀ (s4_HE n)) := P.s4_isUnit_iota hW I₀.1 I₀.2
+  have hΨ₀ : P.s4_PsiOp hW T₀ = I₀.1 := P.s4_PsiOp_iota hW I₀.1 I₀.2
   have hneg₀ : ∀ x, x ≠ 0 → pairing ℝ n x (s4_KOp n T₀ x) < 0 := by
     have hK₀ : s4_KOp n T₀ = (Real.sqrt (d : ℝ))⁻¹ • (P.fR hW * I₀.1) := P.s4_KOp_iota hW I₀.1 I₀.2
     rw [hK₀]
     exact (P.s4_cartan_of_mem_OmegaP hW I₀.1 I₀.2).1.2.2.2
+  -- the open conditions: `A(π)` invertible (transversality), `(x, K_π x)_V < 0` (`g_{I_π}`
+  -- positive definite), and `I_π ∈ SO_+(V_ℝ)` (`I_π` preserves the orientation of the positive cone)
   have hN : ∀ᶠ T in 𝓝 T₀, IsUnit (s4_AOp T (s4_HE n)) ∧
-      ∀ x, x ≠ 0 → pairing ℝ n x (s4_KOp n T x) < 0 := by
-    refine Filter.Eventually.and (s4_eventually_isUnit_AOp _ _ hA₀) ?_
+      (∀ x, x ≠ 0 → pairing ℝ n x (s4_KOp n T x) < 0) ∧
+      (IsComplexStructure (P.s4_PsiOp hW T) →
+        (∀ a b, pairing ℝ n (P.s4_PsiOp hW T a) (P.s4_PsiOp hW T b) = pairing ℝ n a b) →
+          ∃ g ∈ SOplus ℝ n, (g : Module.End ℝ (V ℝ n)) = P.s4_PsiOp hW T) := by
+    refine Filter.Eventually.and (s4_eventually_isUnit_AOp _ _ hA₀) (Filter.Eventually.and ?_ ?_)
     · let := endTopology n
       exact (s4_continuousAt_KOp_end n T₀ hA₀).eventually (s4_eventually_neg n _ hneg₀)
+    · refine s4_eventually_mem_SOplus n (fun T => P.s4_PsiOp hW T) T₀
+        (P.s4_continuousAt_PsiOp hW T₀ hA₀) ?_ ?_
+      · show IsComplexStructure (P.s4_PsiOp hW T₀)
+        rw [hΨ₀]
+        exact I₀.2.2.1
+      · obtain ⟨⟨g, hg, hgI⟩, -⟩ := I₀.2
+        exact ⟨g, hg.1, hgI.trans hΨ₀.symm⟩
   have hpre : (fun U : P.GrW₁ => projV U.1) ⁻¹' {T | IsUnit (s4_AOp T (s4_HE n)) ∧
-      ∀ x, x ≠ 0 → pairing ℝ n x (s4_KOp n T x) < 0} ∈ 𝓝 (P.iota hW I₀) :=
+      (∀ x, x ≠ 0 → pairing ℝ n x (s4_KOp n T x) < 0) ∧
+      (IsComplexStructure (P.s4_PsiOp hW T) →
+        (∀ a b, pairing ℝ n (P.s4_PsiOp hW T a) (P.s4_PsiOp hW T b) = pairing ℝ n a b) →
+          ∃ g ∈ SOplus ℝ n, (g : Module.End ℝ (V ℝ n)) = P.s4_PsiOp hW T)} ∈
+        𝓝 (P.iota hW I₀) :=
     continuous_induced_dom.continuousAt.preimage_mem_nhds hN
   refine Filter.mem_of_superset hpre ?_
-  rintro U ⟨hUA, hUneg⟩
-  obtain ⟨hmem, heq⟩ := P.s4_PsiOp_mem hW U.1 U.2.1 U.2.2 hUA hUneg
+  rintro U ⟨hUA, hUneg, hUSO⟩
+  -- `I_U = -f K_U/√d` is an orthogonal complex structure (`K_U² = 1`, `K_U f = f K_U`, `K_U`
+  -- orthogonal), so it lies in `SO_+(V_ℝ)` by the orientation condition
+  obtain ⟨hKK, hKf, hKiso, -⟩ := P.s4_cartan_KOp hW U.1 U.2.1 hUA
+  obtain ⟨hcs, hiso⟩ := P.s4_cs_of_cartan hW _ hKK hKf hKiso
+  have hΨ : (-(Real.sqrt d)⁻¹) • (P.fR hW * s4_KOp n (projV U.1)) = P.s4_PsiOp hW (projV U.1) :=
+    rfl
+  rw [hΨ] at hcs hiso
+  beta_reduce at hUSO
+  obtain ⟨hmem, heq⟩ := P.s4_PsiOp_mem hW U.1 U.2.1 U.2.2 hUA hUneg (hUSO hcs hiso)
   exact ⟨⟨_, hmem⟩, Subtype.ext heq⟩
 
 open scoped Topology in
@@ -3332,13 +3472,15 @@ instead of the paper's dimension count; in fact `Ω_P` is a single adjoint orbit
 The first step of the paper's proof (`Ω_P` is a union of adjoint orbits, `g_{hIh⁻¹}(x, y) =
 g_I(h⁻¹x, h⁻¹y)`) is `KSecant.adjointOrbit_subset_OmegaP`.
 
-Departure from the paper (authorized): instead of comparing the dimension `4n² - 1` of
-`SO_+(V_ℝ)_f` with that of the stabilizer of `I` and of `Ω_P`, we show directly that `Ω_P` is a
-single `SO_+(V_ℝ)_f`-adjoint orbit and is (path) connected, so that it is its own connected
-component. For `I ∈ Ω_P`, `K = f I/√d` is a "Cartan involution": `K² = 1`, `K f = f K`, `K`
+Departure from the paper (authorized; reason 2: the paper's count needs dimensions of orbits of
+real Lie group actions, which Lean lacks): the paper (TeX 1772–1803) compares the dimension
+`4n² - 1` of `SO_+(V_ℝ)_f` with that of the stabilizer of `I` and of `Ω_P`; here we show directly
+that `Ω_P` is a single `SO_+(V_ℝ)_f`-adjoint orbit and is (path) connected, so that it is its own
+connected component. For `I ∈ Ω_P`, `K = f I/√d` is a "Cartan involution": `K² = 1`, `K f = f K`, `K`
 preserves `(·,·)_V` and `(x, K x)_V < 0` for `x ≠ 0`; conversely every such `K` gives
 `I = -f K/√d ∈ Ω_P` (`KSecant.s4_cartan_of_mem_OmegaP`, `KSecant.s4_mem_OmegaP_of_cartan`; the
-eigenspaces of `K` are definite, hence of dimension `≤ 2n`, hence `= 2n`). For two such `K₀, K₁`,
+eigenspaces of `K` are definite, hence of dimension `≤ 2n`, hence `= 2n`; `I ∈ SO_+(V_ℝ)` by
+Remark 2.4.3). For two such `K₀, K₁`,
 `P = K₀ K₁` is self-adjoint and positive definite for the inner product `-(·, K₀ ·)_V`, and
 `K_t = K₀ P^t` (`t ∈ ℝ`, spectral calculus) is a continuous path of such involutions from `K₀` to
 `K₁` (`KSecant.s4_cartan_path`); the corresponding `I_t` is a path in `Ω_P`, and the midpoint

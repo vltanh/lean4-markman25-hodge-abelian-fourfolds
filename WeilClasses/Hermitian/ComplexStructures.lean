@@ -345,7 +345,7 @@ theorem s3_cV_mem_W₁ℂ {x : V ℂ n} (hx : x ∈ P.W₂ℂ) : s3_cV x ∈ P.W
 /-- A `f_ℂ`-stable subspace splits along `V_ℂ = W_{1,ℂ} ⊕ W_{2,ℂ}`. -/
 theorem s3_split_sup (hW : IsCompl P.W₁ P.W₂) (L : Submodule ℂ (V ℂ n))
     (hL : ∀ x ∈ L, complexifyV n (P.fR hW) x ∈ L) : L ⊓ P.W₁ℂ ⊔ L ⊓ P.W₂ℂ = L := by
-  have hs : ((Kd.sqrtNeg d : Kd d) : ℂ) ≠ 0 := by exact_mod_cast s3_sqrtNeg_ne_zero (s3_d_pos P)
+  have hs : ((Kd.sqrtNeg d : Kd d) : ℂ) ≠ 0 := by exact_mod_cast s3_sqrtNeg_ne_zero P.d_pos
   refine le_antisymm (sup_le inf_le_left inf_le_left) fun x hx => ?_
   obtain ⟨x₁, hx₁, x₂, hx₂, rfl⟩ :=
     Submodule.mem_sup.mp (P.s3_sup_ℂ hW ▸ Submodule.mem_top (x := x))
@@ -394,7 +394,7 @@ theorem s3_core (hW : IsCompl P.W₁ P.W₂) (I : Module.End ℝ (V ℝ n))
     (hcomm : I * P.fR hW = P.fR hW * I) (hI : IsComplexStructure I) (hν : P.nu hW I = 2 * n) :
     Module.finrank ℂ ↥(V10 n I ⊓ P.W₁ℂ) = n ∧ Module.finrank ℂ ↥(V10 n I ⊓ P.W₂ℂ) = n ∧
       Module.finrank ℂ ↥(V01 n I ⊓ P.W₁ℂ) = n ∧ Module.finrank ℂ ↥(V01 n I ⊓ P.W₂ℂ) = n := by
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   set Ic := complexifyV n I with hIc
   set fc := complexifyV n (P.fR hW) with hfc
   set Tc := s3_ext ℝ ℂ n (I * P.fR hW) with hTc
@@ -1033,7 +1033,7 @@ theorem s3_mem_hwPlane_iff (α : ExteriorAlgebra ℚ (V ℚ n)) :
 theorem s3_exists_α : ∃ α₁ α₂ : ExteriorAlgebra ℚ (V ℚ n),
     bcExt ℚ (Kd d) n α₁ = P.s3_ω₁ + P.s3_ω₂ ∧
       bcExt ℚ (Kd d) n α₂ = Kd.sqrtNeg d • (P.s3_ω₁ - P.s3_ω₂) := by
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   obtain ⟨α₁, h₁⟩ := s3_exists_bcExt_of_conjExt_eq hd (P.s3_ω₁ + P.s3_ω₂) (by
     rw [map_add, P.s3_conjExt_ω₁, P.s3_conjExt_ω₂, add_comm])
   obtain ⟨α₂, h₂⟩ := s3_exists_bcExt_of_conjExt_eq hd (Kd.sqrtNeg d • (P.s3_ω₁ - P.s3_ω₂)) (by
@@ -1046,7 +1046,7 @@ theorem s3_hwPlane_eq (hW : IsCompl P.W₁ P.W₂) {α₁ α₂ : ExteriorAlgebr
     (h₁ : bcExt ℚ (Kd d) n α₁ = P.s3_ω₁ + P.s3_ω₂)
     (h₂ : bcExt ℚ (Kd d) n α₂ = Kd.sqrtNeg d • (P.s3_ω₁ - P.s3_ω₂)) :
     P.hwPlane = Submodule.span ℚ (Set.range ![α₁, α₂]) := by
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   have hmem₁ : P.s3_ω₁ ∈ Submodule.span (Kd d) {P.s3_ω₁, P.s3_ω₂} :=
     Submodule.subset_span (Set.mem_insert _ _)
   have hmem₂ : P.s3_ω₂ ∈ Submodule.span (Kd d) {P.s3_ω₁, P.s3_ω₂} :=
@@ -1090,7 +1090,7 @@ theorem s3_α_li (hW : IsCompl P.W₁ P.W₂) {α₁ α₂ : ExteriorAlgebra ℚ
     (h₁ : bcExt ℚ (Kd d) n α₁ = P.s3_ω₁ + P.s3_ω₂)
     (h₂ : bcExt ℚ (Kd d) n α₂ = Kd.sqrtNeg d • (P.s3_ω₁ - P.s3_ω₂)) :
     LinearIndependent ℚ ![α₁, α₂] := by
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   rw [LinearIndependent.pair_iff]
   intro p q hpq
   have h := congrArg (bcExt ℚ (Kd d) n) hpq
@@ -1171,7 +1171,7 @@ variable {n : ℕ} {d : ℚ} (P : KSecant n d)
 /-- `W_{1,ℂ}` is the `√-d`-eigenspace of `f_ℂ`. -/
 theorem s3_mem_W₁ℂ_of_eigen (hW : IsCompl P.W₁ P.W₂) {x : V ℂ n}
     (hx : complexifyV n (P.fR hW) x = ((Kd.sqrtNeg d : Kd d) : ℂ) • x) : x ∈ P.W₁ℂ := by
-  have hs : ((Kd.sqrtNeg d : Kd d) : ℂ) ≠ 0 := by exact_mod_cast s3_sqrtNeg_ne_zero (s3_d_pos P)
+  have hs : ((Kd.sqrtNeg d : Kd d) : ℂ) ≠ 0 := by exact_mod_cast s3_sqrtNeg_ne_zero P.d_pos
   obtain ⟨x₁, hx₁, x₂, hx₂, rfl⟩ :=
     Submodule.mem_sup.mp (P.s3_sup_ℂ hW ▸ Submodule.mem_top (x := x))
   rw [map_add, P.s3_fℂ_W₁ hW hx₁, P.s3_fℂ_W₂ hW hx₂] at hx
@@ -1186,7 +1186,7 @@ theorem s3_mem_W₁ℂ_of_eigen (hW : IsCompl P.W₁ P.W₂) {x : V ℂ n}
 
 theorem s3_mem_W₂ℂ_of_eigen (hW : IsCompl P.W₁ P.W₂) {x : V ℂ n}
     (hx : complexifyV n (P.fR hW) x = -((Kd.sqrtNeg d : Kd d) : ℂ) • x) : x ∈ P.W₂ℂ := by
-  have hs : ((Kd.sqrtNeg d : Kd d) : ℂ) ≠ 0 := by exact_mod_cast s3_sqrtNeg_ne_zero (s3_d_pos P)
+  have hs : ((Kd.sqrtNeg d : Kd d) : ℂ) ≠ 0 := by exact_mod_cast s3_sqrtNeg_ne_zero P.d_pos
   obtain ⟨x₁, hx₁, x₂, hx₂, rfl⟩ :=
     Submodule.mem_sup.mp (P.s3_sup_ℂ hW ▸ Submodule.mem_top (x := x))
   rw [map_add, P.s3_fℂ_W₁ hW hx₁, P.s3_fℂ_W₂ hW hx₂] at hx
@@ -1234,7 +1234,7 @@ theorem corollary3_2_2_rational (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n)
     (hP : Assumption2_4_1 P J) :
     Submodule.span (Kd d) (bcExt ℚ (Kd d) n '' P.hwPlane) = topWedge P.W₁ (2 * n) ⊔ topWedge P.W₂ (2 * n) := by
   have hW := hP.isCompl
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   obtain ⟨α₁, α₂, h₁, h₂⟩ := P.s3_exists_α
   have hplane := P.s3_hwPlane_eq hW h₁ h₂
   have hα₁ : α₁ ∈ P.hwPlane := hplane ▸ Submodule.subset_span ⟨0, rfl⟩
@@ -1266,7 +1266,11 @@ theorem corollary3_2_2_rational (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n)
 
 /-- **Corollary 3.2.2** (`cor-plane-of-Hodge-Weil-classes`), second part: the plane consists of
 rational classes of Hodge type `(n, n)` (the Hodge–Weil classes) for every complex structure `I` in
-`ρ(Spin(V_ℝ)_P)` satisfying `ν(I) = 2n`. -/
+`ρ(Spin(V_ℝ)_P)` satisfying `ν(I) = 2n`.
+
+As in the paper (TeX 1675): each `⋀^{2n} Wᵢ` consists of classes of type `(n, n)` by Lemma 3.2.1
+(`lemma3_2_1`: `W_{i,ℂ} = (W_{i,ℂ} ∩ V^{1,0}) ⊕ (W_{i,ℂ} ∩ V^{0,1})` with both summands
+`n`-dimensional). -/
 theorem corollary3_2_2_hodge (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
     (hP : Assumption2_4_1 P J) (I : Module.End ℝ (V ℝ n))
     (hIP : ∃ g ∈ P.spinPR, (rho ℝ n g : V ℝ n →ₗ[ℝ] V ℝ n) = I) (hI : IsComplexStructure I)
@@ -1274,7 +1278,8 @@ theorem corollary3_2_2_hodge (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
   have hW := hP.isCompl
   obtain ⟨g, hg, hgI⟩ := hIP
   have hcomm : I * P.fR hW = P.fR hW * I := hgI ▸ P.rho_spinPR_comm_fR J hP g hg
-  obtain ⟨hA₁, hA₂, hB₁, hB₂⟩ := P.s3_core hW I hcomm hI hν
+  -- Lemma 3.2.1: the four summands `V^{1,0} ∩ W_{i,ℂ}`, `V^{0,1} ∩ W_{i,ℂ}` are `n`-dimensional
+  obtain ⟨hA₁, hA₂, hB₁, hB₂⟩ := lemma3_2_1 P J hP I ⟨g, hg, hgI⟩ hI hν
   have hdisj : ∀ W : Submodule ℂ (V ℂ n), V10 n I ⊓ W ⊓ (V01 n I ⊓ W) = ⊥ := by
     intro W
     rw [eq_bot_iff]

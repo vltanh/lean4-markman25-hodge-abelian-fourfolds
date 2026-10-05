@@ -36,7 +36,7 @@ and `exp(c) - 1 ∈ F_2`. -/
 theorem glo_prop4_3_7 (g : Spin F n) (k : ℕ) {x : ExtV F n} (hx : x ∈ extFiltGE F n k) :
     rhoPrime F n g x ∈ extFiltGE F n k ∧
       projDeg F n k (rhoPrime F n g x) = rhoExt F n g (projDeg F n k x) := by
-  obtain ⟨c, hc, h⟩ := orlov_theorem2_10 F n g
+  obtain ⟨c, hc, h⟩ := (orlov_theorem2_10 F n).1 g
   have h1 := s61_exp_sub_one_mem F n hc
   have h2 := s61_rhoExt_mem_extFiltGE F n g hx
   -- `(exp(c) - 1) ∪ ρ_g(x) ∈ F_{k+2} ⊆ F_{k+1}`

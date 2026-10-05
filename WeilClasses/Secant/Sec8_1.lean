@@ -34,8 +34,10 @@ paper's `f := (φ_Θ^*)⁻¹ : H¹(X) → H¹(X̂)` is `(-θ)⁻¹` (the footnot
 
 * (8.1.1) `equation8_1_1`; (8.1.2) `equation8_1_2` (corrected, see below); `SO⁺_Hdg`:
   `hdgMatrix_pairing`, `exists_rho_eq_hdgMatrix`.
-* **Lemma 8.1.1** (`lemma8_1_1`), with the Möbius form of the action used in its proof
-  (`m_exp_mem_span_hdgMatrix`).
+* **Lemma 8.1.1** (`lemma8_1_1`), by the paper's case split and stabilizer step, with the points of
+  the orbit `ℙ¹_K` given by coset representatives instead of the rational normal curve (departure,
+  reason 2, see the docstring); and the Möbius form of the action on the pure spinors `exp(kΘ)`
+  (`m_exp_mem_span_hdgMatrix`, used for `ι`).
 * `ι`: `iotaTheta_exp` (`k^n exp(k⁻¹Θ) = ι(exp(kΘ))`) and the claim that the matrix
   `[[0, -f⁻¹], [f, 0]]` extends `ι`, corrected to `ι ∘ τ` (`iota_tau_extends`, see below).
 * The enumeration `q^n exp(kΘ) = α + τ√-d β` (`enumeration8_1`), the displayed expansions
@@ -987,10 +989,11 @@ section Lemma811
 
 variable {n : ℕ} (d : ℚ)
 
-/-- The Möbius form of the action of `SO⁺_Hdg(V_K)` on the pure spinors `exp(kΘ)` (the proof of
-`m_exp_mem_span_hdgMatrix`, needed before Lemma 8.1.1): `ρ(g) = A` maps `ker m_{exp(kΘ)} =
-{(y, -kθ(y))}` onto `{(y, -k'θ(y))} = ker m_{exp(k'Θ)}`, and the pure spinor is determined by its
-annihilator (`s8_mem_span_exp_of_ann`). -/
+/-- The Möbius form of the action of `SO⁺_Hdg(V_F)` on the pure spinors `exp(kΘ)` (the proof of
+`m_exp_mem_span_hdgMatrix`; used for the action of `[[0, -f⁻¹], [f, 0]]` in `iota_tau_extends`, not
+in the proof of Lemma 8.1.1): `ρ(g) = A` maps `ker m_{exp(kΘ)} = {(y, -kθ(y))}` onto
+`{(y, -k'θ(y))} = ker m_{exp(k'Θ)}`, and the pure spinor is determined by its annihilator
+(`s8_mem_span_exp_of_ann`). -/
 theorem s8_m_exp_mem_span {F : Type*} [Field F] [CharZero F] {Θ : S F n}
     (hΘ : Θ ∈ ⋀[F]^2 (H1 F n)) (hθ : Function.Bijective (contractOne F n Θ))
     (a : Matrix (Fin 2) (Fin 2) F) (g : Spin F n)
@@ -1036,6 +1039,79 @@ theorem s8_m_one_eq_smul_pt {F : Type*} [Field F] [CharZero F] {Θ : S F n}
   have hm : m F n (g : C F n) 1 = 0 := by rw [hpt, h0, zero_smul]
   exact one_ne_zero (s8_m_injective g (by rw [hm, map_zero]))
 
+/-- (Proof of Lemma 8.1.1, TeX line 3672) "The subgroup of `SO⁺_Hdg(V_K)` leaving `H¹(X̂, K)`
+invariant is the lower triangular subgroup with `a₁₂ = 0`": a lower triangular matrix (8.1.2)
+(`a₁₂ = 0`) of determinant `1` maps `H¹(X̂) × 0 = ker m_1` onto itself, so its lifts
+`g ∈ Spin(V_F)` fix the pure spinor line of `1`: `m_g(1) ∈ F·1` (a pure spinor line is determined by
+its annihilator, `s8_mem_span_exp_of_ann` with `c = 0`). -/
+theorem s8_m_one_mem_span_one {F : Type*} [Field F] [CharZero F] {Θ : S F n}
+    (hΘ : Θ ∈ ⋀[F]^2 (H1 F n)) (hθ : Function.Bijective (contractOne F n Θ))
+    (b : Matrix (Fin 2) (Fin 2) F) (hb : b.det = 1) (h01 : b 0 1 = 0) (g : Spin F n)
+    (hg : (rho F n g : V F n →ₗ[F] V F n) = hdgMatrix (contractOne F n Θ) hθ b) :
+    m F n (g : C F n) 1 ∈ Submodule.span F {1} := by
+  have h11 : b 1 1 ≠ 0 := by
+    intro h; rw [Matrix.det_fin_two, h, h01] at hb; simp at hb
+  have hmem : m F n (g : C F n) 1 ∈ Submodule.span F {IsNilpotent.exp ((0 : F) • Θ)} := by
+    refine s8_mem_span_exp_of_ann hΘ 0 _ fun y => ?_
+    -- `ρ_g(b₂₂⁻¹ y, 0) = (y, 0)`: `ρ_g` maps `ker m_1 = H¹(X̂) × 0` into `ker m_{g 1}`
+    have h := s8_rho_mem_ann g (s8_inl_mem_ann_one (n := n) ((b 1 1)⁻¹ • y))
+    rw [← LinearEquiv.coe_coe, hg, s8_hdgMatrix_apply] at h
+    convert h using 2
+    · simp [smul_smul, h11]
+    · simp [h01]
+  rwa [zero_smul, IsNilpotent.exp_zero] at hmem
+
+/-- (Proof of Lemma 8.1.1) The coset representative `[[1, k], [0, 1]]` of `k ∈ K ⊆ ℙ¹_K` lifts to
+`exp(kΘ) ∈ Spin(V_F)` ([Chevalley, III.1.7], `s8_expSpin`), which maps `1` to `exp(kΘ)`. -/
+theorem s8_rho_expSpin_eq_hdgMatrix {F : Type*} [Field F] [CharZero F] {Θ : S F n}
+    (hΘ : Θ ∈ ⋀[F]^2 (H1 F n)) (hθ : Function.Bijective (contractOne F n Θ)) (k : F) :
+    (rho F n (s8_expSpin (k • Θ) (Submodule.smul_mem _ k hΘ)) : V F n →ₗ[F] V F n) =
+      hdgMatrix (contractOne F n Θ) hθ !![1, k; 0, 1] := by
+  refine LinearMap.ext fun v => ?_
+  rw [LinearEquiv.coe_coe, s8_rho_expSpin, s8_hdgMatrix_apply, s8_contractOne_smul]
+  simp
+
+/-- (Proof of Lemma 8.1.1, the cosets with `a₂₂ ≠ 0`) If `a₂₂ ≠ 0`, then `a = [[1, k], [0, 1]] b`
+with `k = a₁₂/a₂₂` and `b = [[1, -k], [0, 1]] a` lower triangular: `a` lies in the coset of
+`k ∈ ℙ¹_F`. The lift `exp(-kΘ) g` of `b` fixes the line of `1` (the stabilizer step,
+`s8_m_one_mem_span_one`), so `m_g(1)` spans the image `exp(kΘ)` of `1` under the lift `exp(kΘ)` of
+`[[1, k], [0, 1]]`. -/
+theorem s8_m_one_eq_smul_exp {F : Type*} [Field F] [CharZero F] {Θ : S F n}
+    (hΘ : Θ ∈ ⋀[F]^2 (H1 F n)) (hθ : Function.Bijective (contractOne F n Θ))
+    (a : Matrix (Fin 2) (Fin 2) F) (ha : a.det = 1) (h11 : a 1 1 ≠ 0) (g : Spin F n)
+    (hg : (rho F n g : V F n →ₗ[F] V F n) = hdgMatrix (contractOne F n Θ) hθ a) :
+    ∃ c : F, c ≠ 0 ∧ m F n (g : C F n) 1 = c • IsNilpotent.exp ((a 0 1 / a 1 1) • Θ) := by
+  obtain ⟨k, hk⟩ : ∃ k : F, k = a 0 1 / a 1 1 := ⟨_, rfl⟩
+  rw [← hk]
+  have hb01 : (!![1, -k; 0, 1] * a) 0 1 = 0 := by
+    simp [Matrix.mul_apply, Fin.sum_univ_two, hk, div_mul_cancel₀ _ h11]
+  have hbdet : (!![1, -k; 0, 1] * a).det = 1 := by
+    rw [Matrix.det_mul, ha]; simp [Matrix.det_fin_two]
+  -- the lift `g₁ = exp(-kΘ)` of `[[1, -k], [0, 1]]`, with `m_{g₁}(exp(kΘ)) = 1`
+  obtain ⟨g₁, hg₁ρ, hg₁m⟩ : ∃ g₁ : Spin F n,
+      (rho F n g₁ : V F n →ₗ[F] V F n) = hdgMatrix (contractOne F n Θ) hθ !![1, -k; 0, 1] ∧
+      m F n (g₁ : C F n) (IsNilpotent.exp (k • Θ)) = 1 := by
+    refine ⟨s8_expSpin _ (Submodule.smul_mem _ (-k) hΘ), s8_rho_expSpin_eq_hdgMatrix hΘ hθ (-k), ?_⟩
+    have hcomm : Commute ((-k) • Θ) (k • Θ) := ((Commute.refl _).smul_left (-k)).smul_right k
+    rw [s8_m_expSpin, ← IsNilpotent.exp_add_of_commute hcomm (s8_isNilpotent_of_mem_two hΘ (-k))
+      (s8_isNilpotent_of_mem_two hΘ k), ← add_smul, neg_add_cancel, zero_smul, IsNilpotent.exp_zero]
+  -- the stabilizer step: `g₁ g` lifts `b`, which fixes the line of `1`
+  have hb : (rho F n (g₁ * g) : V F n →ₗ[F] V F n) =
+      hdgMatrix (contractOne F n Θ) hθ (!![1, -k; 0, 1] * a) := by
+    rw [s8_rho_mul, hg₁ρ, hg, s8_hdgMatrix_comp]
+  obtain ⟨c, hc⟩ := Submodule.mem_span_singleton.mp
+    (s8_m_one_mem_span_one hΘ hθ _ hbdet hb01 (g₁ * g) hb)
+  -- so `m_g(1) = m_{g₁⁻¹}(c 1) = c exp(kΘ)`
+  have hinv : m F n ((g₁⁻¹ : Spin F n) : C F n) 1 = IsNilpotent.exp (k • Θ) := by
+    rw [← hg₁m, s8_m_inv_m]
+  have hm : m F n (g : C F n) 1 = c • IsNilpotent.exp (k • Θ) := by
+    have hgg : g = g₁⁻¹ * (g₁ * g) := by rw [inv_mul_cancel_left]
+    rw [hgg, Submonoid.coe_mul, map_mul, Module.End.mul_apply, ← hc, map_smul, hinv]
+  refine ⟨c, ?_, hm⟩
+  rintro rfl
+  rw [zero_smul] at hm
+  exact one_ne_zero (s8_m_injective g (by rw [hm, map_zero]))
+
 /-- **Lemma 8.1.1** (`lemma-orbit-of-pure-spinors`). The `SO⁺_Hdg(V_K)`-orbit of the pure spinor
 `span_K{1} ∈ ℙ(S⁺_K)` is `{span_K{Θⁿ}} ∪ {span_K{exp(kΘ)} : k ∈ K}`.
 
@@ -1046,13 +1122,23 @@ Model: `SO⁺_Hdg(V_K)` is the group of matrices (8.1.2) with coefficients in `K
 of `SO⁺_Hdg(V_K)`; it holds for every `Θ ∈ ⋀² H¹(X, ℚ)` with `θ` invertible (the section's hypotheses
 on `(X, Θ)` are not needed).
 
+Proof as in the paper (TeX lines 3669–3676). If `a₂₂ = 0`, then `A(H¹(X̂, K)) = H¹(X, K)`, so `A`
+maps the pure spinor `span_K{1}` of `H¹(X̂, K)` to the pure spinor `span_K{Θⁿ}` of `H¹(X, K)`
+(`s8_m_one_eq_smul_pt`). The subgroup of `SO⁺_Hdg(V_K)` leaving `H¹(X̂, K)` invariant is the lower
+triangular subgroup `B` (`a₁₂ = 0`); the proof uses that `B` leaves `H¹(X̂, K)` invariant, hence
+fixes `span_K{1}` (`s8_m_one_mem_span_one`), so that the point `A span_K{1}` of the orbit depends
+only on the coset `aB ∈ SL₂(K)/B = ℙ¹_K` (the reverse inclusion, which makes the orbit isomorphic to
+`ℙ¹_K`, is not needed for the description of the orbit).
+
 Departure from the paper (reason 2: no rational normal curves or Zariski closures in the library):
-the proof keeps the paper's case split on `a₂₂` (`a₂₂ = 0` gives the line of `Θⁿ`; the stabilizer of
-`H¹(X̂, K)` is the lower triangular subgroup), but instead of identifying the orbit with the rational
-normal curve of degree `n` and its points with the closure of `{exp(kΘ)}`, it computes the action of
-the matrix `[[a₁₁, a₁₂ f⁻¹], [a₂₁ f, a₂₂]]` on the lines `exp(kΘ)` from their annihilators: the Möbius
-map `k ↦ (a₁₁ k + a₁₂)/(a₂₁ k + a₂₂)` (`m_exp_mem_span_hdgMatrix`), with lifts to `Spin(V_K)` by
-Eichler transvections (`exists_rho_eq_hdgMatrix`, which the paper takes for granted). -/
+the paper identifies the orbit `ℙ¹_K` with the rational normal curve of degree `n` in
+`ℙ(span_K{Θʲ : 0 ≤ j ≤ n})`, the Zariski closure of `{span_K{exp(kΘ)} : k ∈ K}`, to read off its
+points. Here the points of `ℙ¹_K = SL₂(K)/B` are listed by coset representatives: `a ∈ [[1, k], [0, 1]] B`
+with `k = a₁₂/a₂₂` if `a₂₂ ≠ 0`, and `a ∈ [[0, -1], [1, 0]] B` if `a₂₂ = 0`; the first maps
+`span_K{1}` to `span_K{exp(kΘ)}` (its lift `exp(kΘ) ∈ Spin(V_K)`, [Chevalley, III.1.7],
+`s8_rho_expSpin_eq_hdgMatrix`), the second to `span_K{Θⁿ}` (the case `a₂₂ = 0`). The lifts of the
+matrices to `Spin(V_K)` by Eichler transvections (`exists_rho_eq_hdgMatrix`) are taken for granted in
+the paper. -/
 theorem lemma8_1_1 (hd : 0 < d) (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
     (hθ : Function.Bijective (thetaExt n (Kd d) Θ)) :
     {L : Submodule (Kd d) (S (Kd d) n) | ∃ g : Spin (Kd d) n,
@@ -1081,39 +1167,33 @@ theorem lemma8_1_1 (hd : 0 < d) (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ 
   · rintro ⟨g, ⟨a, ha, hga⟩, rfl⟩
     by_cases h11 : a 1 1 = 0
     · exact Or.inl (hcase0 a g ha h11 hga)
-    · -- `a₂₂ ≠ 0`: the line of `exp(k'Θ)`, `k' = a₁₂/a₂₂` (the Möbius image of `k = 0`)
-      refine Or.inr ⟨(a 0 0 * 0 + a 0 1) / (a 1 0 * 0 + a 1 1), ?_⟩
-      have hmem := s8_m_exp_mem_span hΘK hθ a g hga 0 (by simpa using h11)
-      rw [zero_smul, IsNilpotent.exp_zero] at hmem
-      obtain ⟨c, hc⟩ := Submodule.mem_span_singleton.mp hmem
-      have hc0 : c ≠ 0 := by
-        rintro rfl
-        rw [zero_smul] at hc
-        exact one_ne_zero (s8_m_injective g (by rw [← hc, map_zero]))
+    · -- `a₂₂ ≠ 0`: `a = [[1, k], [0, 1]] b`, `k = a₁₂/a₂₂`, `b` lower triangular (the coset of
+      -- `k ∈ ℙ¹_K`), and `b` fixes the line of `1`: the line of `exp(kΘ)`
+      obtain ⟨c, hc0, hm⟩ := s8_m_one_eq_smul_exp hΘK hθ a ha h11 g hga
+      refine Or.inr ⟨a 0 1 / a 1 1, ?_⟩
       simp only
-      rw [← hc, Submodule.span_singleton_smul_eq (IsUnit.mk0 _ hc0)]
+      rw [hm, Submodule.span_singleton_smul_eq (IsUnit.mk0 _ hc0)]
   · rintro (h | ⟨k, rfl⟩)
-    · -- `[[0, -1], [1, 0]]` maps the line of `1` to that of `Θⁿ`
+    · -- the coset representative `[[0, -1], [1, 0]]` maps the line of `1` to that of `Θⁿ`
       have hdet : (!![0, -1; 1, 0] : Matrix (Fin 2) (Fin 2) (Kd d)).det = 1 := by
         simp [Matrix.det_fin_two]
       obtain ⟨g, hg⟩ := exists_rho_eq_hdgMatrix (bcS ℚ (Kd d) n Θ) hΘK hθ _ hdet
       refine ⟨g, ⟨_, hdet, hg⟩, ?_⟩
       rw [Set.mem_singleton_iff.mp h]
       exact (hcase0 _ g hdet (by simp) hg).symm
-    · -- `exp(kΘ) ∈ Spin(V_K)` ([Chevalley, III.1.7]) acts by `[[1, k], [0, 1]]` and maps `1` to
-      -- `exp(kΘ)`
-      have hu : k • bcS ℚ (Kd d) n Θ ∈ ⋀[Kd d]^2 (H1 (Kd d) n) := Submodule.smul_mem _ k hΘK
-      refine ⟨s8_expSpin _ hu, ⟨!![1, k; 0, 1], by simp [Matrix.det_fin_two], ?_⟩, ?_⟩
-      · refine LinearMap.ext fun v => ?_
-        rw [LinearEquiv.coe_coe, s8_rho_expSpin, s8_hdgMatrix_apply, s8_contractOne_smul]
-        simp
-      · rw [s8_m_expSpin, mul_one]
+    · -- the coset representative `[[1, k], [0, 1]]`: its lift `exp(kΘ)` maps `1` to `exp(kΘ)`
+      refine ⟨s8_expSpin _ (Submodule.smul_mem _ k hΘK),
+        ⟨!![1, k; 0, 1], by simp [Matrix.det_fin_two], s8_rho_expSpin_eq_hdgMatrix hΘK hθ k⟩, ?_⟩
+      rw [s8_m_expSpin, mul_one]
 
-/-- (Proof of Lemma 8.1.1, reformulated) The matrix `A = [[a₁₁, a₁₂ f⁻¹], [a₂₁ f, a₂₂]]` maps the
-maximal isotropic subspace `ker m_{exp(kΘ)} = {(y, -kθ(y))}` to `ker m_{exp(k'Θ)}` with
-`k' = (a₁₁ k + a₁₂)/(a₂₁ k + a₂₂)` (a Möbius transformation; `a₂₂ = 0`, `k = 0` gives `H¹(X, K)`,
-the line of `Θⁿ`): for `g ∈ Spin(V_K)` with `ρ(g) = A`, `m_g(exp(kΘ)) ∈ K exp(k'Θ)`. (Checked
-numerically for `n ≤ 3`.) -/
+/-- The action of `SO⁺_Hdg(V_K)` on the pure spinors `exp(kΘ)` of Lemma 8.1.1 is the Möbius action on
+`ℙ¹_K` (not stated in the paper; the proof of Lemma 8.1.1, `lemma8_1_1`, does not use it, and it
+computes the action of `[[0, -f⁻¹], [f, 0]]` in `iota_tau_extends`): the matrix
+`A = [[a₁₁, a₁₂ f⁻¹], [a₂₁ f, a₂₂]]` maps the maximal isotropic subspace
+`ker m_{exp(kΘ)} = {(y, -kθ(y))}` to `ker m_{exp(k'Θ)}` with `k' = (a₁₁ k + a₁₂)/(a₂₁ k + a₂₂)`:
+for `g ∈ Spin(V_K)` with `ρ(g) = A`, `m_g(exp(kΘ)) ∈ K exp(k'Θ)`. (If `a₂₁ k + a₂₂ = 0`, `A` maps
+`ker m_{exp(kΘ)}` onto `H¹(X, K)`, the annihilator of the line of `Θⁿ`; that case is not part of
+this statement.) (Checked numerically for `n ≤ 3`.) -/
 theorem m_exp_mem_span_hdgMatrix (hd : 0 < d) (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
     (hθ : Function.Bijective (thetaExt n (Kd d) Θ)) (a : Matrix (Fin 2) (Fin 2) (Kd d))
     (g : Spin (Kd d) n)

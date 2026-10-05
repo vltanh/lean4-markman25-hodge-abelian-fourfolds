@@ -5,6 +5,7 @@ public import WeilClasses.WeilType.Theta
 public import WeilClasses.PureSpinor.Lemma2_2_4
 public import WeilClasses.Secant.Defs
 public import WeilClasses.PeriodDomain.Defs
+public import WeilClasses.External.VanGeemen.Sec3
 
 /-!
 # The explicit `X × X̂` and the secant `P_Θ` of §2.4
@@ -35,7 +36,8 @@ namespace WeilClasses
 open CliffordAlgebra
 
 /-! ## Helpers (prefix `s24b_`): transport through `coordV`, eigenspaces, base change of `⋀• V`,
-the evaluation `⟪ξ, α ∧ β⟫` of classes of degree `2`, and the complex structure `J₀` -/
+the evaluation `⟪ξ, α ∧ β⟫` of classes of degree `2` (the complex structure `J₀` for which `Θ` is
+ample is `s8_J0` of `WeilClasses.Secant.Defs`) -/
 
 section S24bCmpBasic
 variable (n : ℕ)
@@ -1015,100 +1017,6 @@ theorem s24b_det_restrict [FiniteDimensional K M] (T : Module.End K M) (W U₁ U
 
 end S24bDet
 
-section S24bNmEq
-
-theorem s24b_Nm_eq {d : ℚ} (hd : 0 < d) (k : Kd d) :
-    Kd.Nm d k = Kd.ratPart d k ^ 2 + d * Kd.sqrtNegCoeff d k ^ 2 := by
-  have h := Kd.coe_Nm hd k
-  have hk := Kd.eq_ratPart_add_sqrtNegCoeff hd k
-  have hcs : ((Kd.sqrtNeg d : Kd d) : ℂ) = sqrtNeg d := rfl
-  have hk' : (k : ℂ) = (Kd.ratPart d k : ℂ) + (Kd.sqrtNegCoeff d k : ℂ) * sqrtNeg d := by
-    conv_lhs => rw [hk]
-    simp only [Subfield.coe_add, Subfield.coe_mul, s24b_coe_algebraMap, hcs]
-  have hs : sqrtNeg d * sqrtNeg d = -(d : ℂ) := by
-    have := congrArg (fun z : Kd d => (z : ℂ)) (s24b_sqrtNeg_mul_self (d := d) hd.le)
-    simpa only [Subfield.coe_mul, s24b_coe_algebraMap, hcs, Rat.cast_neg] using this
-  have hc : (starRingEnd ℂ) (sqrtNeg d) = -sqrtNeg d := by simp [sqrtNeg]
-  rw [hk', map_add, map_mul, map_ratCast, map_ratCast, hc] at h
-  apply Rat.cast_injective (α := ℂ)
-  rw [h]
-  push_cast
-  linear_combination (-(Kd.sqrtNegCoeff d k : ℂ) ^ 2) * hs
-
-end S24bNmEq
-
-section S24bJ0
-variable (n : ℕ)
-
-/-- A complex structure on `H¹(X, ℝ)` for which `Θ = ThetaStd` is ample:
-`J₀ e_{2i} = -e_{2i+1}`, `J₀ e_{2i+1} = e_{2i}`. -/
-noncomputable def s24b_J0 : Module.End ℝ (H1 ℝ n) :=
-  ∑ i : Fin n, ((LinearMap.proj (⟨2 * i + 1, by omega⟩ : Fin (2 * n)) :
-      H1 ℝ n →ₗ[ℝ] ℝ).smulRight (e ℝ n ⟨2 * i, by omega⟩) -
-    (LinearMap.proj (⟨2 * i, by omega⟩ : Fin (2 * n)) : H1 ℝ n →ₗ[ℝ] ℝ).smulRight
-      (e ℝ n ⟨2 * i + 1, by omega⟩))
-
-theorem s24b_eR_apply (i j : Fin (2 * n)) : e ℝ n i j = if j = i then 1 else 0 := by
-  simp [e, Pi.single_apply]
-
-theorem s24b_J0_even (j : Fin n) :
-    s24b_J0 n (e ℝ n ⟨2 * j, by omega⟩) = -e ℝ n ⟨2 * j + 1, by omega⟩ := by
-  rw [s24b_J0, LinearMap.sum_apply, Finset.sum_eq_single j]
-  · have : (⟨2 * (j : ℕ), by omega⟩ : Fin (2 * n)) ≠ ⟨2 * j + 1, by omega⟩ := by
-      intro h; simp at h
-    simp [s24b_eR_apply]
-  · intro i _ hij
-    have h1 : (⟨2 * (j : ℕ), by omega⟩ : Fin (2 * n)) ≠ ⟨2 * i + 1, by omega⟩ := by
-      intro h; simp at h; omega
-    have h2 : (⟨2 * (j : ℕ), by omega⟩ : Fin (2 * n)) ≠ ⟨2 * i, by omega⟩ := by
-      intro h; apply hij; ext; simp at h; omega
-    have h3 : ¬ (2 * (i : ℕ) + 1 = 2 * j) := by omega
-    have h4 : ¬ ((i : ℕ) = j) := fun h => hij (Fin.ext h)
-    simp [s24b_eR_apply, h3, h4]
-  · simp
-
-theorem s24b_J0_odd (j : Fin n) :
-    s24b_J0 n (e ℝ n ⟨2 * j + 1, by omega⟩) = e ℝ n ⟨2 * j, by omega⟩ := by
-  rw [s24b_J0, LinearMap.sum_apply, Finset.sum_eq_single j]
-  · have : (⟨2 * (j : ℕ) + 1, by omega⟩ : Fin (2 * n)) ≠ ⟨2 * j, by omega⟩ := by
-      intro h; simp at h
-    simp [s24b_eR_apply]
-  · intro i _ hij
-    have h1 : (⟨2 * (j : ℕ) + 1, by omega⟩ : Fin (2 * n)) ≠ ⟨2 * i + 1, by omega⟩ := by
-      intro h; apply hij; ext; simp at h; omega
-    have h2 : (⟨2 * (j : ℕ) + 1, by omega⟩ : Fin (2 * n)) ≠ ⟨2 * i, by omega⟩ := by
-      intro h; simp at h; omega
-    have h3 : ¬ (2 * (i : ℕ) = 2 * j + 1) := by omega
-    have h4 : ¬ ((i : ℕ) = j) := fun h => hij (Fin.ext h)
-    simp [s24b_eR_apply, h3, h4]
-  · simp
-
-theorem s24b_J0_isComplexStructure : IsComplexStructure (s24b_J0 n) := by
-  show s24b_J0 n * s24b_J0 n = -1
-  refine (Pi.basisFun ℝ (Fin (2 * n))).ext fun k => ?_
-  rw [← s24b_e_eq, Module.End.mul_apply, LinearMap.neg_apply, Module.End.one_apply]
-  rcases s24b_fin_parity n k with ⟨j, rfl⟩ | ⟨j, rfl⟩
-  · rw [s24b_J0_even, map_neg, s24b_J0_odd]
-  · rw [s24b_J0_odd, s24b_J0_even]
-
-theorem s24b_eval2_eq_ev {F : Type*} [Field F] [CharZero F] (ξ : S F n)
-    (a b : Module.Dual F (H1 F n)) : eval2 F n ξ a b = s24b_ev ξ a b := by
-  rw [eval2, s24b_coord_empty]
-  rfl
-
-theorem s24b_ThetaStd_eval (α β : Module.Dual ℝ (H1 ℝ n)) :
-    eval2 ℝ n (bcS ℚ ℝ n (ThetaStd ℚ n)) α β =
-      ∑ i : Fin n, (α (e ℝ n ⟨2 * i, by omega⟩) * β (e ℝ n ⟨2 * i + 1, by omega⟩) -
-        α (e ℝ n ⟨2 * i + 1, by omega⟩) * β (e ℝ n ⟨2 * i, by omega⟩)) := by
-  rw [s24b_eval2_eq_ev, ThetaStd, map_sum]
-  simp only [map_mul, s24b_bcS_ι, s24b_bcH1_e]
-  rw [s24b_ev]
-  simp only [map_sum]
-  refine Finset.sum_congr rfl fun i _ => ?_
-  rw [← s24b_ev, s24b_ev_ι_mul_ι']
-
-end S24bJ0
-
 section S24bHodge11
 variable (n : ℕ)
 
@@ -1264,6 +1172,56 @@ theorem s24b_hodgeV_of_inv (I : Module.End ℝ (V ℝ n)) (hI : IsComplexStructu
 
 end S24bHodge11
 
+/-! ## `η(k)` maps `h = Ξ_P^♯` to `Nm(k) h` -/
+
+section S24bEtaH
+
+variable {n : ℕ} {d : ℚ}
+
+/-- `η_k = a + b f` for `k = a + b√-d` (`a = ratPart k`, `b = sqrtNegCoeff k`, `f = η_{√-d}`). -/
+theorem s24b_η_eq (P : KSecant n d) (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) (k : Kd d) :
+    P.η hW k = Kd.ratPart d k • LinearMap.id + Kd.sqrtNegCoeff d k • P.fη hW := by
+  have hk := Kd.eq_ratPart_add_sqrtNegCoeff hd k
+  have hq : ∀ q : ℚ, P.ηHom hd hW (algebraMap ℚ (Kd d) q) =
+      algebraMap ℚ (Module.End ℚ (V ℚ n)) q := fun q => by
+    rw [← RingHom.comp_apply]; congr 1; exact RingHom.ext_rat _ _
+  have h := congrArg (P.ηHom hd hW) hk
+  rw [map_add, map_mul, hq, hq] at h
+  rw [show P.η hW k = P.ηHom hd hW k from rfl, h, Algebra.algebraMap_eq_smul_one,
+    ← Algebra.smul_def]
+  rfl
+
+/-- (§1.3, TeX lines 447–448, from the condition on the polarization in [van Geemen, Def. 4.9]) If
+`Ξ_P(f x, f y) = d Ξ_P(x, y)` (the condition checked in the proof of Corollary 3.2.3), then `η(k)`
+maps the class `h = Ξ_P^♯` of `Ξ_P` to `Nm(k) h`, `η(k)` acting on `H²(X × X̂, ℚ) = ⋀² V_ℚ` by
+`⋀² η_k`. Proof: the adjoint of `η_k = a + b f` for `(·,·)_V` is `a - b f` (`f` is anti-self-dual),
+and `Ξ_P(a x - b f x, a y - b f y) = Nm(k) Ξ_P(x, y)` is [van Geemen, Def. 4.9] for `-f`
+(`vanGeemen_def4_9`). -/
+theorem s24b_map_η_hClass (P : KSecant n d) (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
+    (hpol : ∀ x y, P.XiQ hW (P.fη hW x) (P.fη hW y) = d * P.XiQ hW x y) (k : Kd d) :
+    ExteriorAlgebra.map (P.η hW k) (P.hClass hW) = (Kd.Nm d k : ℚ) • P.hClass hW := by
+  have hh : P.hClass hW ∈ ⋀[ℚ]^2 (V ℚ n) := formToExt2_mem ℚ n _
+  set a := Kd.ratPart d k
+  set b := Kd.sqrtNegCoeff d k
+  -- [van Geemen, Def. 4.9] for `-f`: `(-f)² = -d` and `Ξ_P(-f x, -f y) = d Ξ_P(x, y)`
+  have hff : (-P.fη hW) ∘ₗ (-P.fη hW) = -(d • LinearMap.id) := by
+    rw [LinearMap.neg_comp, LinearMap.comp_neg, neg_neg, P.fη_comp_fη hW]
+  have hvg := vanGeemen_def4_9 hd (P.XiQ hW) (-P.fη hW) hff (fun x y => by
+    simp only [LinearMap.neg_apply, map_neg, neg_neg]; exact hpol x y) k
+  -- the adjoint of `η_k = a + b f` for `(·,·)_V` is `a - b f`
+  have hadj : ∀ x, pairing ℚ n x ∘ₗ P.η hW k = pairing ℚ n (a • x + b • (-P.fη hW) x) := fun x =>
+    LinearMap.ext fun z => by
+      rw [LinearMap.comp_apply, s24b_η_eq P hd hW k]
+      simp only [LinearMap.add_apply, LinearMap.smul_apply, LinearMap.id_apply,
+        LinearMap.neg_apply, map_add, map_smul, map_neg, smul_eq_mul]
+      rw [P.pairing_fη_left hW x z]; ring
+  refine s24b_eq_of_ev ℚ n (s24b_map_mem_exteriorPower _ hh) (Submodule.smul_mem _ _ hh)
+    fun x y => ?_
+  rw [s24b_ev_map, hadj, hadj, s24b_ev_smul, s24b_ev, s24b_ev, P.hClass_spec hW,
+    P.hClass_spec hW, hvg x y, smul_eq_mul]
+
+end S24bEtaH
+
 variable (n : ℕ)
 
 /-- `Θ = Σ e_{2i} ∧ e_{2i+1}` has degree `2`. -/
@@ -1303,64 +1261,6 @@ theorem thetaStdInv_comp_thetaStd : thetaStdInv n ∘ₗ thetaStd n = LinearMap.
 
 theorem thetaStd_comp_thetaStdInv : thetaStd n ∘ₗ thetaStdInv n = LinearMap.id :=
   s24b_thetaStd_comp_thetaStdInv n
-
-/-- `Θ = ThetaStd` is ample for the complex structure `J₀` (used to apply the results of §§3–4,
-stated under Assumption 2.4.1 for some complex structure of `X`, to `P_Θ`). -/
-theorem s24b_ThetaStd_ample : IsAmple n (s24b_J0 n) (ThetaStd ℚ n) := by
-  refine ⟨?_, ?_⟩
-  · rw [mem_hodgeClassesX_iff]
-    refine ⟨ThetaStd_mem n, ?_⟩
-    rw [ThetaStd, map_sum]
-    refine Submodule.sum_mem _ fun i _ => ?_
-    simp only [map_mul, s24b_bcS_ι, s24b_bcH1_e]
-    set a := e ℂ n ⟨2 * i, by omega⟩
-    set b := e ℂ n ⟨2 * i + 1, by omega⟩
-    have hJa : complexifyH1 n (s24b_J0 n) a = -b := by
-      rw [show a = bcH1 ℝ ℂ n (e ℝ n ⟨2 * i, by omega⟩) from (s24b_bcH1_e ℝ ℂ n _).symm,
-        s24b_complexifyH1_bcH1, s24b_J0_even, map_neg, s24b_bcH1_e]
-    have hJb : complexifyH1 n (s24b_J0 n) b = a := by
-      rw [show b = bcH1 ℝ ℂ n (e ℝ n ⟨2 * i + 1, by omega⟩) from (s24b_bcH1_e ℝ ℂ n _).symm,
-        s24b_complexifyH1_bcH1, s24b_J0_odd, s24b_bcH1_e]
-    have hv : a + Complex.I • b ∈ H10 n (s24b_J0 n) := by
-      rw [H10, Module.End.mem_eigenspace_iff, map_add, map_smul, hJa, hJb, smul_add, smul_smul,
-        Complex.I_mul_I]
-      module
-    have hw : a - Complex.I • b ∈ H01 n (s24b_J0 n) := by
-      rw [H01, Module.End.mem_eigenspace_iff, map_sub, map_smul, hJa, hJb, smul_sub, smul_smul]
-      rw [show -Complex.I * Complex.I = 1 by rw [neg_mul, Complex.I_mul_I, neg_neg]]
-      module
-    have key : ExteriorAlgebra.ι ℂ a * ExteriorAlgebra.ι ℂ b =
-        (Complex.I / 2) • (ExteriorAlgebra.ι ℂ (a + Complex.I • b) *
-          ExteriorAlgebra.ι ℂ (a - Complex.I • b)) := by
-      have hba : ExteriorAlgebra.ι ℂ b * ExteriorAlgebra.ι ℂ a =
-          -(ExteriorAlgebra.ι ℂ a * ExteriorAlgebra.ι ℂ b) :=
-        eq_neg_of_add_eq_zero_left (ExteriorAlgebra.ι_add_mul_swap b a)
-      simp only [map_add, map_sub, map_smul, add_mul, mul_sub, smul_mul_assoc, mul_smul_comm,
-        ExteriorAlgebra.ι_sq_zero, hba]
-      linear_combination (norm := module)
-        Complex.I_mul_I • (ExteriorAlgebra.ι ℂ a * ExteriorAlgebra.ι ℂ b)
-    rw [key]
-    refine Submodule.smul_mem _ _ (Submodule.subset_span ⟨![a + Complex.I • b],
-      ![a - Complex.I • b], ?_, ?_, ?_⟩)
-    · intro j; fin_cases j; exact hv
-    · intro j; fin_cases j; exact hw
-    · simp [ExteriorAlgebra.ιMulti_succ_apply]
-  · intro α hα
-    rw [s24b_ThetaStd_eval]
-    simp only [LinearMap.comp_apply, s24b_J0_even, s24b_J0_odd, map_neg]
-    have hsum : ∑ i : Fin n, (α (e ℝ n ⟨2 * i, by omega⟩) * α (e ℝ n ⟨2 * i, by omega⟩) -
-        α (e ℝ n ⟨2 * i + 1, by omega⟩) * -α (e ℝ n ⟨2 * i + 1, by omega⟩)) =
-        ∑ k, α (e ℝ n k) ^ 2 := by
-      rw [s24b_sum_fin_two_mul n (fun k => α (e ℝ n k) ^ 2)]
-      refine Finset.sum_congr rfl fun i _ => ?_
-      ring
-    rw [hsum]
-    obtain ⟨k, hk⟩ : ∃ k, α (e ℝ n k) ≠ 0 := by
-      by_contra h
-      push Not at h
-      exact hα (s24b_dual_ext ℝ n (fun k => by rw [h k, LinearMap.zero_apply]))
-    exact lt_of_lt_of_le (by positivity) (Finset.single_le_sum (fun j _ => sq_nonneg (α (e ℝ n j)))
-      (Finset.mem_univ k))
 
 variable (d : ℚ) (hd : 0 < d) (hn : 0 < n)
 
@@ -1563,19 +1463,22 @@ theorem s24b_eval2_hX (I : Module.End ℝ (V ℝ n)) (hI : IsComplexStructure I)
   rw [h1, h2, s24b_ev_hV_real n d hd hn]
   rfl
 
+/-- Transport of the Hodge type: if `Ξ_P` is of type `(1,1)` for `I`, `Ξ_P(I x, I y) = Ξ_P(x, y)`
+(Corollary 3.2.3, `corollary3_2_3_type11`), then `h = d Θ + Θ̂`, the class of `Ξ_P`
+(`hV_eq_XiQ`, `hClass_PStd`), is a Hodge class of degree `2` for `I`. -/
 theorem s24b_hV_hodge (I : Module.End ℝ (V ℝ n)) (hI : IsComplexStructure I)
     (hIso : ∀ x y, pairing ℝ n (I x) (I y) = pairing ℝ n x y)
-    (hc : ∀ x, I ((PStd n d hd hn).fR (PStd_isCompl n d hd hn) x) =
-      (PStd n d hd hn).fR (PStd_isCompl n d hd hn) (I x)) :
+    (h11 : ∀ x y, (PStd n d hd hn).XiR (PStd_isCompl n d hd hn) (I x) (I y) =
+      (PStd n d hd hn).XiR (PStd_isCompl n d hd hn) x y) :
     hV n d ∈ hodgeClassesV n I 1 := by
   apply s24b_hodgeV_of_inv n I hI _ (s24b_hV_mem n d)
   have hmem := s24b_bcExt_mem_exteriorPower (F := ℚ) (F' := ℝ) n (s24b_hV_mem n d)
   refine s24b_eq_of_ev ℝ n (s24b_map_mem_exteriorPower I hmem) hmem fun x y => ?_
+  -- `⟪⋀² I (h), (x, ·)_V ∧ (y, ·)_V⟫ = Ξ_P(-I x, -I y) = Ξ_P(I x, I y)` (the adjoint of `I` is `-I`)
   rw [s24b_ev_map, s24b_pairing_comp_I n I hI hIso, s24b_pairing_comp_I n I hI hIso,
     s24b_ev_hV_real n d hd hn, s24b_ev_hV_real n d hd hn]
-  simp only [KSecant.XiR, LinearMap.BilinForm.compLeft_apply, map_neg, LinearMap.neg_apply,
-    neg_neg]
-  rw [← hc, hIso]
+  simp only [map_neg, LinearMap.neg_apply, neg_neg]
+  exact h11 x y
 
 theorem s24b_XiR_apply (x y : V ℝ n) :
     (PStd n d hd hn).XiR (PStd_isCompl n d hd hn) x y =
@@ -1785,9 +1688,10 @@ theorem s24b_eigenspace_fX :
     (s24b_eigenspace_fC n d hd hn).1, (s24b_eigenspace_fC n d hd hn).2]
   exact ⟨rfl, rfl⟩
 
-theorem s24b_assumption_J0 : Assumption2_4_1 (PStd n d hd hn) (s24b_J0 n) :=
-  PTheta_assumption2_4_1 n d hd hn (s24b_J0 n) (s24b_J0_isComplexStructure n) (ThetaStd ℚ n)
-    (s24b_ThetaStd_ample n)
+/-- `P_Θ` satisfies Assumption 2.4.1 for the complex structure `J₀` of `X` (`s8_J0`), for which
+`Θ = ThetaStd` is ample: the setting in which §§3–4 are stated. -/
+theorem s24b_assumption_J0 : Assumption2_4_1 (PStd n d hd hn) (s8_J0 n) :=
+  PTheta_assumption2_4_1 n d hd hn (s8_J0 n) (s8_J0_isComplex n) (ThetaStd ℚ n) (s8_ample_J0 n)
 
 theorem s24b_comm_of_mem_OmegaP (I : Module.End ℝ (V ℝ n))
     (hI : I ∈ (PStd n d hd hn).OmegaP (PStd_isCompl n d hd hn)) :
@@ -1797,24 +1701,36 @@ theorem s24b_comm_of_mem_OmegaP (I : Module.End ℝ (V ℝ n))
   rw [← hgI]
   exact LinearMap.ext fun x => hg.2.1 x
 
-theorem s24b_weil_of_mem_OmegaP (I : Module.End ℝ (V ℝ n))
+/-- A point `I` of `Ω_P` satisfies the hypotheses of Lemma 3.2.1 and Corollary 3.2.3 (§3.2):
+`I = ρ(Ĩ)` for some `Ĩ ∈ Spin(V_ℝ)_P` (Lemma 3.1.1 over `ℝ`), `I` is a complex structure,
+`ν(I) = 2n` and `g_I` is positive definite. -/
+theorem s24b_cor3_2_3_hyps (I : Module.End ℝ (V ℝ n))
     (hI : I ∈ (PStd n d hd hn).OmegaP (PStd_isCompl n d hd hn)) :
-    Module.finrank ℂ ↥((PStd n d hd hn).W₁ℂ ⊓ V01 n I) = n ∧
-      Module.finrank ℂ ↥((PStd n d hd hn).W₂ℂ ⊓ V01 n I) = n := by
+    (∃ g ∈ (PStd n d hd hn).spinPR, (rho ℝ n g : V ℝ n →ₗ[ℝ] V ℝ n) = I) ∧
+      IsComplexStructure I ∧ (PStd n d hd hn).nu (s24b_assumption_J0 n d hd hn).isCompl I = 2 * n ∧
+      ∀ x : V ℝ n, x ≠ 0 → 0 < (PStd n d hd hn).gI (s24b_assumption_J0 n d hd hn).isCompl I x x := by
   have hP := s24b_assumption_J0 n d hd hn
   have hc := s24b_comm_of_mem_OmegaP n d hd hn I hI
-  obtain ⟨⟨g, hg, hgI⟩, hcs, hEp, -, -⟩ := hI
-  have hIP : ∃ g' ∈ (PStd n d hd hn).spinPR, (rho ℝ n g' : V ℝ n →ₗ[ℝ] V ℝ n) = I := by
-    have h := (lemma3_1_1_real (PStd n d hd hn) (s24b_J0 n) hP).2
+  obtain ⟨⟨g, hg, hgI⟩, hcs, hEp, -, hpos⟩ := hI
+  refine ⟨?_, hcs, ?_, hpos⟩
+  · have h := (lemma3_1_1_real (PStd n d hd hn) (s8_J0 n) hP).2
     have hg' : g ∈ rho ℝ n '' ((PStd n d hd hn).spinPR : Set (Spin ℝ n)) := by
       rw [h]; exact hg
     obtain ⟨g', hg'1, hg'2⟩ := hg'
     exact ⟨g', hg'1, by rw [hg'2]; exact hgI⟩
-  have hν : (PStd n d hd hn).nu hP.isCompl I = 2 * n := by
-    rw [KSecant.nu]
+  · rw [KSecant.nu]
     rw [show I * (PStd n d hd hn).fR hP.isCompl = (PStd n d hd hn).fR hP.isCompl * I from hc]
     exact hEp
-  obtain ⟨-, -, h3, h4⟩ := lemma3_2_1 (PStd n d hd hn) (s24b_J0 n) hP I hIP hcs hν
+
+/-- The Weil condition at a point `I` of `Ω_P`, for the standard complex structure `-I` (whose
+`H^{1,0}` is `V^{0,1}` of `I`): Lemma 3.2.1. -/
+theorem s24b_weil_of_mem_OmegaP (I : Module.End ℝ (V ℝ n))
+    (hI : I ∈ (PStd n d hd hn).OmegaP (PStd_isCompl n d hd hn)) :
+    Module.finrank ℂ ↥((PStd n d hd hn).W₁ℂ ⊓ V01 n I) = n ∧
+      Module.finrank ℂ ↥((PStd n d hd hn).W₂ℂ ⊓ V01 n I) = n := by
+  obtain ⟨hIP, hcs, hν, -⟩ := s24b_cor3_2_3_hyps n d hd hn I hI
+  obtain ⟨-, -, h3, h4⟩ :=
+    lemma3_2_1 (PStd n d hd hn) (s8_J0 n) (s24b_assumption_J0 n d hd hn) I hIP hcs hν
   rw [inf_comm] at h3 h4
   exact ⟨h3, h4⟩
 
@@ -1957,55 +1873,6 @@ theorem s24b_eig_dims (I : Module.End ℝ (V ℝ n))
 theorem s24b_etaV_apply (k : Kd d) (v : V ℚ n) :
     etaV n d hd k v = Kd.ratPart d k • v + Kd.sqrtNegCoeff d k • fV n d v := rfl
 
-theorem s24b_fV_inl (y : Module.Dual ℚ (H1 ℚ n)) :
-    fV n d (y, 0) = (0, d • thetaStd n y) := by
-  simp [fV]
-
-theorem s24b_fV_inr (w : H1 ℚ n) : fV n d (0, w) = (-(thetaStdInv n w), 0) := by
-  simp [fV]
-
-theorem s24b_map_etaV_hV (k : Kd d) :
-    ExteriorAlgebra.map (etaV n d hd k) (hV n d) = Kd.Nm d k • hV n d := by
-  set a := Kd.ratPart d k
-  set b := Kd.sqrtNegCoeff d k
-  have hι : ∀ v : V ℚ n, ExteriorAlgebra.map (etaV n d hd k) (ExteriorAlgebra.ι ℚ v) =
-      a • ExteriorAlgebra.ι ℚ v + b • ExteriorAlgebra.ι ℚ (fV n d v) := by
-    intro v
-    rw [ExteriorAlgebra.map_apply_ι, s24b_etaV_apply, map_add, map_smul, map_smul]
-  have hV' : hV n d = ∑ i : Fin n,
-      (d • (ExteriorAlgebra.ι ℚ (((0 : Module.Dual ℚ (H1 ℚ n)), e ℚ n ⟨2 * i, by omega⟩) : V ℚ n) *
-        ExteriorAlgebra.ι ℚ (((0 : Module.Dual ℚ (H1 ℚ n)), e ℚ n ⟨2 * i + 1, by omega⟩) : V ℚ n)) +
-      ExteriorAlgebra.ι ℚ ((f ℚ n ⟨2 * i, by omega⟩, (0 : H1 ℚ n)) : V ℚ n) *
-        ExteriorAlgebra.ι ℚ ((f ℚ n ⟨2 * i + 1, by omega⟩, (0 : H1 ℚ n)) : V ℚ n)) := by
-    rw [hV, ThetaV, ThetaHatV, Finset.smul_sum, ← Finset.sum_add_distrib]
-  rw [hV', map_sum, Finset.smul_sum]
-  refine Finset.sum_congr rfl fun i _ => ?_
-  rw [map_add, map_smul]
-  simp only [map_mul, hι, s24b_fV_inl, s24b_fV_inr, s24b_thetaStd_f_even, s24b_thetaStd_f_odd,
-    s24b_thetaStdInv_e_even, s24b_thetaStdInv_e_odd, neg_neg]
-  set A := ExteriorAlgebra.ι ℚ (((0 : Module.Dual ℚ (H1 ℚ n)), e ℚ n ⟨2 * i, by omega⟩) : V ℚ n)
-  set B := ExteriorAlgebra.ι ℚ (((0 : Module.Dual ℚ (H1 ℚ n)), e ℚ n ⟨2 * i + 1, by omega⟩) : V ℚ n)
-  set C := ExteriorAlgebra.ι ℚ ((f ℚ n ⟨2 * i, by omega⟩, (0 : H1 ℚ n)) : V ℚ n)
-  set D := ExteriorAlgebra.ι ℚ ((f ℚ n ⟨2 * i + 1, by omega⟩, (0 : H1 ℚ n)) : V ℚ n)
-  have hD : ExteriorAlgebra.ι ℚ ((f ℚ n ⟨2 * i + 1, by omega⟩, (0 : H1 ℚ n)) : V ℚ n) = D := rfl
-  have hmC : ExteriorAlgebra.ι ℚ ((-f ℚ n ⟨2 * i, by omega⟩, (0 : H1 ℚ n)) : V ℚ n) = -C := by
-    rw [← map_neg]; simp only [Prod.neg_mk, neg_zero]
-  have hdB : ExteriorAlgebra.ι ℚ (((0 : Module.Dual ℚ (H1 ℚ n)),
-      d • e ℚ n ⟨2 * i + 1, by omega⟩) : V ℚ n) = d • B := by
-    rw [← map_smul]; simp only [Prod.smul_mk, smul_zero]
-  have hdA : ExteriorAlgebra.ι ℚ (((0 : Module.Dual ℚ (H1 ℚ n)),
-      d • -e ℚ n ⟨2 * i, by omega⟩) : V ℚ n) = -(d • A) := by
-    rw [← map_smul, ← map_neg]; simp only [Prod.smul_mk, smul_zero, Prod.neg_mk, neg_zero, smul_neg]
-  rw [hmC, hdB, hdA]
-  have hDB : D * B = -(B * D) := eq_neg_of_add_eq_zero_left (ExteriorAlgebra.ι_add_mul_swap _ _)
-  have hCA : C * A = -(A * C) := eq_neg_of_add_eq_zero_left (ExteriorAlgebra.ι_add_mul_swap _ _)
-  have hDC : D * C = -(C * D) := eq_neg_of_add_eq_zero_left (ExteriorAlgebra.ι_add_mul_swap _ _)
-  have hBA : B * A = -(A * B) := eq_neg_of_add_eq_zero_left (ExteriorAlgebra.ι_add_mul_swap _ _)
-  rw [s24b_Nm_eq hd k]
-  simp only [add_mul, mul_add, smul_mul_assoc, mul_smul_comm, mul_neg, smul_neg,
-    hDB, hCA, hDC, hBA]
-  module
-
 theorem s24b_bcEndV_etaV (k : Kd d) :
     bcEndV ℝ n (etaV n d hd k) =
       ((Kd.ratPart d k : ℚ) : ℝ) • 1 + ((Kd.sqrtNegCoeff d k : ℚ) : ℝ) • bcEndV ℝ n (fV n d) := by
@@ -2067,7 +1934,14 @@ theorem s24b_map_mem_hodgeClassesX_iff (I : Module.End ℝ (V ℝ n)) (_hI : IsC
 /-- The Weil-type period domain of `(X × X̂, η, h)` in the model (`WeilDomain`) is the image of the
 paper's period domain `Ω_P` of `P_Θ` (§4: "the period domain of deformations of `(X × X̂, Ξ_P, η)`
 as a polarized abelian variety of Weil type"), under `I ↦ -I` (the paper's convention to the
-standard one) and `coordV`. -/
+standard one) and `coordV`.
+
+`⊇` is Corollary 3.2.3 transported to the model: for `I ∈ Ω_P`, `η(K)` acts by Hodge
+endomorphisms (`corollary3_2_3_comm`), `h = Ξ_P^♯` (`hClass_PStd`) is of type `(1,1)`
+(`corollary3_2_3_type11`) and a Kähler class (`corollary3_2_3_kahler`), `η(k)^* h = Nm(k) h` (the
+condition on the polarization, `corollary3_2_3_polarization`, with [van Geemen, Def. 4.9],
+`s24b_map_η_hClass`), and the Weil condition is Lemma 3.2.1. `⊆` is the converse that the paper
+leaves implicit (TeX line 443): a Weil-type complex structure of `(X × X̂, η, h)` lies in `Ω_P`. -/
 theorem weilDomain_eq_image_OmegaP (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * n)))
     (hη : η (Kd.sqrtNeg d) = fX n d) :
     WeilDomain η (hX n d) =
@@ -2113,26 +1987,30 @@ theorem weilDomain_eq_image_OmegaP (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 
     · rw [hg]
       exact s24b_det_W n d hd hn I hI hc _ _ (s24b_eigenspace_fC n d hd hn).2.symm n hWd.2 hW2
   · rintro ⟨I, hI, rfl⟩
-    have hc := s24b_comm_of_mem_OmegaP n d hd hn I hI
-    have hc' : ∀ x, I ((PStd n d hd hn).fR (PStd_isCompl n d hd hn) x) =
-        (PStd n d hd hn).fR (PStd_isCompl n d hd hn) (I x) := fun x => by
-      have := congrArg (fun T => T x) hc; simpa using this
+    -- Corollary 3.2.3 for `I ∈ Ω_P`: `(V_ℝ/V_ℤ, I, Ξ_P)` is a polarized abelian variety of Weil
+    -- type; the model's conditions are transported from its parts (`hClass_PStd`, `ηHom_PStd`)
+    have hP := s24b_assumption_J0 n d hd hn
     have hweil := s24b_weil_of_mem_OmegaP n d hd hn I hI
-    obtain ⟨⟨g, hg, hgI⟩, hcs, -, -, hpos⟩ := hI
-    obtain ⟨x₀, hx₀⟩ := (mem_SOplus_iff ℝ n g).mp hg.1
+    obtain ⟨hIP, hcs, hν, hpos⟩ := s24b_cor3_2_3_hyps n d hd hn I hI
+    have hc := corollary3_2_3_comm (PStd n d hd hn) (s8_J0 n) hP I hIP hcs hν hpos
+    have h11 := corollary3_2_3_type11 (PStd n d hd hn) (s8_J0 n) hP I hIP hcs hν hpos
+    have hpol := corollary3_2_3_polarization (PStd n d hd hn) (s8_J0 n) hP I hIP hcs hν hpos
     have hIso : ∀ x y, pairing ℝ n (I x) (I y) = pairing ℝ n x y := by
+      obtain ⟨g, -, hgI⟩ := hIP
       intro x y
-      have h1 : ∀ z, I z = rho ℝ n x₀ z := fun z => by rw [← hgI, ← hx₀]; rfl
-      rw [h1, h1, s24b_rho_isometry]
+      rw [← hgI]
+      exact s24b_rho_isometry n g x y
     refine ⟨(s24b_isComplexStructure_transportEnd n I).mpr hcs,
       (s24b_hodgeMaps_iff n d hd hn I).mpr hc, ?_, ?_, ⟨?_, ?_⟩, ?_⟩
     · rw [etaX_sqrtNeg, hEX.1, s24b_H10_transport, s24b_finrank_map_inf]
       exact hweil.1
     · rw [etaX_sqrtNeg, hEX.2, s24b_H10_transport, s24b_finrank_map_inf]
       exact hweil.2
-    · exact (s24b_map_mem_hodgeClassesX_iff n I hcs 1 (hV n d)).mpr
-        (s24b_hV_hodge n d hd hn I hcs hIso hc')
-    · intro a ha
+    · -- `h` is of type `(1,1)`: `Ξ_P` is (Corollary 3.2.3)
+      exact (s24b_map_mem_hodgeClassesX_iff n I hcs 1 (hV n d)).mpr
+        (s24b_hV_hodge n d hd hn I hcs hIso h11)
+    · -- positivity: `Ξ_P` is a Kähler class for `I` (Corollary 3.2.3)
+      intro a ha
       obtain ⟨x, hx⟩ := s24b_pairing_surjective ℝ n (a ∘ₗ (coordV ℝ n).toLinearMap)
       have ha' : a = pairing ℝ n x ∘ₗ (coordV ℝ n).symm.toLinearMap := by
         rw [hx]
@@ -2144,9 +2022,15 @@ theorem weilDomain_eq_image_OmegaP (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 
         rw [ha']
         simp
       rw [ha', s24b_eval2_hX n d hd hn I hcs hIso x]
-      exact hpos x hx0
-    · intro k
-      rw [s24b_etaX_apply, s24b_map_transportEnd_hX, s24b_map_etaV_hV, map_smul]
+      exact corollary3_2_3_kahler (PStd n d hd hn) (s8_J0 n) hP I hIP hcs hν hpos x hx0
+    · -- `η(k)^* h = Nm(k) h`: the condition on the polarization (Corollary 3.2.3, `f^*Ξ_P = d Ξ_P`)
+      -- with [van Geemen, Def. 4.9]
+      intro k
+      have h := s24b_map_η_hClass (PStd n d hd hn) hd (PStd_isCompl n d hd hn) hpol k
+      have hηk : (PStd n d hd hn).η (PStd_isCompl n d hd hn) k = etaV n d hd k := by
+        rw [← ηHom_PStd n d hd hn]; rfl
+      rw [hClass_PStd n d hd hn, hηk] at h
+      rw [s24b_etaX_apply, s24b_map_transportEnd_hX, h, map_smul]
       rfl
 
 /-- Hodge classes for the standard complex structure `-I`, transported to the model, are the Hodge

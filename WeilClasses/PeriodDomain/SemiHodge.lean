@@ -55,26 +55,6 @@ theorem s4_Q_nondegenerate (n : ℕ) : (Q ℝ n).Nondegenerate := by
   apply TauCeti.nondegenerate_dualProd
   exact Module.eval_apply_injective ℝ
 
-theorem s4_isOpen_square_real : IsOpen (Subgroup.square ℝˣ : Set ℝˣ) := by
-  have h : (Subgroup.square ℝˣ : Set ℝˣ) = Units.val ⁻¹' Set.Ioi 0 := by
-    ext u
-    simp only [SetLike.mem_coe, Subgroup.mem_square, Set.mem_preimage, Set.mem_Ioi]
-    constructor
-    · rintro ⟨v, rfl⟩
-      simp only [Units.val_mul]
-      exact mul_self_pos.mpr v.ne_zero
-    · intro hu
-      have hs : 0 < Real.sqrt (u : ℝ) := Real.sqrt_pos.mpr hu
-      refine ⟨Units.mk0 _ hs.ne', Units.ext ?_⟩
-      simp [Real.mul_self_sqrt hu.le]
-  rw [h]
-  exact isOpen_Ioi.preimage Units.continuous_val
-
-theorem s4_det_extEnd (n : ℕ) (A : Module.End ℝ (V ℝ n)) :
-    LinearMap.det (s4_extEnd ℝ ℂ n A) = ((LinearMap.det A : ℝ) : ℂ) := by
-  rw [s4_extEnd, LinearMap.det_toLin, ← LinearMap.det_toMatrix (basisV ℝ n) A]
-  exact ((algebraMap ℝ ℂ).map_det _).symm
-
 theorem s4_rot_mul (n : ℕ) (I : Module.End ℝ (V ℝ n)) (hI : IsComplexStructure I) (a b : ℝ) :
     rotI n I a * rotI n I b = rotI n I (a + b) := by
   have hII : I * I = -1 := hI
@@ -457,22 +437,6 @@ theorem s4_proj_comm {F' N : Type*} [Field F'] [AddCommGroup N] [Module F' N]
       rw [GradedAlgebra.proj_apply, DFinsupp.notMem_support_iff.mp hk]
       rfl
     rw [this, map_zero, map_zero]
-
-/-- Degree detection: if `φ` preserves degrees and is injective, `φ x ∈ ⋀^k → x ∈ ⋀^k`. -/
-theorem s4_mem_of_map_mem {F' N : Type*} [Field F'] [AddCommGroup N] [Module F' N]
-    (φ : ExteriorAlgebra F M →+ ExteriorAlgebra F' N)
-    (hφ : ∀ i x, x ∈ ⋀[F]^i M → φ x ∈ ⋀[F']^i N) (hinj : Function.Injective φ) (k : ℕ)
-    (x : ExteriorAlgebra F M) (hx : φ x ∈ ⋀[F']^k N) : x ∈ ⋀[F]^k M := by
-  classical
-  have hcomp : ∀ i, i ≠ k → s4_proj F M i x = 0 := by
-    intro i hik
-    apply hinj
-    rw [map_zero, ← s4_proj_comm φ hφ, s4_proj_of_mem i hx, ite_eq_right (Ne.symm hik)]
-  rw [← s4_sum_proj x]
-  refine Submodule.sum_mem _ fun i _ => ?_
-  by_cases h : i = k
-  · subst h; exact s4_proj_mem i x
-  · rw [hcomp i h]; exact zero_mem _
 
 end Graded
 
@@ -1262,7 +1226,7 @@ theorem s4_rot_mem_SOplusfR (J : Module.End ℝ (H1 ℝ n)) (hP : Assumption2_4_
       map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul, hiso, hanti x y]
     linear_combination (pairing ℝ n x y) * Real.cos_sq_add_sin_sq t
   -- the four summands `V^{1,0} ∩ W_{i,ℂ}`, `V^{0,1} ∩ W_{i,ℂ}` are `n`-dimensional
-  have hfr4 := P.s4_finrank_four hW I hc hE1 hE2
+  have hfr4 := P.s4_finrank_four hW I hc hcs hE1
   have hV10 : Module.finrank ℂ (V10 n I) = 2 * n := by
     have hsplit := P.s4_V10_split hW I hc
     have hdisj : V10 n I ⊓ P.W₁ℂ ⊓ (V10 n I ⊓ P.W₂ℂ) = ⊥ := by
@@ -2279,24 +2243,6 @@ theorem s4_hodge_top {n : ℕ} (I : Module.End ℝ (V ℝ n)) (hI : IsComplexStr
 
 
 
-/-- `⋀A` acts on `⋀^k W` (`k = dim W`, `A(W) ⊆ W`) by `det(A|_W)`. -/
-theorem s4_map_ιMulti_det {K M : Type*} [Field K] [AddCommGroup M] [Module K M]
-    [Module.Free K (ExteriorAlgebra K M)] (W : Submodule K M) [FiniteDimensional K W] (k : ℕ)
-    (hk : Module.finrank K W = k) (A : M →ₗ[K] M) (hA : ∀ x ∈ W, A x ∈ W) (v : Fin k → M)
-    (hv : ∀ i, v i ∈ W) :
-    ExteriorAlgebra.map A (ExteriorAlgebra.ιMulti K k v) =
-      LinearMap.det (A.restrict hA) • ExteriorAlgebra.ιMulti K k v := by
-  set b := Module.finBasisOfFinrankEq K W hk
-  set u : Fin k → W := fun i => ⟨v i, hv i⟩
-  set f : W [⋀^Fin k]→ₗ[K] ExteriorAlgebra K M :=
-    (ExteriorAlgebra.ιMulti K k).compLinearMap W.subtype
-  have hfu : ExteriorAlgebra.ιMulti K k v = f u := rfl
-  have hAu : ExteriorAlgebra.map A (ExteriorAlgebra.ιMulti K k v) = f (A.restrict hA ∘ u) := by
-    rw [ExteriorAlgebra.map_apply_ιMulti]
-    rfl
-  rw [hAu, hfu, s4_alternating_eq_det_smul b f, s4_alternating_eq_det_smul b f u,
-    Module.Basis.det_comp, mul_smul]
-
 /-- Naturality `⋀ A_{F'} ∘ bc = bc ∘ ⋀ A`. -/
 theorem s4_map_extEnd_bcExt' (F F' : Type*) [Field F] [CharZero F] [Field F'] [CharZero F']
     [Algebra F F'] (n : ℕ) (A : Module.End F (V F n)) (x : ExteriorAlgebra F (V F n)) :
@@ -2329,15 +2275,15 @@ theorem s4_hClass_ne_zero (hW : IsCompl P.W₁ P.W₂) : P.hClass hW ≠ 0 := by
     intro h; have := congrArg (fun v : V ℚ n => v.2 ⟨0, by omega⟩) h; simp at this⟩⟩
   exact (P.XiQ_nondegenerate hW).ne_zero (LinearMap.ext₂ hX)
 
-/-- `Ξ_P^♯` is invariant under `Spin(V_ℚ)_P` (`ρ(g)` is an isometry commuting with `f`, Lemma 3.1.1). -/
+/-- `Ξ_P^♯` is invariant under `Spin(V_ℚ)_P`: `ρ(g)` is an isometry, and it commutes with
+`f = η_{√-d}` since the image of `η` centralizes `ρ(Spin(V_ℚ)_P)` (Lemma 2.2.4, TeX 862:
+`KSecant.s22b_η_commute`). -/
 theorem s4_rhoExt_hClass (J : Module.End ℝ (H1 ℝ n)) (hP : Assumption2_4_1 P J) (g : Spin ℚ n)
     (hg : g ∈ P.spinPℚ) : rhoExt ℚ n g (P.hClass hP.isCompl) = P.hClass hP.isCompl := by
   have hiso := s4_pairing_of_mem_SOplus (rho ℚ n g) (s4_rho_mem_SOplus g)
-  have hSO : rho ℚ n g ∈ P.SOplusf hP.isCompl := by
-    have : rho ℚ n g ∈ (P.SOplusf hP.isCompl : Set (V ℚ n ≃ₗ[ℚ] V ℚ n)) := by
-      rw [← (lemma3_1_1 P J hP).2]; exact ⟨g, hg, rfl⟩
-    exact this
-  have hc : ∀ x, rho ℚ n g (P.fη hP.isCompl x) = P.fη hP.isCompl (rho ℚ n g x) := hSO.2.1
+  -- Lemma 2.2.4: `η(√-d) = f` commutes with `ρ(g)`
+  have hc : ∀ x, rho ℚ n g (P.fη hP.isCompl x) = P.fη hP.isCompl (rho ℚ n g x) := fun x =>
+    (P.s22b_η_commute hP.pos hP.isCompl (Kd.sqrtNeg d) g hg x).symm
   refine s4_map_eq_of_spec n (rho ℚ n g) hiso (fun x y => P.XiQ hP.isCompl x y)
     (fun x y => ?_) _ (P.s4_hClass_mem _) (P.hClass_spec _)
   have hc' : P.fη hP.isCompl ((rho ℚ n g).symm x) = (rho ℚ n g).symm (P.fη hP.isCompl x) := by
@@ -2406,13 +2352,13 @@ theorem s4_Nm_σ (z : Kd d) (hd : 0 < d) : Kd.Nm d (Kd.σ d z) = Kd.Nm d z := by
 
 theorem s4_η_algebraMap (hW : IsCompl P.W₁ P.W₂) (q : ℚ) :
     P.η hW (algebraMap ℚ (Kd d) q) = q • (1 : Module.End ℚ (V ℚ n)) := by
-  have h := RingHom.map_rat_algebraMap (P.ηHom (s4_d_pos P) hW) q
+  have h := RingHom.map_rat_algebraMap (P.ηHom P.d_pos hW) q
   rw [Algebra.algebraMap_eq_smul_one (A := Module.End ℚ (V ℚ n))] at h
   exact h
 
 theorem s4_η_adj (hW : IsCompl P.W₁ P.W₂) (l : Kd d) (x z : V ℚ n) :
     pairing ℚ n (P.η hW (Kd.σ d l) x) z = pairing ℚ n x (P.η hW l z) := by
-  have hd := s4_d_pos P
+  have hd := P.d_pos
   by_cases hl : l = 0
   · subst hl
     rw [map_zero, P.η_zero hd hW]
@@ -2430,7 +2376,7 @@ theorem s4_η_adj (hW : IsCompl P.W₁ P.W₂) (l : Kd d) (x z : V ℚ n) :
 
 theorem s4_XiQ_η (hW : IsCompl P.W₁ P.W₂) (l : Kd d) (x y : V ℚ n) :
     P.XiQ hW (P.η hW l x) (P.η hW l y) = Kd.Nm d l * P.XiQ hW x y := by
-  have hd := s4_d_pos P
+  have hd := P.d_pos
   simp only [XiQ, LinearMap.BilinForm.compLeft_apply]
   have hc : P.fη hW (P.η hW l x) = P.η hW l (P.fη hW x) := by
     simp only [fη]
@@ -2452,82 +2398,19 @@ theorem s4_map_η_hClass (hW : IsCompl P.W₁ P.W₂) (l : Kd d) :
       simp only [LinearMap.coe_comp, Function.comp_apply]
       rw [s4_η_adj]
     rw [map_sub, map_sub, map_sub, s4_pair2_map, hpη, hpη, P.hClass_spec, map_smul, map_smul,
-      map_smul, P.hClass_spec, s4_XiQ_η, s4_Nm_σ _ (s4_d_pos P), smul_eq_mul, sub_self]
+      map_smul, P.hClass_spec, s4_XiQ_η, s4_Nm_σ _ P.d_pos, smul_eq_mul, sub_self]
 
 theorem s4_extEnd_η_K (hW : IsCompl P.W₁ P.W₂) (l : Kd d) :
     s4_extEnd ℚ (Kd d) n (P.η hW l) = P.ηK hW l := by
   refine (basisV (Kd d) n).ext fun j => ?_
-  rw [← s4_bcV_basisV ℚ (Kd d) n, s4_extEnd_bcV, ηK_bcV P (s4_d_pos P) hW]
+  rw [← s4_bcV_basisV ℚ (Kd d) n, s4_extEnd_bcV, ηK_bcV P P.d_pos hW]
 
 /-- `⋀η_λ` acts on `Ξ_P^♯` (in `⋀² V_K`) by `λ σ(λ)`. -/
 theorem s4_map_ηK_hClass (hW : IsCompl P.W₁ P.W₂) (l : Kd d) :
     ExteriorAlgebra.map (P.ηK hW l) (bcExt ℚ (Kd d) n (P.hClass hW)) =
       (l * Kd.σ d l) • bcExt ℚ (Kd d) n (P.hClass hW) := by
   rw [← s4_extEnd_η_K, s4_map_extEnd_bcExt', s4_map_η_hClass, map_smul,
-    ← s4_algebraMap_Nm l (s4_d_pos P), algebraMap_smul]
-
-theorem s4_topWedge_le {K M : Type*} [Field K] [AddCommGroup M] [Module K M] (W : Submodule K M)
-    (k : ℕ) : topWedge W k ≤ ⋀[K]^k M := by
-  rw [topWedge, Submodule.span_le]
-  rintro _ ⟨v, -, rfl⟩
-  exact ExteriorAlgebra.ιMulti_range K k ⟨v, rfl⟩
-
-/-- `ĤW_P ⊆ (⋀^{2n} V_ℚ)^{Spin(V)_P}`: `ρ(g)` has determinant `1` on `W₁` and `W₂` (Lemma 3.1.1). -/
-theorem s4_hwPlane_le_invQ (J : Module.End ℝ (H1 ℝ n)) (hP : Assumption2_4_1 P J) :
-    P.hwPlane ≤ P.invQ (2 * n) := by
-  intro x hx
-  have hxK : bcExt ℚ (Kd d) n x ∈ topWedge P.W₁ (2 * n) ⊔ topWedge P.W₂ (2 * n) := hx
-  have : Module.Free (Kd d) (ExteriorAlgebra (Kd d) (V (Kd d) n)) :=
-    Module.Free.of_basis (basisExt (Kd d) n)
-  refine ⟨?_, ?_⟩
-  · refine s4_mem_of_map_mem (bcExt ℚ (Kd d) n).toLinearMap.toAddMonoidHom
-      (fun i y hy => s4_bcExt_mem_pow ℚ (Kd d) n i y hy) (s4_bcExt_injective ℚ (Kd d) n) _ x ?_
-    exact sup_le (s4_topWedge_le _ _) (s4_topWedge_le _ _) hxK
-  · intro g hg
-    have hgP : g ∈ P.spinPℚ := hg.2
-    have hSO : rho ℚ n g ∈ P.SOplusf hP.isCompl := by
-      have : rho ℚ n g ∈ (P.SOplusf hP.isCompl : Set (V ℚ n ≃ₗ[ℚ] V ℚ n)) := by
-        rw [← (lemma3_1_1 P J hP).2]; exact ⟨g, hgP, rfl⟩
-      exact this
-    obtain ⟨-, -, ⟨h1, hdet1⟩, ⟨h2, hdet2⟩⟩ := hSO
-    have hfix : ∀ y ∈ topWedge P.W₁ (2 * n) ⊔ topWedge P.W₂ (2 * n),
-        ExteriorAlgebra.map (bcEndV (Kd d) n (rho ℚ n g : V ℚ n →ₗ[ℚ] V ℚ n)) y = y := by
-      intro y hy
-      have hle : topWedge P.W₁ (2 * n) ⊔ topWedge P.W₂ (2 * n) ≤ Module.End.eigenspace
-          (ExteriorAlgebra.map (bcEndV (Kd d) n (rho ℚ n g : V ℚ n →ₗ[ℚ] V ℚ n))).toLinearMap 1 := by
-        refine sup_le ?_ ?_
-        · rw [topWedge, Submodule.span_le]
-          rintro _ ⟨v, hv, rfl⟩
-          rw [SetLike.mem_coe, Module.End.mem_eigenspace_iff, AlgHom.toLinearMap_apply,
-            s4_map_ιMulti_det P.W₁ (2 * n) P.isPure.2.2 _ h1 v hv, hdet1]
-        · rw [topWedge, Submodule.span_le]
-          rintro _ ⟨v, hv, rfl⟩
-          rw [SetLike.mem_coe, Module.End.mem_eigenspace_iff, AlgHom.toLinearMap_apply,
-            s4_map_ιMulti_det P.W₂ (2 * n) P.isPure₂.2.2 _ h2 v hv, hdet2]
-      have := Module.End.mem_eigenspace_iff.mp (hle hy)
-      rwa [one_smul] at this
-    apply s4_bcExt_injective ℚ (Kd d) n
-    show bcExt ℚ (Kd d) n (ExteriorAlgebra.map (rho ℚ n g : V ℚ n →ₗ[ℚ] V ℚ n) x) = _
-    rw [← s4_map_extEnd_bcExt']
-    exact hfix _ hxK
-
-theorem s4_pow_mem_exterior {K M : Type*} [Field K] [AddCommGroup M] [Module K M]
-    (x : ExteriorAlgebra K M) (hx : x ∈ ⋀[K]^2 M) (j : ℕ) : x ^ j ∈ ⋀[K]^(2 * j) M := by
-  have := Submodule.pow_mem_pow _ hx j
-  show _ ∈ (LinearMap.range (ExteriorAlgebra.ι K : M →ₗ[K] _)) ^ (2 * j)
-  rwa [pow_mul]
-
-/-- `(Ξ_P^♯)^n` has `K`-weight `(n, n)`: it lies in `⋀^n W₁ ⊗ ⋀^n W₂`. -/
-theorem s4_pow_hClass_mem_pq (hW : IsCompl P.W₁ P.W₂) :
-    bcExt ℚ (Kd d) n (P.hClass hW ^ n) ∈ pqPiece P.W₁ P.W₂ n n := by
-  rw [← P.wedgeAB_eq (s4_d_pos P) hW]
-  refine ⟨?_, fun l hl => ?_⟩
-  · have := s4_bcExt_mem_pow ℚ (Kd d) n _ _ (s4_pow_mem_exterior _ (P.s4_hClass_mem hW) n)
-    rw [show n + n = 2 * n by ring]
-    exact this
-  · show ExteriorAlgebra.map (P.ηK hW l) (bcExt ℚ (Kd d) n (P.hClass hW ^ n)) =
-      (l ^ (n : ℤ) * Kd.σ d l ^ (n : ℤ)) • bcExt ℚ (Kd d) n (P.hClass hW ^ n)
-    rw [map_pow, map_pow, s4_map_ηK_hClass, smul_pow, zpow_natCast, zpow_natCast, mul_pow]
+    ← s4_algebraMap_Nm l P.d_pos, algebraMap_smul]
 
 theorem s4_topWedge_le_pq₁ (k : ℕ) : topWedge P.W₁ k ≤ pqPiece P.W₁ P.W₂ k 0 := by
   rw [topWedge, Submodule.span_le]
@@ -2540,6 +2423,35 @@ theorem s4_topWedge_le_pq₂ (k : ℕ) : topWedge P.W₂ k ≤ pqPiece P.W₁ P.
   rintro _ ⟨v, hv, rfl⟩
   refine Submodule.subset_span ⟨Fin.elim0, v, fun i => i.elim0, hv, ?_⟩
   rw [ExteriorAlgebra.ιMulti_zero_apply, one_mul]
+
+/-- `ĤW_P ⊆ (⋀^{2n} V_ℚ)^{Spin(V)_P}`: `⋀^{2n} W₁ ⊕ ⋀^{2n} W₂` lies in `(⋀^{2n} V_K)^{Spin(V)_P}` by
+Lemma 2.2.7 (`lemma2_2_7_K_eq`; "`⋀^{2n} Wᵢ` is a trivial character of `SL(Wᵢ)`", TeX 1028), and a
+rational class is invariant iff its image in `⋀• V_K` is (`KSecant.s22b_mem_invQ_iff`). -/
+theorem s4_hwPlane_le_invQ (J : Module.End ℝ (H1 ℝ n)) (hP : Assumption2_4_1 P J) :
+    P.hwPlane ≤ P.invQ (2 * n) := by
+  intro x hx
+  have hxK : bcExt ℚ (Kd d) n x ∈ topWedge P.W₁ (2 * n) ⊔ topWedge P.W₂ (2 * n) := hx
+  rw [KSecant.s22b_mem_invQ_iff, lemma2_2_7_K_eq P hP.pos hP.nonIsotropic]
+  exact (le_sup_left : pqPiece P.W₁ P.W₂ (2 * n) 0 ⊔ pqPiece P.W₁ P.W₂ 0 (2 * n) ≤ _)
+    (sup_le_sup (P.s4_topWedge_le_pq₁ _) (P.s4_topWedge_le_pq₂ _) hxK)
+
+theorem s4_pow_mem_exterior {K M : Type*} [Field K] [AddCommGroup M] [Module K M]
+    (x : ExteriorAlgebra K M) (hx : x ∈ ⋀[K]^2 M) (j : ℕ) : x ^ j ∈ ⋀[K]^(2 * j) M := by
+  have := Submodule.pow_mem_pow _ hx j
+  show _ ∈ (LinearMap.range (ExteriorAlgebra.ι K : M →ₗ[K] _)) ^ (2 * j)
+  rwa [pow_mul]
+
+/-- `(Ξ_P^♯)^n` has `K`-weight `(n, n)`: it lies in `⋀^n W₁ ⊗ ⋀^n W₂`. -/
+theorem s4_pow_hClass_mem_pq (hW : IsCompl P.W₁ P.W₂) :
+    bcExt ℚ (Kd d) n (P.hClass hW ^ n) ∈ pqPiece P.W₁ P.W₂ n n := by
+  rw [← P.wedgeAB_eq P.d_pos hW]
+  refine ⟨?_, fun l hl => ?_⟩
+  · have := s4_bcExt_mem_pow ℚ (Kd d) n _ _ (s4_pow_mem_exterior _ (P.s4_hClass_mem hW) n)
+    rw [show n + n = 2 * n by ring]
+    exact this
+  · show ExteriorAlgebra.map (P.ηK hW l) (bcExt ℚ (Kd d) n (P.hClass hW ^ n)) =
+      (l ^ (n : ℤ) * Kd.σ d l ^ (n : ℤ)) • bcExt ℚ (Kd d) n (P.hClass hW ^ n)
+    rw [map_pow, map_pow, s4_map_ηK_hClass, smul_pow, zpow_natCast, zpow_natCast, mul_pow]
 
 /-- `(Ξ_P^♯)^n ∉ ĤW_P` (they have different `K`-weights). -/
 theorem s4_pow_hClass_not_mem (J : Module.End ℝ (H1 ℝ n)) (hP : Assumption2_4_1 P J) :
@@ -2608,7 +2520,7 @@ theorem s4_finrank_V10_V01_OmegaP (hW : IsCompl P.W₁ P.W₂) (I : Module.End �
   have hcs : IsComplexStructure I := hI.2.1
   have hc : I * P.fR hW = P.fR hW * I := P.s4_comm_OmegaP hW I hI
   obtain ⟨-, -, hE1, hE2, -⟩ := hI
-  have hfr4 := P.s4_finrank_four hW I hc hE1 hE2
+  have hfr4 := P.s4_finrank_four hW I hc hcs hE1
   have hV10 : Module.finrank ℂ (V10 n I) = 2 * n := by
     have hsplit := P.s4_V10_split hW I hc
     have hdisj : V10 n I ⊓ P.W₁ℂ ⊓ (V10 n I ⊓ P.W₂ℂ) = ⊥ := by
@@ -2632,12 +2544,20 @@ end KSecant
 assumption: Assumption 2.4.1.
 
 Proof as in the paper, degree by degree, via Lemma 2.2.7 (the invariants are `ℚ` in degree `0`, the
-powers `(Ξ_P^♯)^j` in degree `2j ≠ 2n`, `ĤW_P ⊕ ℚ (Ξ_P^♯)^n` in degree `2n`, the top degree, and
-`0` in odd degrees) and Lemma 4.0.3(1) (`ĤW_P` consists of Hodge classes). The paper's step "Hence the
-statement holds for classes in `⋀²(V_ℚ)^{Spin(V)_P}`" (a class is of type `(1,1)` iff `I(α) = α`)
-tacitly uses that these classes are fixed by `I`, i.e. by the real group; we justify it instead
-directly: the invariant `⋀²` is spanned by `Ξ_P^♯` (Lemma 2.2.7), and `Ξ_P^♯` is of type `(1,1)`
-for every `I ∈ Ω_P` since `I` is an isometry commuting with `f` (`KSecant.s4_hClass_hodge`). -/
+powers `(Ξ_P^♯)^j` in degree `2j ≠ 2n`, `ĤW_P ⊕ ℚ (Ξ_P^♯)^n` in degree `2n`, and `0` in odd
+degrees) and Lemma 4.0.3(1) (`ĤW_P` consists of Hodge classes). `Ξ_P^♯` and `ĤW_P` are
+`Spin(V)_P`-invariant by Lemma 2.2.4 (the image of `η` centralizes `ρ(Spin(V_ℚ)_P)`,
+`KSecant.s4_rhoExt_hClass`) and Lemma 2.2.7 (`KSecant.s4_hwPlane_le_invQ`). The top degree `4n` is
+handled by `s4_hodge_top` (every top-degree class is of type `(2n, 2n)`) rather than as
+`(Ξ_P^♯)^{2n}` (mechanics: `lemma2_2_7_note_pow` needs `n ≥ 2`).
+
+Departure from the paper (one step; reason 2): the paper's step "A class `α` in `⋀²(V_ℚ)` is of type
+`(1,1)` … if and only if `I(α) = α`. Hence the statement holds for classes in
+`⋀²(V_ℚ)^{Spin(V)_P}`" (TeX 1846–1847) needs that the invariants of the integral group `Spin(V)_P`
+are invariant under `Ĩ ∈ Spin(V_ℝ)_P`, i.e. the Zariski (Borel) density of `Spin(V)_P` in
+`Spin(V_ℝ)_P`, which Lean lacks. Here instead: the invariant `⋀²` is `ℚ Ξ_P^♯` (Lemma 2.2.7), and
+`Ξ_P^♯` is of type `(1,1)` for every `I ∈ Ω_P`, since `I` is an isometry commuting with `f`
+(`KSecant.s4_hClass_hodge`). -/
 theorem corollary4_0_4 (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n)) (hP : Assumption2_4_1 P J)
     (α : ExteriorAlgebra ℚ (V ℚ n)) (hα : ∀ g ∈ SpinZ n ⊓ P.spinPℚ, rhoExt ℚ n g α = α)
     (I : Module.End ℝ (V ℝ n)) (hI : I ∈ P.OmegaP hP.isCompl) : α ∈ hodgeRingV n I := by

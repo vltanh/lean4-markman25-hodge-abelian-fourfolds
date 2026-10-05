@@ -26,8 +26,9 @@ the invariant quartic `J` of (10.1.1), `WeilClasses.J`).
   (Remark 10.1.2(1), l. 9752, which prints `d ∈ F`; see `remark10_1_2_orbit`). **Assumed**
   (`IgusaProp3OrbitSubfield`).
 * `igusa_prop3_normalForm`, `igusa_prop3_normalForm_of_sq`: the normal form `1 + 2√-d [pt_X]` over
-  a field containing `√-d` (last paragraph of the proof of Prop. 3; proof of Lemma 10.2.1, l. 9792).
-  **Assumed** (`IgusaProp3NormalForm`).
+  a field `F ⊆ ℂ` containing `√-d` (last paragraph of the proof of Prop. 3; proof of Lemma 10.2.1,
+  l. 9792). **Assumed** (`IgusaProp3NormalForm`, for the fields embedded in `ℂ`, where the paper
+  quotes Prop. 3).
 * `igusa_lemma2`: the stabilizer of `1 + c [pt_X]`, `c ≠ 0`, maps under `ρ` onto the image of the
   embedding `e : SL(W₁) → SO(V_ℂ)` (10.1.2) for `W₁ = H¹(X̂)`, `W₂ = H¹(X)` (proof of
   Lemma 10.1.1, l. 9709) (proved).
@@ -1967,8 +1968,12 @@ end SCMask
 
 /-- **[Igusa, Prop. 3]**: the quartic `J` of (10.1.1) is `Spin(V_F)`-invariant on `S⁺_F`, for every
 field `F` of characteristic zero (Igusa works with the algebraic group; `J` has rational
-coefficients). Used throughout §10: in §10.1 (l. 9642), in the proof of Lemma 10.1.1 (reduction to
-one element per fiber of `J`) and in the proof of Lemma 10.2.1 (`J(g w) = J(w) = d`). -/
+coefficients). Stated in §10.1 (l. 9642). The proofs of §10 use it in two places: the proof of
+Lemma 10.2.1, l. 9795 (`J(h(α + 2β[pt_X])) = J(α + 2β[pt_X]) ≤ 0` for `h ∈ Spin(V_ℚ)`,
+`WeilClasses.s10_not_fixed_lines`), and the claim of Remark 10.1.2(2), l. 9755, that the even spinor
+variety lies in the singular locus of `V(J)` (`WeilClasses.s10_singular`). (The reduction to one
+element per fiber of `J` in the proof of Lemma 10.1.1, l. 9702, and the normal form in the proof of
+Lemma 10.2.1, l. 9792, go through `IgusaProp3NormalForm` instead.) -/
 theorem igusa_prop3_invariant (F : Type*) [Field F] [CharZero F] (g : Spin F 3) (x : S F 3)
     (hx : x ∈ Splus F 3) : J F (m F 3 (g : C F 3) x) = J F x := by
   -- the elements of `Spin(V_F)` preserving `J` form a subgroup, which contains the generators
@@ -2007,22 +2012,32 @@ theorem igusa_prop3_invariant (F : Type*) [Field F] [CharZero F] (g : Spin F 3) 
   exact hle (Subgroup.mem_top g) x
 
 /-- **[Igusa, Prop. 3], last paragraph of the proof** (the normal form), as a proposition: over
-every field `F` of characteristic zero, if `w ∈ S⁺_F` and `s ∈ F`, `s ≠ 0`, satisfy `s² = -J(w)`, then
-some `g ∈ Spin(V_F)` maps `w` to `1 + 2s [pt_X]` (note `J(1 + 2s [pt_X]) = -s² = J(w)`).
+every field `F` of characteristic zero embedded in `ℂ` (`[Algebra F ℂ]`), if `w ∈ S⁺_F` and `s ∈ F`,
+`s ≠ 0`, satisfy `s² = -J(w)`, then some `g ∈ Spin(V_F)` maps `w` to `1 + 2s [pt_X]` (note
+`J(1 + 2s [pt_X]) = -s² = J(w)`).
+
+Scope: the paper quotes [Igusa, Prop. 3] over `ℂ` (orbits, l. 9702), over `K = ℚ(√-d)` (the normal
+form, l. 9792) and over subfields of `ℂ` (orbits, l. 9752); the fields are therefore restricted to
+fields embedded in `ℂ`. The proofs use it over `ℂ` (`igusa_prop3_orbit_complex`), over `K`
+(`igusa_prop3_normalForm`) and over the algebraic closure of `ℚ` in `ℂ`
+(`WeilClasses.lemma10_1_1_rational`). On subfields of `ℂ` it follows from the quoted l. 9752
+(`IgusaProp3OrbitSubfield`), since `J(1 + 2s [pt_X]) = -s² = J(w) ≠ 0`
+(`WeilClasses.s10_normalForm_of_orbitSubfield`).
 
 **Assumed** (a named hypothesis of the results of §10 whose proofs use it; decided with the
 project owner): its proof needs Igusa's classification of the generic `Spin(12)`-orbit on the
 half-spin representation, which this project does not formalize (see `README.md`; estimated
 1500–3000 lines). The paper does not use §10 for its main theorems. -/
 def IgusaProp3NormalForm : Prop :=
-  ∀ (F : Type) [Field F] [CharZero F] (w : S F 3), w ∈ Splus F 3 → ∀ s : F, s ≠ 0 →
+  ∀ (F : Type) [Field F] [CharZero F] [Algebra F ℂ] (w : S F 3), w ∈ Splus F 3 → ∀ s : F, s ≠ 0 →
     s ^ 2 = -J F w → ∃ g : Spin F 3, m F 3 (g : C F 3) w = 1 + (2 * s) • pt F 3
 
 /-- **[Igusa, Prop. 3], last paragraph of the proof** (normal form), over any field `F` of
-characteristic zero, from the assumed `IgusaProp3NormalForm`. The special case used is
-`igusa_prop3_normalForm`. -/
+characteristic zero embedded in `ℂ`, from the assumed `IgusaProp3NormalForm`. The special case used
+in the proof of Lemma 10.2.1 is `igusa_prop3_normalForm`. -/
 theorem igusa_prop3_normalForm_of_sq (hIgusa : IgusaProp3NormalForm) (F : Type) [Field F]
-    [CharZero F] (w : S F 3) (hw : w ∈ Splus F 3) (s : F) (hs : s ≠ 0) (hsJ : s ^ 2 = -J F w) :
+    [CharZero F] [Algebra F ℂ] (w : S F 3) (hw : w ∈ Splus F 3) (s : F) (hs : s ≠ 0)
+    (hsJ : s ^ 2 = -J F w) :
     ∃ g : Spin F 3, m F 3 (g : C F 3) w = 1 + (2 * s) • pt F 3 :=
   hIgusa F w hw s hs hsJ
 

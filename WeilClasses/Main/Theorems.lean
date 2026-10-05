@@ -10,7 +10,10 @@ public import WeilClasses.AbelianVariety.Lemmas
 The statements of record (`Challenge.lean`) in the library: Theorem 1.4.1 (3), (4) for the explicit
 polarized abelian sixfold of Weil type `X × X̂` of `WeilClasses.Defs` (`fX`, `hX`, `JX`, `kappaX`),
 Theorem 1.5.1 and Corollary 1.6.1 for a system of algebraic classes `Z` satisfying the hypotheses of
-`WeilClasses.Defs`, and the compared theorems that check the definitions of the block.
+`WeilClasses.Defs`, and the compared theorems that check the definitions of the block (`fX_mul_self`,
+`JX_mem_weilDomain`, `discIs_XXhat` here; `Kd_Nm` and `rank_chE` are in `WeilClasses.Main.Intro`,
+where Theorem 1.4.1 uses them). Where a statement fixes no complex structure on `X`, the complex
+structure `J₀` of `WeilClasses.Secant.Defs` (`s8_J0`, for which `ThetaStd` is ample) is used.
 
 * Theorem 1.4.1 (3), (4) follow from the paper's versions for the secant `P_Θ`
   (`WeilClasses.Main.Intro`) through the bridges of `WeilClasses.Main.Compare` (`f = η(√-d)`,
@@ -21,7 +24,8 @@ Theorem 1.5.1 and Corollary 1.6.1 for a system of algebraic classes `Z` satisfyi
   near `X × X̂` (Theorem 1.4.1(4)), on the whole connected component (`VoisinLocus`), and on every
   polarized abelian sixfold of Weil type with discriminant `-1` (`VanGeemenModuli`,
   `PullbackClosed`).
-  For `d ∈ {1, 2}` the proof uses `ℚ(√-4d) = ℚ(√-d)`.
+  For `d ∈ {1, 2}` (a gap in the paper's proof, filled with its own footnote) the proof uses
+  `ℚ(√-4d) = ℚ(√-d)`.
 * Corollary 1.6.1 follows its proof (§1.6), with Lefschetz (1,1) and hard Lefschetz in the degrees
   other than `4`.
 -/
@@ -29,180 +33,6 @@ Theorem 1.5.1 and Corollary 1.6.1 for a system of algebraic classes `Z` satisfyi
 @[expose] public section
 
 namespace WeilClasses
-
-/-! ### A principally polarized abelian `n`-fold: the standard complex structure `J₀`
-
-`ThetaStd = Σ e_{2i} ∧ e_{2i+1}` is ample for `J₀ e_{2i} = -e_{2i+1}`, `J₀ e_{2i+1} = e_{2i}` (the
-torus `ℂⁿ/(ℤⁿ + iℤⁿ)`). The statements of Theorem 1.4.1(4) in the model and of the discriminant of
-`X × X̂` involve no complex structure; the paper's versions are stated for an `X` on which `Θ` is
-ample (the Jacobian of a genus-`3` curve in §8), and `J₀` provides one. -/
-
-section StdComplex
-
-variable (n : ℕ)
-
-/-- The involution `2i ↔ 2i + 1` of `Fin (2n)`. -/
-def main_swap (k : Fin (2 * n)) : Fin (2 * n) :=
-  ⟨if k.val % 2 = 0 then k.val + 1 else k.val - 1, by split_ifs <;> omega⟩
-
-/-- The sign `+1` on even, `-1` on odd indices. -/
-def main_sgn (k : Fin (2 * n)) : ℝ := if k.val % 2 = 0 then 1 else -1
-
-theorem main_swap_swap (k : Fin (2 * n)) : main_swap n (main_swap n k) = k := by
-  ext; simp only [main_swap]; split_ifs <;> omega
-
-theorem main_sgn_swap (k : Fin (2 * n)) : main_sgn n (main_swap n k) = -main_sgn n k := by
-  simp only [main_sgn, main_swap]; split_ifs <;> (try norm_num) <;> omega
-
-theorem main_swap_even (i : Fin n) :
-    main_swap n ⟨2 * i, by omega⟩ = ⟨2 * i + 1, by omega⟩ := by
-  ext; simp [main_swap]
-
-theorem main_swap_odd (i : Fin n) :
-    main_swap n ⟨2 * i + 1, by omega⟩ = ⟨2 * i, by omega⟩ := by
-  ext; simp only [main_swap]; split_ifs <;> omega
-
-theorem main_sgn_even (i : Fin n) : main_sgn n ⟨2 * i, by omega⟩ = 1 := by
-  simp [main_sgn]
-
-theorem main_sgn_odd (i : Fin n) : main_sgn n ⟨2 * i + 1, by omega⟩ = -1 := by
-  simp only [main_sgn]; split_ifs <;> first | rfl | omega
-
-theorem main_swap_eq_iff (k j : Fin (2 * n)) : main_swap n k = j ↔ k = main_swap n j := by
-  constructor
-  · rintro rfl; rw [main_swap_swap]
-  · rintro rfl; rw [main_swap_swap]
-
-/-- The matrix of the standard complex structure `J₀`. -/
-noncomputable def main_M0 : Matrix (Fin (2 * n)) (Fin (2 * n)) ℝ :=
-  fun k j => if j = main_swap n k then main_sgn n k else 0
-
-/-- The standard complex structure `J₀` of `H¹(X, ℝ) = ℝ^{2n}`: `J₀ e_{2i} = -e_{2i+1}`,
-`J₀ e_{2i+1} = e_{2i}`. -/
-noncomputable def main_J0 : Module.End ℝ (H1 ℝ n) := Matrix.toLin' (main_M0 n)
-
-theorem main_J0_apply (x : H1 ℝ n) (k : Fin (2 * n)) :
-    main_J0 n x k = main_sgn n k * x (main_swap n k) := by
-  simp [main_J0, main_M0, Matrix.mulVec, dotProduct]
-
-theorem main_J0_isComplex : IsComplexStructure (main_J0 n) := by
-  refine LinearMap.ext fun x => funext fun k => ?_
-  simp only [Module.End.mul_apply, main_J0_apply, main_swap_swap, main_sgn_swap]
-  simp only [LinearMap.neg_apply, Module.End.one_apply, Pi.neg_apply]
-  have : main_sgn n k * main_sgn n k = 1 := by
-    simp only [main_sgn]; split_ifs <;> norm_num
-  linear_combination (-(x k)) * this
-
-theorem main_complexify_J0_apply (v : H1 ℂ n) (k : Fin (2 * n)) :
-    complexifyH1 n (main_J0 n) v k = (main_sgn n k : ℂ) * v (main_swap n k) := by
-  simp only [complexifyH1, main_J0, LinearMap.toMatrix_eq_toMatrix', Matrix.toLin_eq_toLin',
-    LinearMap.toMatrix'_toLin', Matrix.toLin'_apply, Matrix.mulVec, dotProduct, Matrix.map_apply,
-    main_M0]
-  simp [apply_ite (fun r : ℝ => (r : ℂ)), ite_mul, Finset.sum_ite_eq']
-
-theorem main_J0_e_even (i : Fin n) :
-    main_J0 n (e ℝ n ⟨2 * i, by omega⟩) = -e ℝ n ⟨2 * i + 1, by omega⟩ := by
-  funext k
-  rw [main_J0_apply]
-  simp only [e, Pi.single_apply, main_swap_eq_iff, main_swap_even, Pi.neg_apply]
-  split_ifs with h
-  · subst h; rw [main_sgn_odd]; ring
-  · ring
-
-theorem main_J0_e_odd (i : Fin n) :
-    main_J0 n (e ℝ n ⟨2 * i + 1, by omega⟩) = e ℝ n ⟨2 * i, by omega⟩ := by
-  funext k
-  rw [main_J0_apply]
-  simp only [e, Pi.single_apply, main_swap_eq_iff, main_swap_odd]
-  split_ifs with h
-  · subst h; rw [main_sgn_even]; ring
-  · ring
-
-/-- `e_{2i} + i e_{2i+1} ∈ H^{1,0}` for `J₀`. -/
-theorem main_mem_H10_J0 (i : Fin n) :
-    e ℂ n ⟨2 * i, by omega⟩ + Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩ ∈ H10 n (main_J0 n) := by
-  rw [H10, Module.End.mem_eigenspace_iff]
-  funext k
-  rw [main_complexify_J0_apply]
-  simp only [e, Pi.add_apply, Pi.smul_apply, Pi.single_apply, smul_eq_mul, main_swap_eq_iff,
-    main_swap_even, main_swap_odd]
-  by_cases h1 : k = ⟨2 * i, by omega⟩
-  · subst h1
-    have : (⟨2 * i, by omega⟩ : Fin (2 * n)) ≠ ⟨2 * i + 1, by omega⟩ := by simp
-    simp [main_sgn_even, this]
-  · by_cases h2 : k = ⟨2 * i + 1, by omega⟩
-    · subst h2
-      simp [main_sgn_odd, h1]
-    · simp [h1, h2]
-
-/-- `e_{2i} - i e_{2i+1} ∈ H^{0,1}` for `J₀`. -/
-theorem main_mem_H01_J0 (i : Fin n) :
-    e ℂ n ⟨2 * i, by omega⟩ - Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩ ∈ H01 n (main_J0 n) := by
-  rw [H01, Module.End.mem_eigenspace_iff]
-  funext k
-  rw [main_complexify_J0_apply]
-  simp only [e, Pi.sub_apply, Pi.smul_apply, Pi.single_apply, smul_eq_mul, main_swap_eq_iff,
-    main_swap_even, main_swap_odd]
-  by_cases h1 : k = ⟨2 * i, by omega⟩
-  · subst h1
-    have : (⟨2 * i, by omega⟩ : Fin (2 * n)) ≠ ⟨2 * i + 1, by omega⟩ := by simp
-    simp [main_sgn_even, this]
-  · by_cases h2 : k = ⟨2 * i + 1, by omega⟩
-    · subst h2
-      simp [main_sgn_odd, h1]
-    · simp [h1, h2]
-
-/-- `ThetaStd` is ample for the standard complex structure `J₀`. -/
-theorem main_ample_J0 : IsAmple n (main_J0 n) (ThetaStd ℚ n) := by
-  refine ⟨(mem_hodgeClassesX_iff n _ 1 _).mpr ⟨ThetaStd_mem n, ?_⟩, fun a ha => ?_⟩
-  · rw [main_bcS_ThetaStd]
-    refine Submodule.sum_mem _ fun i _ => ?_
-    set v := e ℂ n ⟨2 * i, by omega⟩ + Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩
-    set w := e ℂ n ⟨2 * i, by omega⟩ - Complex.I • e ℂ n ⟨2 * i + 1, by omega⟩
-    have key : ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i, by omega⟩) *
-        ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i + 1, by omega⟩) =
-        (Complex.I / 2) • (ExteriorAlgebra.ι ℂ v * ExteriorAlgebra.ι ℂ w) := by
-      have hc : ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i + 1, by omega⟩) *
-          ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i, by omega⟩) =
-          -(ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i, by omega⟩) *
-            ExteriorAlgebra.ι ℂ (e ℂ n ⟨2 * i + 1, by omega⟩)) :=
-        eq_neg_of_add_eq_zero_left (ExteriorAlgebra.ι_add_mul_swap _ _)
-      simp only [v, w, map_add, map_sub, map_smul, add_mul, mul_sub,
-        smul_mul_assoc, mul_smul_comm, ExteriorAlgebra.ι_sq_zero, smul_zero, hc]
-      match_scalars
-      ring_nf
-      rw [Complex.I_sq]
-      ring
-    rw [key]
-    refine Submodule.smul_mem _ _ (Submodule.subset_span ⟨![v], ![w], ?_, ?_, ?_⟩)
-    · intro j; fin_cases j; exact main_mem_H10_J0 n i
-    · intro j; fin_cases j; exact main_mem_H01_J0 n i
-    · simp [ExteriorAlgebra.ιMulti_apply]
-  · have hsum : eval2 ℝ n (ThetaStd ℝ n) a (a ∘ₗ main_J0 n) =
-        ∑ i : Fin n, ((a (e ℝ n ⟨2 * i, by omega⟩)) ^ 2 +
-          (a (e ℝ n ⟨2 * i + 1, by omega⟩)) ^ 2) := by
-      rw [main_eval2_eq, ThetaStd, map_sum]
-      refine Finset.sum_congr rfl fun i _ => ?_
-      rw [← main_eval2_eq, main_eval2_ι_mul_ι]
-      simp only [LinearMap.comp_apply, main_J0_e_even, main_J0_e_odd, map_neg]
-      ring
-    rw [main_bcS_ThetaStd, hsum]
-    obtain ⟨k, hk⟩ : ∃ k, a (e ℝ n k) ≠ 0 := by
-      by_contra! h
-      exact ha ((Pi.basisFun ℝ (Fin (2 * n))).ext fun k => by simpa [e] using h k)
-    refine Finset.sum_pos' (fun i _ => by positivity)
-      ⟨⟨k.val / 2, by omega⟩, Finset.mem_univ _, ?_⟩
-    rcases Nat.mod_two_eq_zero_or_one k.val with h | h
-    · have hk' : k = ⟨2 * (k.val / 2), by omega⟩ := Fin.ext (by simp; omega)
-      rw [← hk']
-      have := sq_pos_of_ne_zero hk
-      positivity
-    · have hk' : k = ⟨2 * (k.val / 2) + 1, by omega⟩ := Fin.ext (by simp; omega)
-      rw [← hk']
-      have := sq_pos_of_ne_zero hk
-      positivity
-
-end StdComplex
 
 /-! ### Helpers for Theorem 1.5.1: transport of Hodge–Weil classes -/
 
@@ -382,21 +212,6 @@ theorem main_map_conj_map {n : ℕ} (T : Module.End ℚ (V ℚ n)) (y : ExtV ℚ
 
 /-! ### Compared theorems -/
 
-/-- `Nm(a + b√-d) = a² + d b²`. -/
-theorem Kd_Nm (d : ℚ) (hd : 0 < d) (a b : ℚ) :
-    Kd.Nm d ((a : Kd d) + (b : Kd d) * Kd.sqrtNeg d) = a ^ 2 + d * b ^ 2 := by
-  have h := Kd.coe_Nm hd ((a : Kd d) + (b : Kd d) * Kd.sqrtNeg d)
-  apply_fun ((↑) : ℚ → ℂ) using Rat.cast_injective
-  rw [h]
-  have hs : ((Real.sqrt (d : ℝ) : ℝ) : ℂ) ^ 2 = (d : ℂ) := by
-    rw [← Complex.ofReal_pow, Real.sq_sqrt (by exact_mod_cast hd.le)]
-    simp
-  simp only [Kd.sqrtNeg, WeilClasses.sqrtNeg, Subfield.coe_add, Subfield.coe_mul, map_add, map_mul,
-    SubfieldClass.coe_ratCast, map_ratCast, Complex.conj_I, Complex.conj_ofReal]
-  push_cast
-  linear_combination (b : ℂ) ^ 2 * hs -
-    (b : ℂ) ^ 2 * ((Real.sqrt (d : ℝ) : ℝ) : ℂ) ^ 2 * Complex.I_sq
-
 /-- `f² = -d` on `H¹(X × X̂, ℚ)` in the model. -/
 theorem fX_mul_self (n : ℕ) (d : ℚ) : fX n d * fX n d = -(d • 1) := by
   have h := fV_mul_self n d
@@ -440,8 +255,8 @@ theorem discIs_XXhat (n : ℕ) (d : ℚ) (hd : 0 < d) (A : AbVar (2 * n)) (X : P
     refine ⟨Fin.elim0, linearIndependent_empty_type, 1, one_ne_zero, ?_⟩
     simp [Kd.Nm]
   · -- Lemma 3.1.3 for `P_Θ`, `Θ = ThetaStd` (ample for `J₀`)
-    obtain ⟨b, hb, q, ⟨z, hz, rfl⟩, hdet⟩ := lemma3_1_3 hd hn (main_J0 n) (main_J0_isComplex n)
-      (ThetaStd ℚ n) (main_ample_J0 n)
+    obtain ⟨b, hb, q, ⟨z, hz, rfl⟩, hdet⟩ := lemma3_1_3 hd hn (s8_J0 n) (s8_J0_isComplex n)
+      (ThetaStd ℚ n) (s8_ample_J0 n)
     set P := PStd n d hd hn
     set hW := PStd_isCompl n d hd hn
     have hf : P.fη hW = fV n d := fη_PStd n d hd hn
@@ -501,11 +316,6 @@ theorem discIs_XXhat (n : ℕ) (d : ℚ) (hd : 0 < d) (A : AbVar (2 * n)) (X : P
       rw [pow_mul]
       ring
 
-/-- The sheaf `E` of Theorem 1.4.1(2) has rank `8d`. -/
-theorem rank_chE (d : ℚ) : ExteriorAlgebra.algebraMapInv (chE d) = 8 * d := by
-  rw [chE, tauExt, main_algebraMapInv_reverse]
-  exact lemma8_3_1_rank_eq d
-
 /-! ### Theorem 1.4.1 (3), (4) in the model -/
 
 /-- **Theorem 1.4.1 (3)** (`main-theorem-introduction`), in the model: every graded summand of
@@ -548,7 +358,11 @@ theorem main_kappaX_mem_hodge (d : ℕ) (hd : 3 ≤ d) (J : Module.End ℝ (H1 �
   exact main_projDeg_mem_hodgeClassesV (main_kappa_chE_hodge hJ hΘ hd3 I hI) k
 
 /-- **Theorem 1.4.1 (4)** (`main-theorem-introduction`), in the model: the `η(K)`-translates of
-`κ₃(E)`, together with `h³`, span the `3`-dimensional subspace `ℚ h³ ⊕ ĤW` of `H⁶(X × X̂, ℚ)`. -/
+`κ₃(E)`, together with `h³`, span the `3`-dimensional subspace `ℚ h³ ⊕ ĤW` of `H⁶(X × X̂, ℚ)`.
+
+Reading: the model statement fixes no complex structure on `X`, and its conclusion does not depend
+on one; it is the paper's version (`theorem1_4_1_4`, stated for an `X` on which `Θ` is ample)
+applied to the standard principally polarized threefold `(ℝ⁶, J₀)` (`s8_J0`, `s8_ample_J0`). -/
 theorem theorem1_4_1_4_model (d : ℕ) (hd : 3 ≤ d) (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 3)))
     (hη : η (Kd.sqrtNeg d) = fX 3 d) :
     Submodule.span ℚ
@@ -557,11 +371,9 @@ theorem theorem1_4_1_4_model (d : ℕ) (hd : 3 ≤ d) (η : Kd d →+* Module.En
     Module.finrank ℚ ↥((ℚ ∙ (hX 3 d ^ 3)) ⊔ HWof η) = 3 := by
   have hd3 : (3 : ℚ) ≤ d := by exact_mod_cast hd
   have hd0 : (0 : ℚ) < d := by linarith
-  -- Departure from the paper: the model statement fixes no complex structure on `X`, and the
-  -- conclusion does not depend on one; we apply the paper's version (`theorem1_4_1_4`) to the
-  -- standard principally polarized threefold `(ℝ⁶, J₀)`, for which `Θ = ThetaStd` is ample.
-  have hJ₀ := main_J0_isComplex 3
-  have hΘ := main_ample_J0 3
+  -- the paper's version for `(ℝ⁶, J₀)`, on which `Θ = ThetaStd` is ample (see the docstring)
+  have hJ₀ := s8_J0_isComplex 3
+  have hΘ := s8_ample_J0 3
   set P := PJac (d : ℚ) hΘ hd0 with hP
   set hW := PJac_isCompl (d : ℚ) hΘ hd0
   set Φ := (ExteriorAlgebra.map (coordV ℚ 3).toLinearMap).toLinearMap with hΦ
@@ -685,17 +497,21 @@ theorem main_theorem1_5_1_of_three_le (Z : CycleClasses) [PullbackClosed Z] [Sub
 
 /-- **Theorem 1.5.1** (`thm-algebraicity`). Let `d` be a positive integer and `K = ℚ(√-d)`. The
 Hodge–Weil classes of polarized abelian sixfolds of Weil type with complex multiplication by `K`
-and with discriminant `-1` are algebraic. -/
+and with discriminant `-1` are algebraic.
+
+Gap in the paper (filled): the proof (§9.3, TeX lines 6841–6849) uses Theorem 1.4.1, which assumes
+`d ≥ 3` (TeX lines 497, 500), while the theorem claims every `d > 0`; the cases `d = 1, 2` are not
+treated. They are filled with the paper's own footnote (TeX line 563: "replace it with `4d` and note
+that `ℚ(√-4d) = ℚ(√-d)`"): a polarized abelian sixfold of Weil type for `ℚ(√-d)` is one for
+`ℚ(√-4d)`, `4d ≥ 3`, with the same Hodge–Weil classes and discriminant (`main_exists_four_mul`), to
+which the case `d ≥ 3` (`main_theorem1_5_1_of_three_le`) applies. -/
 theorem theorem1_5_1 (Z : CycleClasses) [PullbackClosed Z] [SubalgebraClosed Z]
     [LefschetzOneOne Z] [VoisinLocus Z] [VanGeemenModuli] [SecantSheafDeformation Z]
     (d : ℕ) (hd : 0 < d) (A : AbVar (2 * 3)) (X : PolarizedWeilType A d) (hdisc : X.DiscIs (-1)) :
     X.HW ≤ Z.alg (2 * 3) A.J := by
   by_cases hd3 : 3 ≤ d
   · exact main_theorem1_5_1_of_three_le Z d hd3 A X hdisc
-  · -- Departure from the paper: the construction of §§8–9 needs `d ≥ 3` (Theorem 1.4.1); for
-    -- `d ∈ {1, 2}` we use `ℚ(√-4d) = ℚ(√-d)` (the footnote in §1.5, used there for the parity of
-    -- `d`) and replace `d` by `4d ≥ 3`: the same abelian variety is of Weil type for `4d`, with the
-    -- same Hodge–Weil classes and discriminant (`main_exists_four_mul`).
+  · -- `d ∈ {1, 2}`: replace `d` by `4d ≥ 3` (`ℚ(√-4d) = ℚ(√-d)`, see the docstring)
     obtain ⟨X', hHW, hdisc'⟩ := main_exists_four_mul (d' := ((4 * d : ℕ) : ℚ))
       (by exact_mod_cast hd) (by push_cast; ring) X hdisc
     rw [← hHW]

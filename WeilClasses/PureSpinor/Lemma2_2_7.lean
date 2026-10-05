@@ -3,7 +3,6 @@ module
 public import WeilClasses.PureSpinor.Stabilizer
 public import WeilClasses.PureSpinor.Lemma2_2_4
 public import WeilClasses.PureSpinor.Lemma2_2_6
-import WeilClasses.External.Chevalley.Sec3
 
 /-!
 # Weight decompositions of `⋀• V` and Lemma 2.2.7 (paper §2.2, end)
@@ -65,6 +64,12 @@ The proofs use the second route (gap filled per `notes/proof-plans.md`):
    `(a, b) ∈ {(2n, 0), (0, 2n)}` (`KSecant.s22b_inv_decomp`). The same operators give the
    irreducibility of `⋀^k Wᵢ`.
 3. Galois descent gives the rational dimensions (`s22b_finrank_descent`).
+
+The dimension counts therefore do not go through the irreducibility of `⋀^k Wᵢ` (a gap of the paper,
+filled as above; documented at `lemma2_2_7_odd`). The Hodge types (`lemma2_2_7_hodge`) are read off
+one element `g` of the complexified circle: `⋀^{2n} Wᵢ` has type `(n, n)` by Lemma 2.2.6, as in the
+paper, and the lines of `ω^j` are fixed by `g` because `ρ(g)` is an isometry preserving `W_{1,ℂ}`,
+`W_{2,ℂ}` (a documented departure, at `lemma2_2_7_hodge`).
 -/
 
 @[expose] public section
@@ -984,20 +989,42 @@ theorem s22b_map_top_sub' {K M : Type*} [Field K] [AddCommGroup M] [Module K M]
   | add x y _ _ hx hy => rw [map_add, hx, hy, smul_add]
   | smul c x _ hx => rw [map_smul, hx, smul_comm]
 
-/-- Chevalley: a spin element fixing an even pure spinor acts with determinant `1` on its
-annihilator. -/
-theorem s22b_det_one (hn : 0 < n) (g : Spin F n) {u : S F n} (hu : IsEvenPureSpinor F n u)
-    (hfix : m F n (g : C F n) u = u) :
-    LinearMap.det ((rho F n g : V F n →ₗ[F] V F n).restrict
-      (fun _ hv => s22b_rho_mem_ann_of_fix g hfix hv)) = 1 := by
-  obtain ⟨c, hc, hc2⟩ := chevalley_III_3_2_III_4_5 F n u hu g
-    (fun _ hv => s22b_rho_mem_ann_of_fix g hfix hv)
-  have hu0 : u ≠ 0 := hu.ne_zero hn
-  have hc1 : c = 1 := by
-    rw [hfix] at hc
-    have : (1 - c) • u = 0 := by rw [sub_smul, one_smul, ← hc, sub_self]
-    exact (sub_eq_zero.mp ((smul_eq_zero.mp this).resolve_right hu0)).symm
-  rw [← hc2, hc1, one_pow]
+/-- `det(T|_W) = (1/2)^n 2^n = 1` when `W = (W ∩ A) ⊕ (W ∩ B)` with both summands of dimension `n`
+and `T` acts by `1/2` on `A` and by `2` on `B`. For `W = W_{i,ℂ}`, `A = V^{1,0}`, `B = V^{0,1}` this
+is the type `(n, n)` of `⋀^{2n} W_{i,ℂ}` given by Lemma 2.2.6 (TeX "`⋀^{n,n}_{2n,0} V = ⋀^{2n} W₁`"). -/
+theorem s22b_det_restrict_split {A B W : Submodule ℂ (V ℂ n)} (hAB : IsCompl A B)
+    (hW : W = W ⊓ A ⊔ W ⊓ B) (hA : Module.finrank ℂ (W ⊓ A : Submodule ℂ (V ℂ n)) = n)
+    (hB : Module.finrank ℂ (W ⊓ B : Submodule ℂ (V ℂ n)) = n) (T : V ℂ n →ₗ[ℂ] V ℂ n)
+    (hT : ∀ v ∈ W, T v ∈ W) (hTA : ∀ v ∈ A, T v = (1 / 2 : ℂ) • v)
+    (hTB : ∀ v ∈ B, T v = (2 : ℂ) • v) :
+    LinearMap.det (T.restrict hT) = 1 := by
+  set A' := A.comap W.subtype
+  set B' := B.comap W.subtype
+  have hAB' : IsCompl A' B' := by
+    constructor
+    · rw [Submodule.disjoint_def]
+      intro x hx1 hx2
+      exact Subtype.ext ((Submodule.disjoint_def.mp hAB.disjoint) _ hx1 hx2)
+    · rw [codisjoint_iff, eq_top_iff]
+      intro x _
+      have hx : (x : V ℂ n) ∈ W ⊓ A ⊔ W ⊓ B := by rw [← hW]; exact x.2
+      obtain ⟨a, ha, b, hb, hab⟩ := Submodule.mem_sup.mp hx
+      exact Submodule.mem_sup.mpr ⟨⟨a, ha.1⟩, ha.2, ⟨b, hb.1⟩, hb.2, Subtype.ext hab⟩
+  have hdet := s22b_det_of_isCompl hAB' (T.restrict hT) (1 / 2) 2
+    (fun x hx => Subtype.ext (by rw [LinearMap.restrict_apply]; exact hTA _ hx))
+    (fun x hx => Subtype.ext (by rw [LinearMap.restrict_apply]; exact hTB _ hx))
+  have hfinA : Module.finrank ℂ A' = n := by
+    have : A' = (W ⊓ A).comap W.subtype := by
+      rw [Submodule.comap_inf, Submodule.comap_subtype_self, top_inf_eq]
+    rw [this]
+    exact (LinearEquiv.finrank_eq (Submodule.comapSubtypeEquivOfLe inf_le_left)).trans hA
+  have hfinB : Module.finrank ℂ B' = n := by
+    have : B' = (W ⊓ B).comap W.subtype := by
+      rw [Submodule.comap_inf, Submodule.comap_subtype_self, top_inf_eq]
+    rw [this]
+    exact (LinearEquiv.finrank_eq (Submodule.comapSubtypeEquivOfLe inf_le_left)).trans hB
+  rw [hdet, hfinA, hfinB, ← mul_pow]
+  norm_num
 
 end S22bHodgeGeneric
 
@@ -3375,9 +3402,15 @@ theorem s22b_rhoExt_bcExt_omega (hW : IsCompl P.W₁ P.W₂) (g : Spin ℂ n)
   simp only [map_mul, s22b_bcExt_ι, rhoExt, map_sum, ExteriorAlgebra.map_apply_ι]
   exact key
 
-/-- `⋀^{2n} W₁` (base-changed) is fixed by the torus element (`det = 1`, Chevalley). -/
-theorem s22b_rhoExt_bcExt_eL (hW : IsCompl P.W₁ P.W₂) (g : Spin ℂ n)
-    (hfix : ∀ x ∈ P.PK, m ℂ n (g : C ℂ n) (bcS (Kd d) ℂ n x) = bcS (Kd d) ℂ n x) :
+/-- `⋀^{2n} W₁` (base-changed) is fixed by the torus element: it is the type `(n, n)` of
+`⋀^{2n} W_{1,ℂ}`, from Lemma 2.2.6 (`W_{1,ℂ} = W₁^{1,0} ⊕ W₁^{0,1}`, both of dimension `n`:
+`lemma2_2_6_decomp`, `lemma2_2_6`, `lemma2_2_6_V01`), so `det(ρ(g)|_{W_{1,ℂ}}) = (1/2)^n 2^n = 1`. -/
+theorem s22b_rhoExt_bcExt_eL (hd : 0 < d) (hP : ¬ P.IsIsotropic) (hW : IsCompl P.W₁ P.W₂)
+    (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hPJ : P.Pℚ ≤ hodgeRingX n J)
+    (g : Spin ℂ n)
+    (hfix : ∀ x ∈ P.PK, m ℂ n (g : C ℂ n) (bcS (Kd d) ℂ n x) = bcS (Kd d) ℂ n x)
+    (h10 : ∀ v ∈ V10 n (productStructure n J), rho ℂ n g v = (1 / 2 : ℂ) • v)
+    (h01 : ∀ v ∈ V01 n (productStructure n J), rho ℂ n g v = (2 : ℂ) • v) :
     rhoExt ℂ n g (bcExt (Kd d) ℂ n ((P.s22b_bV hW).ExteriorAlgebra s22b_allL)) =
       bcExt (Kd d) ℂ n ((P.s22b_bV hW).ExteriorAlgebra s22b_allL) := by
   have hn := P.s22b_n_pos
@@ -3387,12 +3420,23 @@ theorem s22b_rhoExt_bcExt_eL (hW : IsCompl P.W₁ P.W₂) (g : Spin ℂ n)
   rw [show Submodule.span ℂ (bcV (Kd d) ℂ n '' (P.W₁ : Set (V (Kd d) n))) = P.W₁ℂ from rfl,
     show Submodule.span ℂ (bcV (Kd d) ℂ n '' (P.W₂ : Set (V (Kd d) n))) = P.W₂ℂ from rfl,
     P.s22b_W₁ℂ_eq hn] at hmem
+  -- Lemma 2.2.6: `W_{1,ℂ} = W₁^{1,0} ⊕ W₁^{0,1}`, both summands of dimension `n`.
+  have hsplit := (lemma2_2_6_decomp P hd hP J hJ hPJ).1
+  have h1 := (lemma2_2_6 P hd hP J hJ hPJ).1
+  have h2 := (lemma2_2_6_V01 P hd hP J hJ hPJ).1
+  rw [P.s22b_W₁ℂ_eq hn] at hsplit h1 h2
   show ExteriorAlgebra.map _ _ = _
   rw [s22b_map_top_sub _ _ hpure.2.2 _ (fun _ hv => s22b_rho_mem_ann_of_fix g hfix₁ hv) hmem,
-    s22b_det_one hn g hpure hfix₁, one_smul]
+    s22b_det_restrict_split (s22b_isCompl_V10 J hJ) hsplit h1 h2 _ _ h10 h01, one_smul]
 
-theorem s22b_rhoExt_bcExt_eR (hW : IsCompl P.W₁ P.W₂) (g : Spin ℂ n)
-    (hfix : ∀ x ∈ P.PK, m ℂ n (g : C ℂ n) (bcS (Kd d) ℂ n x) = bcS (Kd d) ℂ n x) :
+/-- `⋀^{2n} W₂` (base-changed) is fixed by the torus element (Lemma 2.2.6, as for
+`s22b_rhoExt_bcExt_eL`). -/
+theorem s22b_rhoExt_bcExt_eR (hd : 0 < d) (hP : ¬ P.IsIsotropic) (hW : IsCompl P.W₁ P.W₂)
+    (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hPJ : P.Pℚ ≤ hodgeRingX n J)
+    (g : Spin ℂ n)
+    (hfix : ∀ x ∈ P.PK, m ℂ n (g : C ℂ n) (bcS (Kd d) ℂ n x) = bcS (Kd d) ℂ n x)
+    (h10 : ∀ v ∈ V10 n (productStructure n J), rho ℂ n g v = (1 / 2 : ℂ) • v)
+    (h01 : ∀ v ∈ V01 n (productStructure n J), rho ℂ n g v = (2 : ℂ) • v) :
     rhoExt ℂ n g (bcExt (Kd d) ℂ n ((P.s22b_bV hW).ExteriorAlgebra s22b_allR)) =
       bcExt (Kd d) ℂ n ((P.s22b_bV hW).ExteriorAlgebra s22b_allR) := by
   have hn := P.s22b_n_pos
@@ -3402,13 +3446,22 @@ theorem s22b_rhoExt_bcExt_eR (hW : IsCompl P.W₁ P.W₂) (g : Spin ℂ n)
   rw [show Submodule.span ℂ (bcV (Kd d) ℂ n '' (P.W₁ : Set (V (Kd d) n))) = P.W₁ℂ from rfl,
     show Submodule.span ℂ (bcV (Kd d) ℂ n '' (P.W₂ : Set (V (Kd d) n))) = P.W₂ℂ from rfl,
     P.s22b_W₂ℂ_eq hn] at hmem
+  -- Lemma 2.2.6: `W_{2,ℂ} = W₂^{1,0} ⊕ W₂^{0,1}`, both summands of dimension `n`.
+  have hsplit := (lemma2_2_6_decomp P hd hP J hJ hPJ).2
+  have h1 := (lemma2_2_6 P hd hP J hJ hPJ).2
+  have h2 := (lemma2_2_6_V01 P hd hP J hJ hPJ).2
+  rw [P.s22b_W₂ℂ_eq hn] at hsplit h1 h2
   show ExteriorAlgebra.map _ _ = _
   rw [s22b_map_top_sub' _ _ hpure.2.2 _ (fun _ hv => s22b_rho_mem_ann_of_fix g hfix₂ hv) hmem,
-    s22b_det_one hn g hpure hfix₂, one_smul]
+    s22b_det_restrict_split (s22b_isCompl_V10 J hJ) hsplit h1 h2 _ _ h10 h01, one_smul]
 
 /-- Every `Spin(V)_P`-invariant of `⋀• V_K`, base-changed to `ℂ`, is fixed by the torus element. -/
-theorem s22b_rhoExt_bcExt_inv (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) (g : Spin ℂ n)
+theorem s22b_rhoExt_bcExt_inv (hd : 0 < d) (hP : ¬ P.IsIsotropic) (hW : IsCompl P.W₁ P.W₂)
+    (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hPJ : P.Pℚ ≤ hodgeRingX n J)
+    (g : Spin ℂ n)
     (hfix : ∀ x ∈ P.PK, m ℂ n (g : C ℂ n) (bcS (Kd d) ℂ n x) = bcS (Kd d) ℂ n x)
+    (h10 : ∀ v ∈ V10 n (productStructure n J), rho ℂ n g v = (1 / 2 : ℂ) • v)
+    (h01 : ∀ v ∈ V01 n (productStructure n J), rho ℂ n g v = (2 : ℂ) • v)
     (z : ExteriorAlgebra (Kd d) (V (Kd d) n))
     (hz : ∀ g' ∈ P.spinPZ, rhoExt (Kd d) n (bcSpin ℚ (Kd d) n g') z = z) :
     rhoExt ℂ n g (bcExt (Kd d) ℂ n z) = bcExt (Kd d) ℂ n z := by
@@ -3417,8 +3470,9 @@ theorem s22b_rhoExt_bcExt_inv (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) (g : Spi
     rw [← algebraMap_smul ℂ c y, map_smul, algebraMap_smul]
   obtain ⟨cL, cR, c, rfl⟩ := s22b_inv_decomp hd hW z hz
   rw [s22b_combo]
-  simp only [map_add, map_sum, map_smul, hsmul, map_pow, P.s22b_rhoExt_bcExt_eL hW g hfix,
-    P.s22b_rhoExt_bcExt_eR hW g hfix, P.s22b_rhoExt_bcExt_omega hW g hfix]
+  simp only [map_add, map_sum, map_smul, hsmul, map_pow,
+    P.s22b_rhoExt_bcExt_eL hd hP hW J hJ hPJ g hfix h10 h01,
+    P.s22b_rhoExt_bcExt_eR hd hP hW J hJ hPJ g hfix h10 h01, P.s22b_rhoExt_bcExt_omega hW g hfix]
 
 end S22bHodgeB
 
@@ -3431,13 +3485,22 @@ conclusion the proof uses), `P` is contained in the Hodge ring of `X` for the co
 of `X`; without this the statement is false. Group: the integral `Spin(V)_P` (see the module
 docstring).
 
-Proof: the paper says the invariant lines are `U(1)`-invariant and defined over `ℚ`, hence trivial
-`U(1)`-characters. Here the `K`-invariants are spanned by `ω^j`, and also by `⋀^{2n} W₁` and
-`⋀^{2n} W₂` when `j = n`. All of them are fixed by the element `g` of the complexified circle used
-in Lemma 2.2.6 (`KSecant.s22b_torus_P`). For `ω`, this holds because `ρ(g)` is an isometry
-preserving `W₁` and `W₂`. For `⋀^{2n} W_i`, it holds because `det(ρ(g)|_{W_i}) = 1`, the step of
-Lemma 2.2.6 that gives `dim W_i^{1,0} = dim W_i^{0,1}`. Fixed vectors of `g` in degree `2j` have
-type `(j, j)`. -/
+Proof: the `K`-invariants are spanned by `ω^j` (`ω` the pairing element of `W₁ ⊗ W₂`), and also
+by `⋀^{2n} W₁` and `⋀^{2n} W₂` when `j = n` (`KSecant.s22b_inv_decomp`). Hodge types are read off one
+element `g` of the complexified circle (`KSecant.s22b_torus_P`: `g` fixes `P_K`, and `ρ(g)` acts by
+`1/2` on `V^{1,0}` and by `2` on `V^{0,1}`): its fixed vectors in degree `2j` have type `(j, j)`
+(`s22b_mem_pq_of_fixed`). As in the paper ("`⋀^{n,n}_{2n,0} V = ⋀^{2n} W₁`"), `⋀^{2n} W_i` has type
+`(n, n)` by Lemma 2.2.6: `W_{i,ℂ} = W_i^{1,0} ⊕ W_i^{0,1}` with both summands of dimension `n`
+(`lemma2_2_6_decomp`, `lemma2_2_6`, `lemma2_2_6_V01`), so `det(ρ(g)|_{W_{i,ℂ}}) = (1/2)^n 2^n = 1`
+and `g` fixes `⋀^{2n} W_i` (`KSecant.s22b_rhoExt_bcExt_eL`, `KSecant.s22b_rhoExt_bcExt_eR`).
+
+Departure from the paper (reasons 3 and 1), for the lines of `ω^j`: the paper says that the line
+`[(⋀^j W₁) ⊗ (⋀^j W₂)]^{Spin(V)_P}` is `U(1)`-invariant and defined over `ℚ`, hence the trivial
+`U(1)`-character. Its `U(1)`-invariance is not justified (reason 1), and the rationality argument
+(complex conjugation exchanges the characters `z^k` and `z^{-k}`) does not apply to the non-real
+element `g` through which the circle action is used (reason 3). Here `g` fixes `ω` directly: `g`
+fixes `λ₁, λ₂ ∈ P_K`, so `ρ(g)` preserves `W_{1,ℂ}` and `W_{2,ℂ}`, and `ρ(g)` is an isometry, so it
+preserves the pairing element `ω` (`KSecant.s22b_rhoExt_bcExt_omega`). -/
 theorem _root_.WeilClasses.lemma2_2_7_hodge (hd : 0 < d) (hP : ¬ P.IsIsotropic)
     (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) (hPJ : P.Pℚ ≤ hodgeRingX n J)
     (j : ℕ) :
@@ -3451,10 +3514,22 @@ theorem _root_.WeilClasses.lemma2_2_7_hodge (hd : 0 < d) (hP : ¬ P.IsIsotropic)
   refine ⟨(Submodule.mem_inf.mp hα).1, ?_⟩
   rw [← s22b_bcExt_trans]
   exact s22b_mem_pq_of_fixed (s22b_isCompl_V10 J hJ) (rho ℂ n g : V ℂ n →ₗ[ℂ] V ℂ n) h10 h01 j
-    (s22b_bcExt_mem_exteriorPower' hα'.1) (P.s22b_rhoExt_bcExt_inv hd hW g hfix _ hα'.2)
+    (s22b_bcExt_mem_exteriorPower' hα'.1)
+    (P.s22b_rhoExt_bcExt_inv hd hP hW J hJ hPJ g hfix h10 h01 _ hα'.2)
 
 /-- **Lemma 2.2.7** (`lemma-Spin-V-P-invariant-classes-are-Hodge`), dimensions, `k` odd:
-`dim (⋀^k V_ℚ)^{Spin(V)_P} = 0`. -/
+`dim (⋀^k V_ℚ)^{Spin(V)_P} = 0`.
+
+Gap in the paper (filled): the paper derives the dimensions from "`⋀^k Wᵢ`, `i = 1, 2`, are dual
+irreducible `Spin(V)_P` representation[s]", with "Hence"; this also uses, without proof, absolute
+irreducibility (Schur's lemma) and `⋀^a W₁ ≇ ⋀^b W₁` for `a ≠ b`, `{a, b} ≠ {0, 2n}`, besides the
+irreducibility itself. Here the invariants are computed without irreducibility: the integral
+unitary transvections of `Spin(V)_P` give the action of `sl(W₁)` (`KSecant.s22b_Der_Dop_mem`), whose
+torus and root operators (`KSecant.s22b_H_mem`, `KSecant.s22b_root_mem`) cut the invariants of
+`⋀^a W₁ ⊗ ⋀^b W₂` down to the line of `ω^a` (`a = b`) and the lines `⋀^{2n} W₁`, `⋀^{2n} W₂`
+(`KSecant.s22b_inv_decomp`); Galois descent gives the rational dimensions
+(`KSecant.s22b_finrank_invQ`). The irreducibility (`lemma2_2_7_irreducible₁/₂`) is proved separately
+and not used. -/
 theorem _root_.WeilClasses.lemma2_2_7_odd (hd : 0 < d) (hP : ¬ P.IsIsotropic) (k : ℕ)
     (hk : Odd k) :
     Module.finrank ℚ (P.invQ k) = 0 := by
@@ -3462,7 +3537,10 @@ theorem _root_.WeilClasses.lemma2_2_7_odd (hd : 0 < d) (hP : ¬ P.IsIsotropic) (
   rw [KSecant.s22b_finrank_invQ hd, KSecant.s22b_invK_odd hd hW k hk, finrank_bot]
 
 /-- **Lemma 2.2.7** (`lemma-Spin-V-P-invariant-classes-are-Hodge`), dimensions, `k` even:
-`dim (⋀^k V_ℚ)^{Spin(V)_P} = 1` if `0 ≤ k ≤ 4n`, `k` even, `k ≠ 2n`. -/
+`dim (⋀^k V_ℚ)^{Spin(V)_P} = 1` if `0 ≤ k ≤ 4n`, `k` even, `k ≠ 2n`.
+
+Gap in the paper (filled), as for `lemma2_2_7_odd`: the invariants are computed with the `sl(W₁)`
+weight operators (`KSecant.s22b_invK_eq_span`: the line of `ω^{k/2}`), not through irreducibility. -/
 theorem _root_.WeilClasses.lemma2_2_7_even (hd : 0 < d) (hP : ¬ P.IsIsotropic) (k : ℕ)
     (hk : Even k) (hk4 : k ≤ 4 * n) (hk2 : k ≠ 2 * n) :
     Module.finrank ℚ (P.invQ k) = 1 := by
@@ -3473,7 +3551,11 @@ theorem _root_.WeilClasses.lemma2_2_7_even (hd : 0 < d) (hP : ¬ P.IsIsotropic) 
     finrank_span_singleton (KSecant.s22b_omega_pow_ne_zero hW a (by omega))]
 
 /-- **Lemma 2.2.7** (`lemma-Spin-V-P-invariant-classes-are-Hodge`), dimensions, middle degree:
-`dim (⋀^{2n} V_ℚ)^{Spin(V)_P} = 3`. -/
+`dim (⋀^{2n} V_ℚ)^{Spin(V)_P} = 3`.
+
+Gap in the paper (filled), as for `lemma2_2_7_odd`: the invariants (`ω^n`, `⋀^{2n} W₁`, `⋀^{2n} W₂`)
+are computed with the `sl(W₁)` weight operators (`KSecant.s22b_finrank_invK_middle`), not through
+irreducibility. -/
 theorem _root_.WeilClasses.lemma2_2_7_middle (hd : 0 < d) (hP : ¬ P.IsIsotropic) :
     Module.finrank ℚ (P.invQ (2 * n)) = 3 := by
   rw [KSecant.s22b_finrank_invQ hd,
@@ -3481,7 +3563,10 @@ theorem _root_.WeilClasses.lemma2_2_7_middle (hd : 0 < d) (hP : ¬ P.IsIsotropic
 
 /-- **Lemma 2.2.7** (`lemma-Spin-V-P-invariant-classes-are-Hodge`), third sentence, the sum:
 `(⋀^{2n} V_K)^{Spin(V)_P} = ⋀^{2n} W₁ ⊕ ⋀^{2n} W₂ ⊕ L`, where the trivial line is
-`L = (⋀^n W₁ ⊗ ⋀^n W₂)^{Spin(V)_P}` (proof of Lemma 2.2.7). -/
+`L = (⋀^n W₁ ⊗ ⋀^n W₂)^{Spin(V)_P}` (proof of Lemma 2.2.7).
+
+Gap in the paper (filled), as for `lemma2_2_7_odd`: the invariants are computed with the `sl(W₁)`
+weight operators (`KSecant.s22b_invK_middle`), not through irreducibility. -/
 theorem _root_.WeilClasses.lemma2_2_7_K_eq (hd : 0 < d) (hP : ¬ P.IsIsotropic) :
     P.invK (2 * n) =
       pqPiece P.W₁ P.W₂ (2 * n) 0 ⊔ pqPiece P.W₁ P.W₂ 0 (2 * n) ⊔
@@ -3491,7 +3576,10 @@ theorem _root_.WeilClasses.lemma2_2_7_K_eq (hd : 0 < d) (hP : ¬ P.IsIsotropic) 
   exact KSecant.s22b_invK_middle hd hW
 
 /-- **Lemma 2.2.7** (`lemma-Spin-V-P-invariant-classes-are-Hodge`), third sentence: the sum
-`⋀^{2n} W₁ + ⋀^{2n} W₂ + L` is direct. -/
+`⋀^{2n} W₁ + ⋀^{2n} W₂ + L` is direct.
+
+Proof: `⋀^{2n} V_K = ⊕_{a+b=2n} ⋀^a W₁ ⊗ ⋀^b W₂` (`KSecant.wedge_decomp`); no irreducibility is
+needed. -/
 theorem _root_.WeilClasses.lemma2_2_7_K_indep (hd : 0 < d) (hP : ¬ P.IsIsotropic) :
     iSupIndep ![pqPiece P.W₁ P.W₂ (2 * n) 0, pqPiece P.W₁ P.W₂ 0 (2 * n),
       P.invK (2 * n) ⊓ pqPiece P.W₁ P.W₂ n n] := by
@@ -3510,7 +3598,10 @@ theorem _root_.WeilClasses.lemma2_2_7_K_indep (hd : 0 < d) (hP : ¬ P.IsIsotropi
     simp [show 2 * n - n = n by omega]
 
 /-- **Lemma 2.2.7** (`lemma-Spin-V-P-invariant-classes-are-Hodge`), third sentence: the three
-summands `⋀^{2n} W₁`, `⋀^{2n} W₂` and `L = (⋀^n W₁ ⊗ ⋀^n W₂)^{Spin(V)_P}` are lines. -/
+summands `⋀^{2n} W₁`, `⋀^{2n} W₂` and `L = (⋀^n W₁ ⊗ ⋀^n W₂)^{Spin(V)_P}` are lines.
+
+Gap in the paper (filled), as for `lemma2_2_7_odd`: `L` is computed with the `sl(W₁)` weight
+operators (`KSecant.s22b_invK_inf_pq`: the line of `ω^n`), not through irreducibility. -/
 theorem _root_.WeilClasses.lemma2_2_7_K_finrank (hd : 0 < d) (hP : ¬ P.IsIsotropic) :
     Module.finrank (Kd d) (pqPiece P.W₁ P.W₂ (2 * n) 0) = 1 ∧
       Module.finrank (Kd d) (pqPiece P.W₁ P.W₂ 0 (2 * n)) = 1 ∧
@@ -3526,7 +3617,8 @@ theorem _root_.WeilClasses.lemma2_2_7_K_finrank (hd : 0 < d) (hP : ¬ P.IsIsotro
     exact finrank_span_singleton (KSecant.s22b_omega_pow_ne_zero hW n (by omega))
 
 /-- **Lemma 2.2.7** (`lemma-Spin-V-P-invariant-classes-are-Hodge`), third sentence: `⋀^{2n} W₁` is
-the character `det₁` of `Spin(V_K)_{ℓ₁,ℓ₂}`. -/
+the character `det₁` of `Spin(V_K)_{ℓ₁,ℓ₂}`. Proof: `⋀^{2n} ρ(g)` acts on `⋀^{2n} W₁` by
+`det(ρ(g)|_{W₁})` (`KSecant.s22b_rhoExt_top₁`); no irreducibility is needed. -/
 theorem _root_.WeilClasses.lemma2_2_7_K_det₁ (hd : 0 < d) (hP : ¬ P.IsIsotropic)
     (g : P.spinL₁L₂) (x : ExteriorAlgebra (Kd d) (V (Kd d) n))
     (hx : x ∈ pqPiece P.W₁ P.W₂ (2 * n) 0) :
@@ -3536,7 +3628,8 @@ theorem _root_.WeilClasses.lemma2_2_7_K_det₁ (hd : 0 < d) (hP : ¬ P.IsIsotrop
   exact KSecant.s22b_rhoExt_top₁ g x hx
 
 /-- **Lemma 2.2.7** (`lemma-Spin-V-P-invariant-classes-are-Hodge`), third sentence: `⋀^{2n} W₂` is
-the character `det₂` of `Spin(V_K)_{ℓ₁,ℓ₂}`. -/
+the character `det₂` of `Spin(V_K)_{ℓ₁,ℓ₂}`. Proof: as for `lemma2_2_7_K_det₁`
+(`KSecant.s22b_rhoExt_top₂`). -/
 theorem _root_.WeilClasses.lemma2_2_7_K_det₂ (hd : 0 < d) (hP : ¬ P.IsIsotropic)
     (g : P.spinL₁L₂) (x : ExteriorAlgebra (Kd d) (V (Kd d) n))
     (hx : x ∈ pqPiece P.W₁ P.W₂ 0 (2 * n)) :
@@ -3544,7 +3637,11 @@ theorem _root_.WeilClasses.lemma2_2_7_K_det₂ (hd : 0 < d) (hP : ¬ P.IsIsotrop
   exact KSecant.s22b_rhoExt_top₂ (P.isCompl_of_not_isIsotropic hd hP) g x hx
 
 /-- **Lemma 2.2.7** (`lemma-Spin-V-P-invariant-classes-are-Hodge`), third sentence: the third
-summand `L = (⋀^n W₁ ⊗ ⋀^n W₂)^{Spin(V)_P}` is the trivial character of `Spin(V_K)_{ℓ₁,ℓ₂}`. -/
+summand `L = (⋀^n W₁ ⊗ ⋀^n W₂)^{Spin(V)_P}` is the trivial character of `Spin(V_K)_{ℓ₁,ℓ₂}`.
+
+Gap in the paper (filled), as for `lemma2_2_7_odd`: `L` is the line of `ω^n`
+(`KSecant.s22b_invK_inf_pq`, computed with the `sl(W₁)` weight operators), and `ω` is invariant
+under `Spin(V_K)_{ℓ₁,ℓ₂}` (`KSecant.s22b_rhoExt_omega`: `W₂ ≅ W₁*` is equivariant). -/
 theorem _root_.WeilClasses.lemma2_2_7_K_trivial (hd : 0 < d) (hP : ¬ P.IsIsotropic)
     (g : P.spinL₁L₂) (x : ExteriorAlgebra (Kd d) (V (Kd d) n))
     (hx : x ∈ P.invK (2 * n) ⊓ pqPiece P.W₁ P.W₂ n n) :

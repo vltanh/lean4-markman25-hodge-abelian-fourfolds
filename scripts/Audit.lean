@@ -177,7 +177,6 @@ meta def paperResults : List (String × Name) :=
   [("Proposition 1.2.1", ``WeilClasses.proposition1_2_1),
    ("Proposition 1.3.1", ``WeilClasses.proposition1_3_1_eq),
    ("Proposition 1.3.1", ``WeilClasses.proposition1_3_1_equivariant),
-   ("Corollary 1.3.2", ``WeilClasses.main_kappa_chE_hodge),
    ("Corollary 1.3.2", ``WeilClasses.corollary1_3_2),
    ("Corollary 1.3.2", ``WeilClasses.corollary1_3_2_hodge),
    ("(1.3.2)", ``WeilClasses.equation1_3_2_equivariant),

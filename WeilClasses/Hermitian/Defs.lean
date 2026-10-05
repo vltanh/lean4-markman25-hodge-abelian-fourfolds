@@ -2,6 +2,7 @@ module
 
 public import WeilClasses.WeilType.Theta
 public import WeilClasses.External.Chevalley.Sec3
+import WeilClasses.External.Chevalley.Sec2_2
 import TauCeti.LinearAlgebra.CliffordAlgebra.Spin.Kernel
 import TauCeti.LinearAlgebra.ExteriorAlgebra.Contraction
 import TauCeti.LinearAlgebra.CliffordAlgebra.Spin.SpinorNorm.Basic
@@ -687,26 +688,6 @@ end S3Signature
 
 variable {n : ℕ} {d : ℚ}
 
-/-- A rational `K`-secant exists only when `d > 0`. (The upstream `KSecant.d_pos` lost its
-`KSecant` argument in elaboration: it states `∀ d, 0 < d`; we do not use it.) -/
-theorem s3_d_pos (P : KSecant n d) : 0 < d := by
-  by_contra hd
-  rw [not_lt] at hd
-  have h0 : sqrtNeg d = 0 := by
-    simp [sqrtNeg, Real.sqrt_eq_zero'.mpr (by exact_mod_cast hd : (d : ℝ) ≤ 0)]
-  have hσ : ∀ z : Kd d, Kd.σ d z = z := by
-    intro z
-    apply Subtype.ext
-    obtain ⟨a, b, hz⟩ := (Kd.mem_iff d).mp z.2
-    rw [Kd.coe_σ, hz, h0]
-    simp
-  have hu : σS n d P.u₁ = P.u₁ := by
-    show (∑ K, Kd.σ d ((basisS (Kd d) n).repr P.u₁ K) • basisS (Kd d) n K) = P.u₁
-    simp only [hσ]
-    exact (basisS (Kd d) n).sum_repr P.u₁
-  have := P.linIndep.injective.ne (show (0 : Fin 2) ≠ 1 by decide)
-  simp [hu] at this
-
 namespace KSecant
 
 variable (P : KSecant n d)
@@ -740,7 +721,7 @@ theorem s3_η_one (hW : IsCompl P.W₁ P.W₂) : P.η hW 1 = LinearMap.id := by
 /-- `η_λ = a + b f` for `λ = a + b √-d`. -/
 theorem s3_η_apply (hW : IsCompl P.W₁ P.W₂) (l : Kd d) (y : V ℚ n) :
     P.η hW l y = Kd.ratPart d l • y + Kd.sqrtNegCoeff d l • P.fη hW y := by
-  conv_lhs => rw [Kd.eq_ratPart_add_sqrtNegCoeff (s3_d_pos P) l]
+  conv_lhs => rw [Kd.eq_ratPart_add_sqrtNegCoeff P.d_pos l]
   rw [s3_η_add, ← mul_one (algebraMap ℚ (Kd d) (Kd.ratPart d l)), s3_η_algebraMap_mul,
     s3_η_algebraMap_mul, s3_η_one]
   rfl
@@ -1269,7 +1250,7 @@ theorem s3_mem_Pℚ_iff (p : S ℚ n) : p ∈ P.Pℚ ↔ bcS ℚ (Kd d) n p ∈ 
 /-- The rational points `p₁ = u₁ + u₂`, `p₂ = √-d (u₁ - u₂)` of `P_K` (`P_K` is defined over `ℚ`). -/
 theorem s3_exists_Pℚ : ∃ p₁ p₂ : S ℚ n, p₁ ∈ P.Pℚ ∧ p₂ ∈ P.Pℚ ∧
     bcS ℚ (Kd d) n p₁ = P.u₁ + P.u₂ ∧ bcS ℚ (Kd d) n p₂ = Kd.sqrtNeg d • (P.u₁ - P.u₂) := by
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   obtain ⟨p₁, hp₁⟩ := s3_exists_bcS_of_σS_eq hd (P.u₁ + P.u₂) (by
     rw [map_add, P.s3_σS_u₂, add_comm]; rfl)
   obtain ⟨p₂, hp₂⟩ := s3_exists_bcS_of_σS_eq hd (Kd.sqrtNeg d • (P.u₁ - P.u₂)) (by
@@ -1465,7 +1446,7 @@ theorem s3_isCompl_ℂ (hW : IsCompl P.W₁ P.W₂) : IsCompl P.W₁ℂ P.W₂�
   intro x hx₁ hx₂
   have h := (P.s3_fℂ_W₁ hW hx₁).symm.trans (P.s3_fℂ_W₂ hW hx₂)
   have hs : (Kd.sqrtNeg d : ℂ) ≠ 0 := by
-    exact_mod_cast s3_sqrtNeg_ne_zero (s3_d_pos P)
+    exact_mod_cast s3_sqrtNeg_ne_zero P.d_pos
   have : (2 * (Kd.sqrtNeg d : ℂ)) • x = 0 := by
     have e : (2 * (Kd.sqrtNeg d : ℂ)) • x = (Kd.sqrtNeg d : ℂ) • x - (-(Kd.sqrtNeg d : ℂ)) • x := by
       module
@@ -1598,7 +1579,7 @@ theorem lemma3_1_1 (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n)) (hP : Assum
     Set.InjOn (rho ℚ n) (P.spinPℚ : Set (Spin ℚ n)) ∧
       rho ℚ n '' (P.spinPℚ : Set (Spin ℚ n)) = (P.SOplusf hP.isCompl : Set (V ℚ n ≃ₗ[ℚ] V ℚ n)) := by
   have hW := hP.isCompl
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   have hn := s3_n_pos P
   obtain ⟨p₁, p₂, hp₁, hp₂, hbc₁, hbc₂⟩ := P.s3_exists_Pℚ
   have hs0 : Kd.sqrtNeg d ≠ 0 := s3_sqrtNeg_ne_zero hd
@@ -1738,7 +1719,7 @@ theorem lemma3_1_1_real (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n)) (hP : 
     Set.InjOn (rho ℝ n) (P.spinPR : Set (Spin ℝ n)) ∧
       rho ℝ n '' (P.spinPR : Set (Spin ℝ n)) = (P.SOplusfR hP.isCompl : Set (V ℝ n ≃ₗ[ℝ] V ℝ n)) := by
   have hW := hP.isCompl
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   have hn := s3_n_pos P
   obtain ⟨p₁, p₂, hp₁, hp₂, hbc₁, hbc₂⟩ := P.s3_exists_Pℚ
   have hs0 : Kd.sqrtNeg d ≠ 0 := s3_sqrtNeg_ne_zero hd
@@ -1942,7 +1923,7 @@ theorem s3_hermH_smul_left (hW : IsCompl P.W₁ P.W₂) (a : ℚ) (x y : V ℚ n
 theorem s3_hermH_fη_right (hW : IsCompl P.W₁ P.W₂) (x y : V ℚ n) :
     P.hermH hW x (P.fη hW y) = Kd.sqrtNeg d * P.hermH hW x y := by
   simp only [hermH]
-  rw [P.pairing_fη_fη hW, mul_add, ← mul_assoc, s3_sqrtNeg_mul_self (s3_d_pos P),
+  rw [P.pairing_fη_fη hW, mul_add, ← mul_assoc, s3_sqrtNeg_mul_self P.d_pos,
     P.pairing_fη_left hW, map_mul, map_mul, map_neg]
   ring
 
@@ -1958,7 +1939,7 @@ theorem s3_hermH_η_right (hW : IsCompl P.W₁ P.W₂) (l : Kd d) (x y : V ℚ n
     P.hermH hW x (P.η hW l y) = l * P.hermH hW x y := by
   rw [P.s3_η_apply hW, P.s3_hermH_add_right, P.s3_hermH_smul_right, P.s3_hermH_smul_right,
     P.s3_hermH_fη_right]
-  conv_rhs => rw [Kd.eq_ratPart_add_sqrtNegCoeff (s3_d_pos P) l]
+  conv_rhs => rw [Kd.eq_ratPart_add_sqrtNegCoeff P.d_pos l]
   ring
 
 /-- `H(η_λ x, y) = σ(λ) H(x, y)`. -/
@@ -2063,7 +2044,7 @@ def DiscIs (hW : IsCompl P.W₁ P.W₂) (c : ℚ) : Prop :=
 /-- `H(x, y) = 0` iff `(x, y)_V = 0` and `(f x, y)_V = 0`. -/
 theorem s3_hermH_eq_zero_iff (hW : IsCompl P.W₁ P.W₂) (x y : V ℚ n) :
     P.hermH hW x y = 0 ↔ pairing ℚ n x y = 0 ∧ pairing ℚ n (P.fη hW x) y = 0 := by
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   constructor
   · intro h
     have h' : Kd.σ d (P.hermH hW x y) = 0 := by rw [h, map_zero]
@@ -2119,7 +2100,7 @@ theorem s3_orth_family (hW : IsCompl P.W₁ P.W₂) {m : Type*} (b : m → V ℚ
   rintro (i | i)
   · exact hb1 i
   · simp only [Sum.elim_inr, P.pairing_fη_fη hW]
-    exact mul_ne_zero (s3_d_pos P).ne' (hb1 i)
+    exact mul_ne_zero P.d_pos.ne' (hb1 i)
 
 /-- The Gram–Schmidt step: there are `m ≤ 2n` mutually `H`-orthogonal vectors `b_i` with
 `(b_i, b_i)_V ≠ 0`. -/
@@ -2213,7 +2194,7 @@ theorem s3_hasSignature (hW : IsCompl P.W₁ P.W₂) : P.HasSignature hW n n := 
   rw [s3_sig_Q.1, s3_ncard_sum] at h1
   rw [s3_sig_Q.2, s3_ncard_sum] at h2
   simp only [hc, Sum.elim_inl, Sum.elim_inr, P.s3_Q_fη hW] at h1 h2
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   have hpos : ∀ i, (0 < d * Q ℚ n (v i) ↔ 0 < Q ℚ n (v i)) := fun i => by
     constructor
     · intro h; exact pos_of_mul_pos_right h hd.le
@@ -2296,7 +2277,7 @@ theorem s3_hermH_expand_left (hW : IsCompl P.W₁ P.W₂) (b : Fin (2 * n) → V
 /-- `y = 0` if all its `K`-coordinates vanish. -/
 theorem s3_eq_zero_of_coordK (hW : IsCompl P.W₁ P.W₂) (b : Fin (2 * n) → V ℚ n)
     (hb : P.IsKBasis hW b) (y : V ℚ n) (hy : ∀ i, P.s3_coordK hW b hb y i = 0) : y = 0 := by
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   apply (P.s3_qBasis hW b hb).repr.injective
   ext s
   have key : ∀ i, (P.s3_qBasis hW b hb).repr y (Sum.inl i) = 0 ∧
@@ -2337,7 +2318,7 @@ theorem s3_normGroup_mul {q q' : ℚ} (hq : q ∈ Kd.normGroup d)
 theorem s3_det_gramH_change (hW : IsCompl P.W₁ P.W₂) (b₀ b : Fin (2 * n) → V ℚ n)
     (hb₀ : P.IsKBasis hW b₀) (hb : P.IsKBasis hW b) :
     ∃ q ∈ Kd.normGroup d, (P.gramH hW b).det = (P.gramH hW b₀).det * algebraMap ℚ (Kd d) q := by
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   -- the change of basis matrix
   let A : Matrix (Fin (2 * n)) (Fin (2 * n)) (Kd d) :=
     Matrix.of fun i j => P.s3_coordK hW b₀ hb₀ (b j) i
@@ -2412,170 +2393,16 @@ end KSecant
 /-! ## The spinor norm on `SU(V_ℚ, H)` (gap repair for Lemma 3.1.2)
 
 The proof that `SU(V_ℚ, H) ⊆ SO_+(V_ℚ)_f`, which replaces the last paragraph of the proof of
-Lemma 3.1.2 (see `lemma3_1_2_finiteIndex`). Ingredients: `(m_x s, t)_S = (s, m_{τ(x)} t)_S` for the
-Mukai pairing ([Chevalley, III.2.2]); a pure spinor is Mukai-isotropic, so `(u₁, u₂)_S ≠ 0` for a
-non-isotropic `P`; the determinant of a `K`-linear `g` on `W₂ = σ(W₁)` is `σ(det(g|W₁))`;
-eigenvalues of rational operators on `u₁` descend from `ℂ` to `K`. -/
-
-section S3Mukai
-
-variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
-
-omit [CharZero F] in
-/-- `∫_X D_θ z = 0`: a contraction has no top-degree component. -/
-theorem s3_integral_D (θ : Module.Dual F (H1 F n)) (z : S F n) : integral F n (D F n θ z) = 0 := by
-  have hθ : θ = ∑ i, θ (e F n i) • (Pi.basisFun F (Fin (2 * n))).coord i := by
-    apply LinearMap.ext
-    intro w
-    rw [LinearMap.sum_apply]
-    simp only [LinearMap.smul_apply, smul_eq_mul, Module.Basis.coord_apply, Pi.basisFun_repr]
-    conv_lhs => rw [show w = ∑ i, w i • e F n i by ext j; simp [e, Pi.single_apply]]
-    simp [map_sum, mul_comm]
-  conv_lhs => rw [← (basisS F n).sum_repr z]
-  simp only [map_sum, map_smul]
-  refine Finset.sum_eq_zero fun K _ => ?_
-  refine mul_eq_zero_of_right _ ?_
-  rw [hθ]
-  simp only [D, map_sum, map_smul]
-  rw [LinearMap.sum_apply, map_sum]
-  refine Finset.sum_eq_zero fun i _ => ?_
-  rw [LinearMap.smul_apply, map_smul]
-  refine smul_eq_zero_of_right _ ?_
-  rw [show basisS F n K = (Pi.basisFun F (Fin (2 * n))).ExteriorAlgebra K from rfl,
-    TauCeti.ExteriorAlgebra.contractLeft_coord_basis]
-  split_ifs with hi
-  · have h0 : integral F n (basisS F n (K.erase i)) = 0 := by
-      rw [integral, Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_apply,
-        ite_eq_right_iff]
-      intro h
-      have : i ∈ K.erase i := h ▸ Finset.mem_univ i
-      simp at this
-    rw [Units.smul_def, map_zsmul,
-      show (Pi.basisFun F (Fin (2 * n))).ExteriorAlgebra (K.erase i) = basisS F n (K.erase i) from rfl,
-      h0, smul_zero]
-  · simp
-
-theorem s3_m_ι_apply (θ : Module.Dual F (H1 F n)) (w : H1 F n) (x : S F n) :
-    m F n (ι (Q F n) (θ, w)) x = ExteriorAlgebra.ι F w * x + D F n θ x := by
-  simp only [m, CliffordAlgebra.lift_ι_apply, cliffordOp, LinearMap.add_apply, LinearMap.coe_comp,
-    Function.comp_apply, LinearMap.fst_apply, LinearMap.snd_apply, L, LinearMap.mul_apply']
-
-omit [CharZero F] in
-theorem s3_mukai_apply (s t : S F n) : mukai F n s t = integral F n (tau F n s * t) := rfl
-
-omit [CharZero F] in
-/-- `∫ τ(D_θ s) t = ∫ τ(s) D_θ t`. -/
-theorem s3_integral_tau_D (θ : Module.Dual F (H1 F n)) (s t : S F n) :
-    integral F n (tau F n (D F n θ s) * t) = integral F n (tau F n s * D F n θ t) := by
-  induction s using CliffordAlgebra.left_induction generalizing t with
-  | algebraMap r =>
-    have h0 : D F n θ (algebraMap F (S F n) r) = 0 := contractLeft_algebraMap (Q := (0 : QuadraticForm F (H1 F n))) θ r
-    have h1 : tau F n (algebraMap F (S F n) r) = algebraMap F (S F n) r :=
-      CliffordAlgebra.reverse.commutes r
-    rw [h0, map_zero, zero_mul, map_zero, h1, Algebra.algebraMap_eq_smul_one, smul_mul_assoc,
-      one_mul, map_smul, s3_integral_D, smul_zero]
-  | add a b ha hb => rw [map_add, map_add, add_mul, map_add, ha, hb, map_add, add_mul, map_add]
-  | ι_mul x u hx =>
-    have h1 : D F n θ (ι (0 : QuadraticForm F (H1 F n)) u * x) =
-        θ u • x - ι (0 : QuadraticForm F (H1 F n)) u * D F n θ x := contractLeft_ι_mul _ _ _
-    have h2 : D F n θ (ι (0 : QuadraticForm F (H1 F n)) u * t) =
-        θ u • t - ι (0 : QuadraticForm F (H1 F n)) u * D F n θ t := contractLeft_ι_mul _ _ _
-    rw [h1, map_sub, map_smul, sub_mul, map_sub, smul_mul_assoc, map_smul]
-    have h3 : tau F n (ι (0 : QuadraticForm F (H1 F n)) u * D F n θ x) * t =
-        tau F n (D F n θ x) * (ι (0 : QuadraticForm F (H1 F n)) u * t) := by
-      simp only [tau, CliffordAlgebra.reverse.map_mul, CliffordAlgebra.reverse_ι, mul_assoc]
-    rw [h3, hx, h2, mul_sub, map_sub, mul_smul_comm, map_smul]
-    have h4 : tau F n (ι (0 : QuadraticForm F (H1 F n)) u * x) * D F n θ t =
-        tau F n x * (ι (0 : QuadraticForm F (H1 F n)) u * D F n θ t) := by
-      simp only [tau, CliffordAlgebra.reverse.map_mul, CliffordAlgebra.reverse_ι, mul_assoc]
-    rw [h4]
-    abel
-
-/-- **[Chevalley, III.2.2]**: `m_v` is self-adjoint for the Mukai pairing. -/
-theorem s3_mukai_m_ι (v : V F n) (s t : S F n) :
-    mukai F n (m F n (ι (Q F n) v) s) t = mukai F n s (m F n (ι (Q F n) v) t) := by
-  obtain ⟨θ, w⟩ := v
-  rw [s3_mukai_apply, s3_mukai_apply, s3_m_ι_apply, s3_m_ι_apply, map_add, add_mul, map_add,
-    mul_add, map_add, s3_integral_tau_D]
-  congr 1
-  simp only [tau, CliffordAlgebra.reverse.map_mul]
-  rw [show (ExteriorAlgebra.ι F w : S F n) = ι (0 : QuadraticForm F (H1 F n)) w from rfl,
-    CliffordAlgebra.reverse_ι, mul_assoc]
-
-/-- `(m_x s, t)_S = (s, m_{τ(x)} t)_S`. -/
-theorem s3_mukai_m (x : C F n) (s t : S F n) :
-    mukai F n (m F n x s) t = mukai F n s (m F n (CliffordAlgebra.reverse x) t) := by
-  induction x using CliffordAlgebra.induction generalizing s t with
-  | algebraMap r =>
-    simp only [AlgHom.commutes, CliffordAlgebra.reverse.commutes, Module.algebraMap_end_apply,
-      map_smul, LinearMap.smul_apply]
-  | ι v => rw [s3_mukai_m_ι, CliffordAlgebra.reverse_ι]
-  | mul a b ha hb =>
-    rw [map_mul, Module.End.mul_apply, ha, hb, CliffordAlgebra.reverse.map_mul, map_mul,
-      Module.End.mul_apply]
-  | add a b ha hb =>
-    rw [map_add, LinearMap.add_apply, map_add, LinearMap.add_apply, ha, hb, map_add, map_add,
-      LinearMap.add_apply, map_add]
-
-/-- A pure spinor is isotropic for the Mukai pairing ([Chevalley, III.2.4]). -/
-theorem s3_mukai_self_of_pure (hn : 0 < n) {u : S F n} (hu : IsEvenPureSpinor F n u) :
-    mukai F n u u = 0 := by
-  have hW : ann F n u ≠ ⊥ := by
-    intro h
-    have := hu.2.2
-    rw [h, finrank_bot] at this
-    omega
-  obtain ⟨v, hv, hv0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hW
-  obtain ⟨w, hw⟩ : ∃ w, pairing F n v w ≠ 0 := by
-    by_contra h
-    push Not at h
-    exact hv0 (s3_pairing_sepLeft v h)
-  have hvu : m F n (ι (Q F n) v) u = 0 := hv
-  have hrel : m F n (ι (Q F n) v) (m F n (ι (Q F n) w) u) = pairing F n v w • u := by
-    have h := congrArg (fun x => m F n x u) (CliffordAlgebra.ι_mul_ι_add_swap (Q := Q F n) v w)
-    simp only [map_add, map_mul, LinearMap.add_apply, Module.End.mul_apply, hvu, map_zero,
-      add_zero, AlgHom.commutes, Module.algebraMap_end_apply] at h
-    rw [h]
-    rfl
-  have : pairing F n v w • mukai F n u u = 0 := by
-    have e : pairing F n v w • mukai F n u u = mukai F n (pairing F n v w • u) u := by
-      rw [map_smul, LinearMap.smul_apply]
-    rw [e, ← hrel, s3_mukai_m_ι, hvu, map_zero]
-  exact (smul_eq_zero.mp this).resolve_left hw
-
-end S3Mukai
+Lemma 3.1.2 (see `lemma3_1_2_finiteIndex`). Ingredients: [Chevalley, III.3.2, III.4.5]
+(`chevalley_III_3_2_III_4_5`, as in the proof of Lemma 3.1.1); [Chevalley, III.2.1]
+(`chevalley_III_2_1`: `(x s, x t)_S = N(x) (s, t)_S` for the Mukai pairing); `(u₁, u₂)_S ≠ 0` for a
+non-isotropic `P` (Lemma 2.2.1 and [Chevalley, III.2.4], `chevalley_III_2_4`); the determinant of a
+`K`-linear `g` on `W₂ = σ(W₁)` is `σ(det(g|W₁))`; eigenvalues of rational operators on `u₁` descend
+from `ℂ` to `K`. -/
 
 section S3MukaiBc
 
 variable (F F' : Type*) [Field F] [CharZero F] [Field F'] [CharZero F'] [Algebra F F'] {n : ℕ}
-
-omit [CharZero F] [CharZero F'] in
-theorem s3_bcS_tau (s : S F n) : bcS F F' n (tau F n s) = tau F' n (bcS F F' n s) := by
-  induction s using CliffordAlgebra.induction with
-  | algebraMap r =>
-    simp only [tau, CliffordAlgebra.reverse.commutes, AlgHom.commutes]
-    rw [IsScalarTower.algebraMap_apply F F' (S F' n), CliffordAlgebra.reverse.commutes]
-  | ι w =>
-    simp only [tau, CliffordAlgebra.reverse_ι]
-    rw [show (ι (0 : QuadraticForm F (H1 F n)) w : S F n) = ExteriorAlgebra.ι F w from rfl,
-      s3_bcS_ι]
-    exact (CliffordAlgebra.reverse_ι _).symm
-  | mul a b ha hb =>
-    simp only [tau, CliffordAlgebra.reverse.map_mul, map_mul] at ha hb ⊢
-    rw [ha, hb]
-  | add a b ha hb => rw [map_add, map_add, ha, hb, map_add, map_add]
-
-omit [CharZero F] [CharZero F'] in
-theorem s3_integral_bcS (s : S F n) :
-    integral F' n (bcS F F' n s) = algebraMap F F' (integral F n s) := by
-  simp only [integral, Module.Basis.coord_apply]
-  exact s3_bcS_repr F F' s Finset.univ
-
-omit [CharZero F] [CharZero F'] in
-/-- The Mukai pairing commutes with change of coefficients. -/
-theorem s3_mukai_bcS (s t : S F n) :
-    mukai F' n (bcS F F' n s) (bcS F F' n t) = algebraMap F F' (mukai F n s t) := by
-  rw [s3_mukai_apply, s3_mukai_apply, ← s3_bcS_tau, ← map_mul, s3_integral_bcS]
 
 theorem s3_bcC_reverse (x : C F n) :
     bcC F F' n (CliffordAlgebra.reverse x) = CliffordAlgebra.reverse (bcC F F' n x) := by
@@ -2715,28 +2542,17 @@ namespace KSecant
 
 variable (P : KSecant n d)
 
-/-- `(u₁, u₂)_S ≠ 0` (or `(u₂, u₁)_S ≠ 0`): `P` is non-isotropic and pure spinors are isotropic. -/
-theorem s3_mukai_u₁₂ (hW : IsCompl P.W₁ P.W₂) (hiso : ¬ P.IsIsotropic) :
-    mukai (Kd d) n P.u₁ P.u₂ ≠ 0 ∨ mukai (Kd d) n P.u₂ P.u₁ ≠ 0 := by
-  have hn := s3_n_pos P
-  by_contra h
-  push Not at h
-  obtain ⟨h12, h21⟩ := h
-  apply hiso
-  intro a ha b hb
-  apply (algebraMap ℚ (Kd d)).injective
-  rw [← s3_mukai_bcS, map_zero]
-  obtain ⟨α₁, α₂, hα⟩ := Submodule.mem_span_pair.mp ((P.s3_mem_Pℚ_iff a).mp ha)
-  obtain ⟨β₁, β₂, hβ⟩ := Submodule.mem_span_pair.mp ((P.s3_mem_Pℚ_iff b).mp hb)
-  rw [← hα, ← hβ]
-  simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul,
-    s3_mukai_self_of_pure hn P.isPure, s3_mukai_self_of_pure hn (P.s3_isPure₂ hW), h12, h21]
-  ring
+/-- `(u₁, u₂)_S ≠ 0`: `W₁ ∩ W₂ = 0` by Lemma 2.2.1 (`P` is non-isotropic), and `Wᵢ = ann(uᵢ)`
+for the even pure spinors `u₁`, `u₂`, so `(u₁, u₂)_S ≠ 0` by [Chevalley, III.2.4]. -/
+theorem s3_mukai_u₁₂ (hiso : ¬ P.IsIsotropic) : mukai (Kd d) n P.u₁ P.u₂ ≠ 0 := by
+  have hinf : P.W₁ ⊓ P.W₂ = ⊥ := not_not.mp fun h => hiso ((lemma2_2_1 P P.d_pos).mpr h)
+  exact fun h0 =>
+    (chevalley_III_2_4 (Kd d) n (s3_n_pos P) P.u₁ P.u₂ P.isPure P.isPure₂).mp h0 hinf
 
 
 theorem s3_mem_W₁_of_eigen (hW : IsCompl P.W₁ P.W₂) {v : V (Kd d) n}
     (hv : P.ηK hW (Kd.sqrtNeg d) v = Kd.sqrtNeg d • v) : v ∈ P.W₁ := by
-  have hs := s3_sqrtNeg_ne_zero (s3_d_pos P)
+  have hs := s3_sqrtNeg_ne_zero P.d_pos
   obtain ⟨v₁, hv₁, v₂, hv₂, rfl⟩ := Submodule.mem_sup.mp (hW.sup_eq_top ▸ Submodule.mem_top (x := v))
   rw [map_add, P.s3_ηK_W₁ hW _ hv₁, P.s3_ηK_W₂ hW _ hv₂, s3_σ_sqrtNeg] at hv
   have : (2 * Kd.sqrtNeg d) • v₂ = 0 := by
@@ -2748,7 +2564,7 @@ theorem s3_mem_W₁_of_eigen (hW : IsCompl P.W₁ P.W₂) {v : V (Kd d) n}
 
 theorem s3_mem_W₂_of_eigen (hW : IsCompl P.W₁ P.W₂) {v : V (Kd d) n}
     (hv : P.ηK hW (Kd.sqrtNeg d) v = -Kd.sqrtNeg d • v) : v ∈ P.W₂ := by
-  have hs := s3_sqrtNeg_ne_zero (s3_d_pos P)
+  have hs := s3_sqrtNeg_ne_zero P.d_pos
   obtain ⟨v₁, hv₁, v₂, hv₂, rfl⟩ := Submodule.mem_sup.mp (hW.sup_eq_top ▸ Submodule.mem_top (x := v))
   rw [map_add, P.s3_ηK_W₁ hW _ hv₁, P.s3_ηK_W₂ hW _ hv₂, s3_σ_sqrtNeg] at hv
   have : (2 * Kd.sqrtNeg d) • v₁ = 0 := by
@@ -2917,12 +2733,22 @@ theorem s3_bcC_mem_even {F F' : Type*} [Field F] [CharZero F] [Field F'] [CharZe
         SetLike.mul_mem_graded
           (ι_mul_ι_mem_evenOdd_zero (Q F' n) (bcV F F' n m₁) (bcV F F' n m₂)) hx
 
-/-- If `τ(x) x = c`, then `(m_x s, m_x t)_S = c (s, t)_S`. -/
-theorem s3_mukai_m_m {F : Type*} [Field F] [CharZero F] {n : ℕ} (x : C F n) (c : F)
-    (hx : CliffordAlgebra.reverse x * x = algebraMap F (C F n) c) (s t : S F n) :
-    mukai F n (m F n x s) (m F n x t) = c * mukai F n s t := by
-  rw [s3_mukai_m, ← Module.End.mul_apply, ← map_mul, hx, AlgHom.commutes,
-    Module.algebraMap_end_apply, map_smul, smul_eq_mul]
+/-- If `x v x⁻¹ = T(v)` for `v ∈ V_ℚ`, then `x_K v x_K⁻¹ = T_K(v)` for `v ∈ V_K`: `x_K` lies in the
+Clifford group `G(V_K)`. -/
+theorem s3_bcC_mem_cliffordGroup {n : ℕ} {d : ℚ} {T : V ℚ n →ₗ[ℚ] V ℚ n} (x : (C ℚ n)ˣ)
+    (hconj : ∀ w, (x : C ℚ n) * ι (Q ℚ n) w * ((x⁻¹ : (C ℚ n)ˣ) : C ℚ n) = ι (Q ℚ n) (T w)) :
+    Units.map (bcC ℚ (Kd d) n : C ℚ n →* C (Kd d) n) x ∈ cliffordGroup (Kd d) n := by
+  intro v
+  refine ⟨s3_ext ℚ (Kd d) n T v, ?_⟩
+  have key : LinearMap.mulRight (Kd d) (bcC ℚ (Kd d) n ((x⁻¹ : (C ℚ n)ˣ) : C ℚ n)) ∘ₗ
+      LinearMap.mulLeft (Kd d) (bcC ℚ (Kd d) n (x : C ℚ n)) ∘ₗ ι (Q (Kd d) n) =
+      ι (Q (Kd d) n) ∘ₗ s3_ext ℚ (Kd d) n T := by
+    refine (basisV (Kd d) n).ext fun i => ?_
+    simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.mulLeft_apply,
+      LinearMap.mulRight_apply]
+    rw [← s3_bcV_basisV ℚ (Kd d), s3_ext_bcV, ← s3_bcC_ι, ← s3_bcC_ι, ← map_mul, ← map_mul,
+      hconj]
+  exact LinearMap.congr_fun key v
 
 /-- The determinant of a restriction depends only on the map and the subspace. -/
 theorem s3_det_restrict_congr {K M : Type*} [Field K] [AddCommGroup M] [Module K M]
@@ -2968,7 +2794,7 @@ variable (P : KSecant n d)
 theorem s3_pairing_of_hermH (hW : IsCompl P.W₁ P.W₂) {g : V ℚ n → V ℚ n}
     (hg : ∀ x y, P.hermH hW (g x) (g y) = P.hermH hW x y) (x y : V ℚ n) :
     pairing ℚ n (g x) (g y) = pairing ℚ n x y := by
-  have hd := s3_d_pos P
+  have hd := P.d_pos
   have key : ∀ a b : V ℚ n, P.hermH hW a b + Kd.σ d (P.hermH hW a b) =
       algebraMap ℚ (Kd d) (2 * d * pairing ℚ n a b) := by
     intro a b
@@ -2997,16 +2823,20 @@ theorem s3_det_eq_one_of_SUH (hW : IsCompl P.W₁ P.W₂) {g : V ℚ n ≃ₗ[�
 /-- The core of the gap repair for Lemma 3.1.2: let `g ∈ SU(V_ℚ, H)`, let `x ∈ C(V_ℚ)` be invertible
 with `x v x⁻¹ = g(v)` and `τ(x) x = N ∈ ℚ`, and let `y = a x_ℂ ∈ Spin(V_ℂ)`. Then `N` is a square.
 By [Chevalley, III.3.2, III.4.5] `y u₁ = c u₁` with `c² = det(g|W₁) = 1`; so `x u₁ = λ u₁` with
-`λ ∈ K`, `λ² = N`; by Galois conjugation `x u₂ = σ(λ) u₂`, and the Mukai pairing (`P` is
-non-isotropic) gives `N = λ σ(λ)`. Hence `λ = σ(λ) ∈ ℚ`. -/
+`λ ∈ K`, `λ² = N`; by Galois conjugation `x u₂ = σ(λ) u₂`, and [Chevalley, III.2.1]
+(`(x u₁, x u₂)_S = N (u₁, u₂)_S`) with `(u₁, u₂)_S ≠ 0` (Lemma 2.2.1 and [Chevalley, III.2.4],
+`KSecant.s3_mukai_u₁₂`) gives `N = λ σ(λ)`. Hence `λ = σ(λ) ∈ ℚ`. -/
 theorem s3_norm_isSquare (hW : IsCompl P.W₁ P.W₂) (hiso : ¬ P.IsIsotropic)
-    {g : V ℚ n ≃ₗ[ℚ] V ℚ n} (hg : g ∈ P.SUH hW) {X0 X0i : C ℚ n} (hXX : X0 * X0i = 1) {N : ℚ}
-    (hN : CliffordAlgebra.reverse X0 * X0 = algebraMap ℚ (C ℚ n) N)
-    (hconj : ∀ w, X0 * ι (Q ℚ n) w * X0i = ι (Q ℚ n) (g w))
+    {g : V ℚ n ≃ₗ[ℚ] V ℚ n} (hg : g ∈ P.SUH hW) (x : (C ℚ n)ˣ) {N : ℚ}
+    (hN : CliffordAlgebra.reverse (x : C ℚ n) * x = algebraMap ℚ (C ℚ n) N)
+    (hconj : ∀ w, (x : C ℚ n) * ι (Q ℚ n) w * ((x⁻¹ : (C ℚ n)ˣ) : C ℚ n) = ι (Q ℚ n) (g w))
     (y : Spin ℂ n) {a : ℂ} (ha : a ≠ 0)
-    (hy : (y : C ℂ n) = algebraMap ℂ (C ℂ n) a * bcC ℚ ℂ n X0) :
+    (hy : (y : C ℂ n) = algebraMap ℂ (C ℂ n) a * bcC ℚ ℂ n x) :
     ∃ q : ℚ, N = q * q := by
-  have hd := s3_d_pos P
+  have hd := P.d_pos
+  set X0 : C ℚ n := (x : C ℚ n) with hX0
+  set X0i : C ℚ n := ((x⁻¹ : (C ℚ n)ˣ) : C ℚ n) with hX0i
+  have hXX : X0 * X0i = 1 := x.mul_inv
   have hgf : ∀ x, (g : V ℚ n →ₗ[ℚ] V ℚ n) (P.fη hW x) = P.fη hW ((g : V ℚ n →ₗ[ℚ] V ℚ n) x) :=
     hg.1.1
   obtain ⟨hp₁, -⟩ := P.s3_ext_preserves hW (g : V ℚ n →ₗ[ℚ] V ℚ n) hgf
@@ -3065,15 +2895,17 @@ theorem s3_norm_isSquare (hW : IsCompl P.W₁ P.W₂) (hiso : ¬ P.IsIsotropic)
     rw [← s3_bcC_reverse, ← map_mul, hN, AlgHom.commutes,
       IsScalarTower.algebraMap_apply ℚ (Kd d) (C (Kd d) n)]
   have hnorm : l₁ * Kd.σ d l₁ = algebraMap ℚ (Kd d) N := by
-    have h12 := s3_mukai_m_m _ _ hrevK P.u₁ P.u₂
-    have h21 := s3_mukai_m_m _ _ hrevK P.u₂ P.u₁
-    rw [hxu₁, hxu₂] at h12 h21
-    simp only [map_smul, LinearMap.smul_apply, smul_eq_mul] at h12 h21
-    rcases P.s3_mukai_u₁₂ hW hiso with h | h
-    · apply mul_right_cancel₀ h
-      linear_combination h12
-    · apply mul_right_cancel₀ h
-      linear_combination h21
+    -- [Chevalley, III.2.1] for `x_K ∈ G(V_K)`, of norm `x_K τ(x_K) = N`
+    have hxK := s3_bcC_mem_cliffordGroup (d := d) x hconj
+    have hNK : ((Units.map (bcC ℚ (Kd d) n : C ℚ n →* C (Kd d) n) x : (C (Kd d) n)ˣ) : C (Kd d) n) *
+        CliffordAlgebra.reverse
+          ((Units.map (bcC ℚ (Kd d) n : C ℚ n →* C (Kd d) n) x : (C (Kd d) n)ˣ) : C (Kd d) n) =
+        algebraMap (Kd d) (C (Kd d) n) (algebraMap ℚ (Kd d) N) :=
+      CliffordAlgebra.self_mul_reverse_of_reverse_mul_self hrevK
+    have h12 := chevalley_III_2_1 (Kd d) n _ hxK _ hNK P.u₁ P.u₂
+    rw [Units.coe_map, MonoidHom.coe_ofClass, hxu₁, hxu₂] at h12
+    simp only [map_smul, LinearMap.smul_apply, smul_eq_mul] at h12
+    exact mul_right_cancel₀ (P.s3_mukai_u₁₂ hiso) (by linear_combination h12)
   -- `l₁² = N`
   have hsq : l₁ * l₁ = algebraMap ℚ (Kd d) N := by
     apply Subtype.ext
@@ -3141,7 +2973,7 @@ theorem s3_mem_SOplus_of_SUH (hW : IsCompl P.W₁ P.W₂) (hiso : ¬ P.IsIsotrop
       algebraMap ℂ (C ℂ n) (a : ℂ) * bcC ℚ ℂ n ((x : (C ℚ n)ˣ) : C ℚ n) := by
     rw [Subgroup.coe_mul, Units.val_mul, coe_scalarUnits, hxℂ]
   -- the Clifford norm of `x` is a square
-  obtain ⟨q, hq⟩ := P.s3_norm_isSquare hW hiso hg (Units.mul_inv _)
+  obtain ⟨q, hq⟩ := P.s3_norm_isSquare hW hiso hg (x : (C ℚ n)ˣ)
     (reverse_mul_self_eq_algebraMap_cliffordNorm x) hconj ⟨_, hy⟩ a.ne_zero hyc
   have hq0 : q ≠ 0 := by
     rintro rfl
@@ -3227,9 +3059,10 @@ has infinite index (`det_K` maps `U(H)` onto the infinite group `K¹` of norm-on
 proof's final step ("`det M` is a unit, and units are finite") needs `g` integral. See REPORT.md.
 In fact the index is `1` (`lemma3_1_2_eq_SUH`).
 
-Departure from the paper: the paper reduces the claim to `SO(V_ℚ)_f = SU(V_ℚ, H)` because "the norm
-character has finitely many values on `SO(V_ℚ)`", and ends with "`det M` is a unit, and units are
-finite". Over `ℚ` the first claim is false (the spinor norm maps `SO(V_ℚ)` onto the infinite group
+Departure from the paper (reason 1: the paper's step is wrong over `ℚ`): the paper reduces the
+claim to `SO(V_ℚ)_f = SU(V_ℚ, H)` because "the norm character has finitely many values on `SO(V_ℚ)`"
+(TeX 1529), and ends with "`det M` is a unit, and units are finite" (TeX 1537). Over `ℚ` the first
+claim is false (the spinor norm maps `SO(V_ℚ)` onto the infinite group
 `ℚ^×/(ℚ^×)²`: `V_ℚ` is hyperbolic) and the second is not available (`det M ∈ K` has norm `1` but need
 not be integral); both hold for integral `g`. We keep the paper's computation
 `det_ℚ g = det M · σ(det M)` (`KSecant.s3_det_eq_one_of_SUH`), so `SU(V_ℚ, H) ⊆ SO(V_ℚ)_f`, and
@@ -3237,8 +3070,9 @@ replace the norm-character step by a proof that the spinor norm of `g ∈ SU(V_�
 (`KSecant.s3_mem_SOplus_of_SUH`, `KSecant.s3_norm_isSquare`): for a Lipschitz lift `x` of `g` and
 `y = a x ∈ Spin(V_ℂ)`, [Chevalley, III.3.2, III.4.5] (as in the proof of Lemma 3.1.1) gives
 `y u₁ = c u₁` with `c² = det M = 1`; hence `x u₁ = λ u₁` with `λ ∈ K` and `λ² = N(x)`, `x u₂ = σ(λ) u₂`
-(`u₂ = σ(u₁)`), and the Mukai pairing (`P` is non-isotropic) gives `N(x) = λ σ(λ)`. So `λ = σ(λ) ∈ ℚ`
-and `N(x) = λ²` is a square. Thus `SO_+(V_ℚ)_f = SU(V_ℚ, H)`. -/
+(`u₂ = σ(u₁)`), and [Chevalley, III.2.1] with `(u₁, u₂)_S ≠ 0` (Lemma 2.2.1 and
+[Chevalley, III.2.4]: `P` is non-isotropic) gives `N(x) = λ σ(λ)`. So `λ = σ(λ) ∈ ℚ` and `N(x) = λ²`
+is a square. Thus `SO_+(V_ℚ)_f = SU(V_ℚ, H)`. -/
 theorem lemma3_1_2_finiteIndex (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
     (hP : Assumption2_4_1 P J) :
     P.SOplusf hP.isCompl ≤ P.SUH hP.isCompl ∧
@@ -3250,9 +3084,11 @@ theorem lemma3_1_2_finiteIndex (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
 /-- In the proof of Lemma 3.1.2: `SO_+(V_ℚ)_f` *equals* the special unitary group `SU(V_ℚ, H)`
 (`K`-linear `H`-isometries of `K`-determinant `1`).
 
-Departure from the paper (see `lemma3_1_2_finiteIndex`): `SU(V_ℚ, H) ⊆ SO_+(V_ℚ)_f` is proved by
-showing that the spinor norm is trivial on `SU(V_ℚ, H)` (Chevalley's III.3.2/III.4.5, the Mukai
-pairing and Galois descent), in place of the paper's "the norm character has finitely many values". -/
+Departure from the paper (reason 1, see `lemma3_1_2_finiteIndex`): the paper's step "the norm
+character has finitely many values on `SO(V_ℚ)`" (TeX 1529) is false over `ℚ`; here
+`SU(V_ℚ, H) ⊆ SO_+(V_ℚ)_f` is proved by showing that the spinor norm is trivial on `SU(V_ℚ, H)`
+([Chevalley, III.3.2/III.4.5], [Chevalley, III.2.1], Lemma 2.2.1 with [Chevalley, III.2.4], and
+Galois descent). -/
 theorem lemma3_1_2_eq_SUH (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n)) (hP : Assumption2_4_1 P J) :
     P.SOplusf hP.isCompl = P.SUH hP.isCompl :=
   P.s3_SOplusf_eq_SUH hP.isCompl hP.nonIsotropic

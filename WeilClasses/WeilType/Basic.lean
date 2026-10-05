@@ -1370,10 +1370,11 @@ theorem s24a_span_sum_elim (hn : 0 < n) (e e' : Fin (2 * n) → V ℂ n)
 Reading: "complex structure" means a complex structure which is an isometry of `(·,·)_V` (as
 `I_{V_ℝ}` is), so that `V^{1,0}` and `V^{0,1}` are complementary maximal isotropic subspaces.
 
-Departure from the paper: the paper concludes that `ϖ̃(e^{iπ/4}) ∈ Spin(V_ℂ)` "must be already in
-`Spin(V_ℝ)` as it maps to `I`". An element of `Spin(V_ℂ)` over an element of `SO(V_ℝ)` is real only
-if that element lies in `ρ(Spin(V_ℝ))` (an element of `SO(V_ℝ)` of nontrivial spinor norm, e.g. `-1`
-on a real hyperbolic plane, has no real lift). We prove `I ∈ ρ(Spin(V_ℝ))`: `I = G²` with
+Departure from the paper (reason 1: the paper's step has a gap): the paper concludes that
+`ϖ̃(e^{iπ/4}) ∈ Spin(V_ℂ)` "must be already in `Spin(V_ℝ)` as it maps to `I`" (TeX 1306–1307). An
+element of `Spin(V_ℂ)` over an element of `SO(V_ℝ)` is real only if that element lies in
+`ρ(Spin(V_ℝ))` (an element of `SO(V_ℝ)` of nontrivial spinor norm, e.g. `-1` on a real hyperbolic
+plane, has no real lift). Here we prove `I ∈ ρ(Spin(V_ℝ))`: `I = G²` with
 `G = (1 + I)/√2 ∈ O(V_ℝ)`, so the spinor norm of `I` (valued in `ℝ^×/(ℝ^×)²`) is trivial, and
 `ρ(Spin(V_ℝ))` is the kernel of the spinor norm (Tau Ceti). Then `ϖ̃(e^{iπ/4})` and the
 complexification of a real lift lie over `I_ℂ`, so they agree up to the kernel `{±1}` of `ρ` (Tau
@@ -1519,7 +1520,10 @@ theorem s24a_finrank_V10_V01 {I : Module.End ℝ (V ℝ n)} (hI : IsComplexStruc
   omega
 
 /-- **Remark 2.4.3** (`rem-complex-structure-lifts-to-Spin-V-RR`): every complex structure `I` of `V_ℝ` which is an isometry of `(·,·)_V` lifts to
-an element of `Spin(V_ℝ)`, i.e. lies in `ρ(Spin(V_ℝ)) = SO_+(V_ℝ)`. -/
+an element of `Spin(V_ℝ)`, i.e. lies in `ρ(Spin(V_ℝ)) = SO_+(V_ℝ)`.
+
+The lift is the one of the special case `remark2_4_3_complexStructure`, whose last step (the lift
+is real) departs from the paper (reason 1, a gap; see there). -/
 theorem remark2_4_3_exists_lift (I : Module.End ℝ (V ℝ n)) (hI : IsComplexStructure I)
     (hIso : ∀ x y, pairing ℝ n (I x) (I y) = pairing ℝ n x y) :
     ∃ g : Spin ℝ n, (rho ℝ n g : V ℝ n →ₗ[ℝ] V ℝ n) = I := by
@@ -1553,7 +1557,9 @@ theorem remark2_4_3_exists_lift (I : Module.End ℝ (V ℝ n)) (hI : IsComplexSt
   exact ⟨g, hg⟩
 
 /-- **Remark 2.4.3** (`rem-complex-structure-lifts-to-Spin-V-RR`), first sentence: the complex structure `I = I_{V_ℝ}` of `X × X̂` lifts to an
-element of `Spin(V_ℝ)`. -/
+element of `Spin(V_ℝ)`. Through `remark2_4_3_exists_lift`; the real lift comes from
+`remark2_4_3_complexStructure`, whose last step departs from the paper (reason 1, a gap; see
+there). -/
 theorem remark2_4_3 (J : Module.End ℝ (H1 ℝ n)) (hJ : IsComplexStructure J) :
     ∃ g : Spin ℝ n, (rho ℝ n g : V ℝ n →ₗ[ℝ] V ℝ n) = productStructure n J := by
   -- `I_{V_ℝ}` is an orthogonal complex structure.

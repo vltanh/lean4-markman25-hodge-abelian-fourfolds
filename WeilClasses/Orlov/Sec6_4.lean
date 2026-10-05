@@ -8,6 +8,8 @@ public import WeilClasses.PureSpinor.Lemma2_2_7
 public import WeilClasses.Hermitian.ComplexStructures
 public import WeilClasses.Orlov.Sec6_2
 public import WeilClasses.External.Chevalley.Sec2_2
+import TauCeti.LinearAlgebra.CliffordAlgebra.Basic
+import TauCeti.LinearAlgebra.CliffordAlgebra.Spin.Kernel
 
 /-!
 # §6.4: Hodge–Weil classes on `X × X̂` from tensor squares of even pure spinors
@@ -108,32 +110,6 @@ theorem s62_rhoPrime_one (x : ExtV F n) : rhoPrime F n 1 x = x := by
 theorem s62_rhoPrime_inv (g : Spin F n) (x : ExtV F n) :
     rhoPrime F n g⁻¹ (rhoPrime F n g x) = x := by
   rw [← s62_rhoPrime_mul, inv_mul_cancel, s62_rhoPrime_one]
-
-omit [CharZero F] in
-theorem s62_basisExt_mem (S : Finset (Fin (2 * n + 2 * n))) :
-    basisExt F n S ∈ ⋀[F]^S.card (V F n) := by
-  rw [basisExt, ExteriorAlgebra.basis_apply_ofCard (b := basisV F n) (rfl : S.card = S.card)]
-  exact ExteriorAlgebra.ιMulti_range F _ ⟨_, rfl⟩
-
-omit [CharZero F] in
-/-- `∫_{X̂ × X}` vanishes outside the top degree `4n`. -/
-theorem s62_integralExt_projDeg (m : ℕ) (hm : m ≠ 4 * n) (x : ExtV F n) :
-    integralExt F n (projDeg F n m x) = 0 := by
-  have : (integralExt F n) ∘ₗ (projDeg F n m) = 0 := by
-    refine (basisExt F n).ext fun S => ?_
-    rw [LinearMap.comp_apply, LinearMap.zero_apply, s62_projDeg_of_mem F n (s62_basisExt_mem F n S)]
-    split_ifs with h
-    · rw [integralExt, Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_apply, ite_eq_right]
-      rintro rfl
-      rw [Finset.card_univ, Fintype.card_fin] at h
-      omega
-    · rw [map_zero]
-  exact LinearMap.congr_fun this x
-
-omit [CharZero F] in
-theorem s62_integralExt_of_mem {m : ℕ} {z : ExtV F n} (hz : z ∈ ⋀[F]^m (V F n)) (hm : m ≠ 4 * n) :
-    integralExt F n z = 0 := by
-  rw [← s62_projDeg_self F n hz]; exact s62_integralExt_projDeg F n m hm z
 
 omit [CharZero F] in
 theorem s62_coe_projDegSub (k : ℕ) (x : ExtV F n) :
@@ -240,32 +216,73 @@ theorem s62_projDeg_PiMap {j : ℕ} (hj : j ≤ 4 * n) (y : ExtV F n) :
       simp
   | add y z hy hz => rw [map_add, map_add, hy, hz, map_add, map_add]
 
-/-- `φ_𝒫 ⊗ ψ_{𝒫⁻¹[n]}` is injective (`φ_𝒫` and `ψ_{𝒫⁻¹[n]}` are mutually inverse). -/
-theorem s62_PiMap_injective : Function.Injective (PiMap F n) := by
-  have hinv : ∀ x, kunnethHatX F n (TensorProduct.map (psiPinvShift F n) (phiP F n)
-      ((kunnethXHat F n).symm (PiMap F n x))) = x := by
-    intro x
-    have hP : PiMap F n x = kunnethXHat F n (TensorProduct.map (phiP F n) (psiPinvShift F n)
-        ((kunnethHatX F n).symm x)) := rfl
-    rw [hP, LinearEquiv.symm_apply_apply, ← LinearMap.comp_apply (TensorProduct.map _ _),
-      ← TensorProduct.map_comp, psiPinvShift_comp_phiP, phiP_comp_psiPinvShift,
-      TensorProduct.map_id, LinearMap.id_apply, LinearEquiv.apply_symm_apply]
-  intro x y hxy
-  rw [← hinv x, ← hinv y, hxy]
-
 /-- `φ' = (φ_𝒫 ⊗ ψ_{𝒫⁻¹[n]}) ∘ φ̃` (Lemma 6.1.1, `τ² = 1`). -/
 theorem s62_phiPrime_eq : phiPrime F n = PiMap F n ∘ₗ varphiTilde F n := by
   rw [phiPrime, lemma6_1_1, LinearMap.comp_assoc, LinearMap.comp_assoc, tauTensor_comp_tauTensor,
     LinearMap.comp_id]
 
-/-- (§6.4, TeX line 2867) "Both [`ρ` and `ρ'`] factor through the image `SO⁺(V)` of `Spin(V)`":
-`ρ'_g` depends only on `ρ(g)` (`ρ` on `⋀•V` is `⋀ρ(g)` by definition). -/
+/-- (§6.4, TeX line 2867; also TeX line 2298, in the proof of Proposition 6.1.2) "Both [`ρ` and
+`ρ'`] factor through the image `SO⁺(V)` of `Spin(V)`": `ρ'_g` depends only on `ρ(g)` (`ρ` on `⋀•V`
+is `⋀ρ(g)` by definition).
+Proof (the paper gives none): if `ρ(g) = ρ(g')`, then `g = ±g'`, since the kernel of
+`ρ : Spin(V) → SO(V)` is `{±1}` (Tau Ceti,
+`CliffordAlgebra.eq_or_eq_negOne_mul_of_spinToSpecialOrthogonal_eq`; for `n = 0`, `V = 0` and
+`Spin(V) = {±1}`); so `m_g ⊗ m_g = m_{g'} ⊗ m_{g'}`, and `ρ'_g = φ'(m_g ⊗ m_g)φ'⁻¹ = ρ'_{g'}` by
+(6.1.4). -/
 theorem rhoPrime_factors (g g' : Spin F n) (h : rho F n g = rho F n g') :
     rhoPrime F n g = rhoPrime F n g' := by
-  -- by Proposition 6.1.2, `ρ'_g = exp(½[c₁(𝒫) - ρ_g c₁(𝒫)]) ∪ ρ_g` only depends on `ρ_g = ⋀ρ(g)`
-  have hρ : rhoExt F n g = rhoExt F n g' := by simp only [rhoExt, h]
-  refine LinearMap.ext fun x => ?_
-  rw [proposition6_1_2, proposition6_1_2, hρ]
+  -- `g = ±g'` in the Clifford algebra: the kernel of `ρ` is `{±1}`
+  have hpm : (g : C F n) = g' ∨ (g : C F n) = -(g' : C F n) := by
+    rcases Nat.eq_zero_or_pos n with rfl | hn
+    · -- `n = 0`: `V = 0`, so `C(V) = F` and `Spin(V) = {±1}`
+      have hsc : ∀ x : C F 0, ∃ r : F, x = algebraMap F (C F 0) r := by
+        intro x
+        induction x using CliffordAlgebra.induction with
+        | algebraMap r => exact ⟨r, rfl⟩
+        | ι v => exact ⟨0, by rw [s24a_V_zero F v, map_zero, map_zero]⟩
+        | mul x y hx hy =>
+          obtain ⟨a, ha⟩ := hx
+          obtain ⟨b, hb⟩ := hy
+          exact ⟨a * b, by rw [ha, hb, map_mul]⟩
+        | add x y hx hy =>
+          obtain ⟨a, ha⟩ := hx
+          obtain ⟨b, hb⟩ := hy
+          exact ⟨a + b, by rw [ha, hb, map_add]⟩
+      have hpm1 : ∀ k : Spin F 0, (k : C F 0) = 1 ∨ (k : C F 0) = -1 := by
+        intro k
+        obtain ⟨r, hr⟩ := hsc k
+        have h1 : star (k : C F 0) * k = 1 := spinGroup.star_mul_self_of_mem k.2
+        rw [hr, CliffordAlgebra.star_algebraMap, ← map_mul,
+          ← map_one (algebraMap F (C F 0))] at h1
+        rcases mul_self_eq_one_iff.mp (CliffordAlgebra.algebraMap_injective (Q F 0) h1) with
+          h2 | h2
+        · left; rw [hr, h2, map_one]
+        · right; rw [hr, h2, map_neg, map_one]
+      rcases hpm1 g with h1 | h1 <;> rcases hpm1 g' with h2 | h2 <;> simp [h1, h2]
+    · have := s24a_nontrivial_V F n hn
+      have hSO : CliffordAlgebra.spinToSpecialOrthogonal (Q F n) g =
+          CliffordAlgebra.spinToSpecialOrthogonal (Q F n) g' := by
+        apply Subtype.ext
+        apply LinearEquiv.ext
+        intro v
+        rw [CliffordAlgebra.coe_spinToSpecialOrthogonal_apply,
+          CliffordAlgebra.coe_spinToSpecialOrthogonal_apply]
+        exact congrArg (fun A : V F n ≃ₗ[F] V F n => A v) h
+      rcases CliffordAlgebra.eq_or_eq_negOne_mul_of_spinToSpecialOrthogonal_eq (Q F n)
+          (s24a_Q_nondegenerate F n) g g' hSO with h1 | h1
+      · exact Or.inl (congrArg Subtype.val h1)
+      · right
+        rw [h1, Submonoid.coe_mul, CliffordAlgebra.spinGroup.coe_negOne, neg_one_mul]
+  -- hence `m_g ⊗ m_g = m_{g'} ⊗ m_{g'}`, and `ρ'_g = ρ'_{g'}` by (6.1.4)
+  have hmm : TensorProduct.map (m F n (g : C F n)) (m F n (g : C F n)) =
+      TensorProduct.map (m F n (g' : C F n)) (m F n (g' : C F n)) := by
+    rcases hpm with h1 | h1
+    · rw [h1]
+    · rw [h1, map_neg]
+      exact TensorProduct.ext' fun x y => by
+        simp only [TensorProduct.map_tmul, LinearMap.neg_apply, TensorProduct.neg_tmul,
+          TensorProduct.tmul_neg, neg_neg]
+  simp only [rhoPrime, hmm]
 
 /-- (§6.4, TeX lines 2891–2895) Let `U` be an irreducible representation of a subgroup
 `G ⊆ Spin(V_F)` acting by `ρ'`, of weight `k`. Then `U ∩ F_{k+1} = 0` (a proper subrepresentation of

@@ -2,6 +2,7 @@ module
 
 public import WeilClasses.Igusa.Secant
 public import WeilClasses.PureSpinor.Lemma2_2_4
+public import WeilClasses.PureSpinor.Stabilizer
 public import TauCeti.LinearAlgebra.CliffordAlgebra.Spin.Transvection
 
 /-!
@@ -14,10 +15,13 @@ the paper's `√-d = i√d`); `-d` is then not a rational square.
 * **Lemma 10.2.1**: the two maximal isotropic subspaces of `V_ℂ` invariant under `Spin(V_ℚ)_w` are
   defined over `K`, not over `ℚ`, and exchanged by `σ` (`lemma10_2_1`); the centralizer of
   `ρ(Spin(V_ℚ)_w)` in `Õ(V_ℚ)` (2.2.3) is isomorphic to `K^×` (`lemma10_2_1_centralizer`).
-  Claims of its proof: the secant through `w` is a rational `K`-secant with `V_K = W₁ ⊕ W₂`
-  (`lemma10_2_1_secant`) and `Spin(V_ℚ)_w = Spin(V_ℚ)_P` (`lemma10_2_1_spinStab_eq`, from
-  Remark 2.2.3, `n = 3` odd). The text after the lemma: the image of `η : K^× → GL(V_ℚ)` (2.2.4) is
-  the centralizer (`eta_centralizer_spinStab`).
+  Claims of its proof: the pair `{W₁, W₂}` is `σ`-invariant (`s10_lines_σ`), `W₁, W₂` are not
+  defined over `ℚ` (`s10_not_isDefinedOver`, with the `J`-argument `s10_not_fixed_lines`), and
+  `σ(W₁) = W₂` (`s10_cm_secant`, which discusses the order of these steps); the secant through `w`
+  is a rational `K`-secant with `V_K = W₁ ⊕ W₂` (`lemma10_2_1_secant`) and
+  `Spin(V_ℚ)_w = Spin(V_ℚ)_P` (`lemma10_2_1_spinStab_eq`, from Remark 2.2.3, `n = 3` odd). The
+  text after the lemma: the image of `η : K^× → GL(V_ℚ)` (2.2.4) is the centralizer
+  (`eta_centralizer_spinStab`).
 * **Example 10.2.2** (`example-gulbrandsen`): `J(2 - dΘ²) = 16d³`, so `K = ℚ(√-d)`, for
   `Θ = e₁ ∧ e₄ + e₂ ∧ e₅ + e₃ ∧ e₆` as printed; this `Θ` has `Θ³ = -6[pt_X]`, so it is not a
   principal polarization in the orientation `∫_X e₁ ∧ ⋯ ∧ e₆ = 1` of §10.1 (slip of the paper); the
@@ -241,9 +245,35 @@ theorem s10_finrank_span_bcV_le (A : Submodule ℚ (V ℚ 3)) :
   rw [h]
   exact (finrank_range_le_card _).trans (by simp)
 
+/-- **Galois descent for subspaces of `V_K`** (used for "`σ(W₁) = W₂`", proof of Lemma 10.2.1,
+l. 9796): a `σ`-stable `K`-subspace `W ⊆ V_K` is defined over `ℚ`; it is the base change of its
+rational points `W ∩ V_ℚ`. (Every `y ∈ W` is `½ (a + (√-d)⁻¹ b)` with the `σ`-fixed vectors
+`a = y + σ y` and `b = √-d (y - σ y)` of `W`, which are rational.) -/
+theorem s10_isDefinedOverV_of_σ (hd : 0 < d) (W : Submodule (Kd d) (V (Kd d) 3))
+    (hW : ∀ y ∈ W, σV 3 d y ∈ W) : IsDefinedOverV ℚ (Kd d) 3 W := by
+  refine ⟨(W.restrictScalars ℚ).comap (bcV ℚ (Kd d) 3), le_antisymm (fun y hy => ?_) ?_⟩
+  · obtain ⟨a, ha⟩ := s10_rat_of_σV hd (y + σV 3 d y) (by rw [map_add, s10_σV_σV, add_comm])
+    obtain ⟨b, hb⟩ := s10_rat_of_σV hd (Kd.sqrtNeg d • (y - σV 3 d y)) (by
+      rw [show σV 3 d = conjV (Kd.σ d) 3 from rfl, s10_conjV_smul, map_sub,
+        show conjV (Kd.σ d) 3 (conjV (Kd.σ d) 3 y) = y from s10_σV_σV y, s10_σ_sqrtNeg]
+      module)
+    have haW : bcV ℚ (Kd d) 3 a ∈ W := by rw [ha]; exact add_mem hy (hW y hy)
+    have hbW : bcV ℚ (Kd d) 3 b ∈ W := by rw [hb]; exact W.smul_mem _ (sub_mem hy (hW y hy))
+    have hs := s10_sqrtNeg_ne_zero hd
+    have hy' : y = (2 : Kd d)⁻¹ • (bcV ℚ (Kd d) 3 a + (Kd.sqrtNeg d)⁻¹ • bcV ℚ (Kd d) 3 b) := by
+      rw [ha, hb, smul_smul, inv_mul_cancel₀ hs, one_smul]
+      rw [show (y + σV 3 d y + (y - σV 3 d y)) = (2 : Kd d) • y by module, smul_smul,
+        inv_mul_cancel₀ two_ne_zero, one_smul]
+    rw [hy', bcSubV]
+    exact Submodule.smul_mem _ _ (add_mem (Submodule.subset_span ⟨a, haW, rfl⟩)
+      (Submodule.smul_mem _ _ (Submodule.subset_span ⟨b, hbW, rfl⟩)))
+  · rw [bcSubV, Submodule.span_le]
+    rintro _ ⟨a, ha, rfl⟩
+    exact ha
+
 /-- **Descent of purity** from `K` to `ℚ`: a rational spinor which is an even pure spinor over `K`
 is an even pure spinor over `ℚ` (its annihilator is `σ`-stable, hence spanned by rational
-vectors). -/
+vectors, `s10_isDefinedOverV_of_σ`). -/
 theorem s10_pure_descent (hd : 0 < d) {r : S ℚ 3}
     (hr : IsEvenPureSpinor (Kd d) 3 (bcS ℚ (Kd d) 3 r)) : IsEvenPureSpinor ℚ 3 r := by
   set x := bcS ℚ (Kd d) 3 r with hx
@@ -274,29 +304,208 @@ theorem s10_pure_descent (hd : 0 < d) {r : S ℚ 3}
       rw [show conjS (Kd.σ d) 3 x = x from s10_conjS_bcS _ r] at h1
       rw [h1]
       exact Submodule.mem_map_of_mem hy
-    have hs := s10_sqrtNeg_ne_zero hd
+    -- `ker m_x` is the base change of a rational subspace, which lies in `ker m_r`
+    obtain ⟨W₀, hW₀⟩ := s10_isDefinedOverV_of_σ hd _ hσ
     have hle : ann (Kd d) 3 x ≤ Submodule.span (Kd d) (bcV ℚ (Kd d) 3 '' (ann ℚ 3 r)) := by
-      intro y hy
-      obtain ⟨a, ha⟩ := s10_rat_of_σV hd (y + σV 3 d y) (by
-        rw [map_add, s10_σV_σV, add_comm])
-      obtain ⟨b, hb⟩ := s10_rat_of_σV hd (Kd.sqrtNeg d • (y - σV 3 d y)) (by
-        rw [show σV 3 d = conjV (Kd.σ d) 3 from rfl, s10_conjV_smul, map_sub,
-          show conjV (Kd.σ d) 3 (conjV (Kd.σ d) 3 y) = y from s10_σV_σV y, s10_σ_sqrtNeg]
-        module)
-      have haA : a ∈ ann ℚ 3 r := (hmem a).mpr (ha ▸ add_mem hy (hσ y hy))
-      have hbA : b ∈ ann ℚ 3 r := (hmem b).mpr (hb ▸ Submodule.smul_mem _ _ (sub_mem hy (hσ y hy)))
-      have hy' : y = (2 : Kd d)⁻¹ • (bcV ℚ (Kd d) 3 a + (Kd.sqrtNeg d)⁻¹ • bcV ℚ (Kd d) 3 b) := by
-        rw [ha, hb, smul_smul, inv_mul_cancel₀ hs, one_smul]
-        rw [show (y + σV 3 d y + (y - σV 3 d y)) = (2 : Kd d) • y by module, smul_smul,
-          inv_mul_cancel₀ two_ne_zero, one_smul]
-      rw [hy']
-      exact Submodule.smul_mem _ _ (add_mem (Submodule.subset_span ⟨a, haA, rfl⟩)
-        (Submodule.smul_mem _ _ (Submodule.subset_span ⟨b, hbA, rfl⟩)))
+      rw [hW₀, bcSubV]
+      refine Submodule.span_mono (Set.image_mono fun a ha => (hmem a).mpr ?_)
+      rw [hW₀]
+      exact Submodule.subset_span ⟨a, ha, rfl⟩
     calc 2 * 3 = Module.finrank (Kd d) (ann (Kd d) 3 x) := hr.2.2.symm
       _ ≤ _ := Submodule.finrank_mono hle
       _ ≤ _ := s10_finrank_span_bcV_le _
 
 end S10Descend
+
+section S10BCV
+
+variable {F F' : Type*} [Field F] [CharZero F] [Field F'] [CharZero F'] [Algebra F F']
+
+theorem s10_bcV_fst' (v : V F 3) (i : Fin 6) :
+    (bcV F F' 3 v).1 (e F' 3 i) = algebraMap F F' (v.1 (e F 3 i)) := by
+  show bcDual F F' 3 v.1 (e F' 3 i) = _
+  rw [← s10_bcH1_e F 3 F' i, s10_bcDual_apply_bcH1]
+
+theorem s10_bcV_snd' (v : V F 3) (i : Fin 6) :
+    (bcV F F' 3 v).2 i = algebraMap F F' (v.2 i) := rfl
+
+theorem s10_bcV_bcV {F'' : Type*} [Field F''] [CharZero F''] [Algebra F' F''] [Algebra F F'']
+    [IsScalarTower F F' F''] (x : V F 3) : bcV F' F'' 3 (bcV F F' 3 x) = bcV F F'' 3 x := by
+  apply s10_V_ext
+  · intro i
+    rw [s10_bcV_fst', s10_bcV_fst', s10_bcV_fst', ← IsScalarTower.algebraMap_apply]
+  · intro i
+    rw [s10_bcV_snd', s10_bcV_snd', s10_bcV_snd', ← IsScalarTower.algebraMap_apply]
+
+theorem s10_pairing_bcV' (x y : V F 3) :
+    pairing F' 3 (bcV F F' 3 x) (bcV F F' 3 y) = algebraMap F F' (pairing F 3 x y) := by
+  simp only [pairing, QuadraticMap.polarBilin_apply_apply, QuadraticMap.polar, ← map_add, Q_bcV,
+    map_sub]
+
+theorem s10_bcV_f (i : Fin 6) : bcV F F' 3 ((f F 3 i, 0) : V F 3) = (f F' 3 i, 0) := by
+  apply s10_V_ext
+  · intro j
+    rw [s10_bcV_fst']
+    simp [s10_f_e]
+  · intro j
+    rw [s10_bcV_snd']
+    simp
+
+theorem s10_bcV_e (i : Fin 6) : bcV F F' 3 ((0, e F 3 i) : V F 3) = (0, e F' 3 i) := by
+  apply s10_V_ext
+  · intro j
+    rw [s10_bcV_fst']
+    simp
+  · intro j
+    rw [s10_bcV_snd']
+    simp [e, Pi.single_apply]
+
+theorem s10_bcC_star (x : C F 3) : bcC F F' 3 (star x) = star (bcC F F' 3 x) := by
+  induction x using CliffordAlgebra.induction with
+  | algebraMap r =>
+    rw [star_algebraMap, AlgHom.commutes, IsScalarTower.algebraMap_apply F F' (C F' 3),
+      star_algebraMap]
+  | ι v => simp [s10_bcC_ι, star_ι]
+  | add x y hx hy => simp only [star_add, map_add, hx, hy]
+  | mul x y hx hy => simp only [star_mul, map_mul, hx, hy]
+
+/-- `ρ` commutes with change of coefficients. -/
+theorem s10_bcV_rho (g : Spin F 3) (x : V F 3) :
+    bcV F F' 3 (rho F 3 g x) = rho F' 3 (bcSpin F F' 3 g) (bcV F F' 3 x) := by
+  apply CliffordAlgebra.ι_injective (Q F' 3)
+  rw [ι_rho, ← s10_bcC_ι, ι_rho, map_mul, map_mul, s10_bcC_ι, s10_bcC_star]
+  rfl
+
+end S10BCV
+
+section S10Frame
+
+set_option linter.unusedSectionVars false
+
+variable {F F' : Type*} [Field F] [CharZero F] [Field F'] [CharZero F'] [Algebra F F']
+
+theorem s10_rho_rho_inv (g : Spin F 3) (v : V F 3) : rho F 3 g (rho F 3 g⁻¹ v) = v := by
+  have hρmul : ∀ a b : Spin F 3, rho F 3 (a * b) = rho F 3 a * rho F 3 b := fun a b =>
+    CliffordAlgebra.spinVectorAction_mul _ a b
+  rw [← LinearEquiv.mul_apply, ← hρmul, mul_inv_cancel]
+  exact congrArg (fun e : V F 3 ≃ₗ[F] V F 3 => e v) (CliffordAlgebra.spinVectorAction_one _)
+
+theorem s10_rho_inv_rho (g : Spin F 3) (v : V F 3) : rho F 3 g⁻¹ (rho F 3 g v) = v := by
+  have := s10_rho_rho_inv g⁻¹ v
+  rwa [inv_inv] at this
+
+theorem s10_bcSubV_map_rho (g : Spin F 3) (A : Submodule F (V F 3)) :
+    bcSubV F F' 3 (A.map (rho F 3 g).toLinearMap) =
+      (bcSubV F F' 3 A).map (rho F' 3 (bcSpin F F' 3 g)).toLinearMap := by
+  rw [bcSubV, bcSubV, Submodule.map_span, Submodule.map_coe, Set.image_image, Set.image_image]
+  congr 1
+  exact Set.image_congr fun x _ => s10_bcV_rho g x
+
+theorem s10_bcSubV_bot_prod_top :
+    bcSubV F F' 3 ((⊥ : Submodule F (Module.Dual F (H1 F 3))).prod ⊤) =
+      (⊥ : Submodule F' (Module.Dual F' (H1 F' 3))).prod ⊤ := by
+  apply le_antisymm
+  · rw [bcSubV, Submodule.span_le]
+    rintro _ ⟨x, hx, rfl⟩
+    have h1 : x.1 = 0 := by simpa using (Submodule.mem_prod.mp hx).1
+    refine Submodule.mem_prod.mpr ⟨?_, Submodule.mem_top⟩
+    rw [Submodule.mem_bot]
+    show bcDual F F' 3 x.1 = 0
+    rw [h1, map_zero]
+  · intro y hy
+    have h1 : y.1 = 0 := by simpa using (Submodule.mem_prod.mp hy).1
+    have hy' : y = ∑ i : Fin 6, y.2 i • ((0, e F' 3 i) : V F' 3) := by
+      refine Prod.ext ?_ ?_
+      · simp [h1, Prod.fst_sum]
+      · funext k
+        simp [Prod.snd_sum, Finset.sum_apply, e, Pi.single_apply]
+    rw [hy']
+    exact Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ (Submodule.subset_span
+      ⟨(0, e F 3 i), Submodule.mem_prod.mpr ⟨Submodule.zero_mem _, Submodule.mem_top⟩,
+        s10_bcV_e i⟩)
+
+theorem s10_bcSubV_top_prod_bot :
+    bcSubV F F' 3 ((⊤ : Submodule F (Module.Dual F (H1 F 3))).prod ⊥) =
+      (⊤ : Submodule F' (Module.Dual F' (H1 F' 3))).prod ⊥ := by
+  apply le_antisymm
+  · rw [bcSubV, Submodule.span_le]
+    rintro _ ⟨x, hx, rfl⟩
+    have h2 : x.2 = 0 := by simpa using (Submodule.mem_prod.mp hx).2
+    refine Submodule.mem_prod.mpr ⟨Submodule.mem_top, ?_⟩
+    rw [Submodule.mem_bot]
+    show bcH1 F F' 3 x.2 = 0
+    rw [h2, map_zero]
+  · intro y hy
+    have h2 : y.2 = 0 := by simpa using (Submodule.mem_prod.mp hy).2
+    have hy' : y = ∑ i : Fin 6, y.1 (e F' 3 i) • ((f F' 3 i, 0) : V F' 3) := by
+      refine Prod.ext ?_ ?_
+      · simp only [Prod.fst_sum, Prod.smul_fst]
+        exact s10_dual_eq_sum y.1
+      · simp [h2, Prod.snd_sum]
+    rw [hy']
+    exact Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ (Submodule.subset_span
+      ⟨(f F 3 i, 0), Submodule.mem_prod.mpr ⟨Submodule.mem_top, Submodule.zero_mem _⟩,
+        s10_bcV_f i⟩)
+
+/-- The coordinatewise action of a field automorphism fixes the vectors defined over `ℚ`. -/
+theorem s10_conjV_bcV (c : F ≃+* F) (x : V ℚ 3) : conjV c 3 (bcV ℚ F 3 x) = bcV ℚ F 3 x := by
+  apply s10_V_ext
+  · intro i
+    rw [s10_conjV_fst]
+    simp only [LinearMap.sum_apply, LinearMap.smul_apply, s10_f_e, smul_eq_mul, mul_ite, mul_one,
+      mul_zero, Finset.sum_ite_eq', Finset.mem_univ, ite_true]
+    rw [s10_bcV_fst', eq_ratCast, map_ratCast]
+  · intro i
+    rw [s10_conjV_snd, Function.comp_apply, s10_bcV_snd', eq_ratCast, map_ratCast]
+
+theorem s10_map_conjVL_bcSubV (c : F ≃+* F) (W₀ : Submodule ℚ (V ℚ 3)) :
+    (bcSubV ℚ F 3 W₀).map (s10_conjVL c) = bcSubV ℚ F 3 W₀ := by
+  rw [bcSubV, Submodule.map_span, Set.image_image]
+  congr 1
+  exact Set.image_congr fun x _ => s10_conjV_bcV c x
+
+/-- Base change of subspaces is transitive: `(W_{F'})_{F''} = W_{F''}`. -/
+theorem s10_bcSubV_bcSubV {F'' : Type*} [Field F''] [CharZero F''] [Algebra F' F'']
+    [Algebra F F''] [IsScalarTower F F' F''] (W : Submodule F (V F 3)) :
+    bcSubV F' F'' 3 (bcSubV F F' 3 W) = bcSubV F F'' 3 W := by
+  unfold bcSubV
+  apply le_antisymm
+  · rw [Submodule.span_le]
+    rintro _ ⟨y, hy, rfl⟩
+    induction hy using Submodule.span_induction with
+    | mem x hx =>
+      obtain ⟨a, ha, rfl⟩ := hx
+      rw [s10_bcV_bcV]
+      exact Submodule.subset_span ⟨a, ha, rfl⟩
+    | zero => rw [map_zero]; exact Submodule.zero_mem _
+    | add x y _ _ hx hy => rw [map_add]; exact add_mem hx hy
+    | smul a x _ hx =>
+      rw [map_smul, ← algebraMap_smul F'']
+      exact Submodule.smul_mem _ _ hx
+  · rw [Submodule.span_le]
+    rintro _ ⟨a, ha, rfl⟩
+    rw [← s10_bcV_bcV (F' := F')]
+    exact Submodule.subset_span ⟨_, Submodule.subset_span ⟨a, ha, rfl⟩, rfl⟩
+
+/-- `(ker m_{h x})_{F'} = ker m_{(h x)_{F'}}` for `h ∈ Spin(V_F)`, if
+`(ker m_x)_{F'} = ker m_{x_{F'}}` (both sides are transported by `ρ(h)`). -/
+theorem s10_bcSubV_ann_m (h : Spin F 3) (x : S F 3)
+    (hx : bcSubV F F' 3 (ann F 3 x) = ann F' 3 (bcS F F' 3 x)) :
+    bcSubV F F' 3 (ann F 3 (m F 3 (h : C F 3) x)) =
+      ann F' 3 (bcS F F' 3 (m F 3 (h : C F 3) x)) := by
+  rw [ann_m_spin, s10_bcSubV_map_rho, hx, s10_bcS_m_spin, ann_m_spin]
+
+/-- `(ker m_{[pt_X]})_{F'} = (H¹(X, F))_{F'} = H¹(X, F') = ker m_{[pt_X]}`. -/
+theorem s10_bcSubV_ann_pt :
+    bcSubV F F' 3 (ann F 3 (pt F 3)) = ann F' 3 (bcS F F' 3 (pt F 3)) := by
+  rw [ann_pt, s10_bcSubV_bot_prod_top, show bcS F F' 3 (pt F 3) = pt F' 3 from
+    s10_bcS_basisS _ _ _ _, ann_pt]
+
+/-- `(ker m_1)_{F'} = (H¹(X̂, F))_{F'} = H¹(X̂, F') = ker m_1`. -/
+theorem s10_bcSubV_ann_one : bcSubV F F' 3 (ann F 3 1) = ann F' 3 (bcS F F' 3 1) := by
+  rw [ann_one, s10_bcSubV_top_prod_bot, map_one, ann_one]
+
+end S10Frame
 
 section S10Core
 
@@ -360,8 +569,12 @@ theorem s10_bcV_injective {F F' : Type*} [Field F] [CharZero F] [Field F'] [Char
 
 variable {w : S ℚ 3}
 
-/-- The lines of the secant `P_K` through `w` are permuted by `σ` (Remark 10.1.2(2) with complex
-conjugation, i.e. "`P_w` is defined over `ℚ`" of Lemma 10.1.1). -/
+/-- **"The pair `{W₁, W₂}` is invariant under `σ`, since `P_w` is, by Lemma 10.1.1"** (proof of
+Lemma 10.2.1, l. 9796): for `g ∈ Spin(V_K)` with `g(w) = 1 + 2√-d [pt_X]`, `σ` permutes the two
+pure spinor lines `ℓ̃₁ = K g⁻¹[pt_X]` and `ℓ̃₂ = K g⁻¹ 1` of the secant through `w` (the lines of
+`W₁ = ker m_{g⁻¹[pt_X]}` and `W₂ = ker m_{g⁻¹ 1}`). By Remark 10.1.2(2) for complex conjugation
+(`remark10_1_2_rational`, which cites "`P_w` is defined over `ℚ`" of Lemma 10.1.1). Step 1 of
+`s10_cm_secant`, where the order of the steps is discussed. -/
 theorem s10_lines_σ (hIgusa : IgusaProp3NormalForm) {d : ℚ} (hdJ : J ℚ w = d) (hw : w ∈ Splus ℚ 3) (hd : 0 < d)
     (g : Spin (Kd d) 3)
     (hg : m (Kd d) 3 (g : C (Kd d) 3) (bcS ℚ (Kd d) 3 w) = 1 + (2 * Kd.sqrtNeg d) • pt (Kd d) 3) :
@@ -415,8 +628,9 @@ theorem s10_lines_σ (hIgusa : IgusaProp3NormalForm) {d : ℚ} (hdJ : J ℚ w = 
   · exact Or.inl ⟨key _ _ hu0 h1, key _ _ hu0' h2⟩
   · exact Or.inr ⟨key _ _ hu0' h1, key _ _ hu0 h2⟩
 
-/-- **The paper's argument that `W₁, W₂` are not defined over `ℚ`** (proof of Lemma 10.2.1): if
-`σ` fixed the two pure spinor lines of `P_K`, they would be spanned by rational pure spinors, so
+/-- **The paper's argument that `W₁, W₂` are not defined over `ℚ`** (proof of Lemma 10.2.1,
+l. 9795): if `σ` fixed the two pure spinor lines of `P_K` (as it does when `W₁` and `W₂` are both
+defined over `ℚ`, see `s10_not_isDefinedOver`), they would be spanned by rational pure spinors, so
 `P_w` would be a `Spin(V_ℚ)`-translate of `span{1, [pt_X]}` ([Chevalley, §3.3 Lemma 1, III.1.4]
 over `ℚ`), and `J` would be `≤ 0` on its rational points by (10.1.1), contradicting `J(w) > 0`. -/
 theorem s10_not_fixed_lines {d : ℚ} (hdJ : J ℚ w = d) (hd : 0 < d)
@@ -541,33 +755,138 @@ theorem s10_bcSubS_span {F F' : Type*} [Field F] [CharZero F] [Field F'] [CharZe
     rintro _ ⟨x, hx, rfl⟩
     exact Submodule.subset_span ⟨x, Submodule.subset_span hx, rfl⟩
 
-/-- **The rational `K`-secant through `w`** (proof of Lemma 10.2.1): for `g ∈ Spin(V_K)` with
-`g(w) = 1 + 2√-d [pt_X]` ([Igusa, Prop. 3], last paragraph), `σ` exchanges the lines of
-`g⁻¹[pt_X]` and `g⁻¹ 1`.
-Departure from the paper (order of the steps): the paper first shows that `W₁, W₂` are not defined
-over `ℚ` (otherwise `J ≤ 0` on the rational points of a `Spin(V_ℚ)`-translate of
-`span{1, [pt_X]}`) and deduces `σ(W₁) = W₂` from the `σ`-invariance of the pair. Here the same
-`J`-argument is applied to `σ`-fixed lines (`s10_not_fixed_lines`), which gives `σ(ℓ̃₁) = ℓ̃₂`
-directly; that `W₁, W₂` are not defined over `ℚ` then follows in `lemma10_2_1`, since complex
-conjugation exchanges `(W₁)_ℂ` and `(W₂)_ℂ` and fixes every subspace defined over `ℚ`. -/
+/-- A vector on two independent lines is zero. -/
+theorem s10_eq_zero_of_mem_span_pair {F M : Type*} [Field F] [AddCommGroup M] [Module F M]
+    {x y v : M} (hxy : LinearIndependent F ![x, y]) (hx : v ∈ Submodule.span F {x})
+    (hy : v ∈ Submodule.span F {y}) : v = 0 := by
+  obtain ⟨a, rfl⟩ := Submodule.mem_span_singleton.mp hx
+  obtain ⟨b, hb⟩ := Submodule.mem_span_singleton.mp hy
+  have h := LinearIndependent.pair_iff.mp hxy a (-b) (by rw [neg_smul, hb, add_neg_cancel])
+  rw [h.1, zero_smul]
+
+/-- If the base change to `ℂ` of `ker m_u ⊆ V_K` is defined over `ℚ`, then `σ` fixes the line
+`K u`: complex conjugation fixes a subspace defined over `ℚ` and maps `ker m_{u_ℂ}` to
+`ker m_{σ(u)_ℂ}`, and `ker m_{u_ℂ}` determines the line of `u_ℂ` ([Chevalley, III.1.4]). -/
+theorem s10_σ_mem_span_of_isDefinedOver {d : ℚ} {u : S (Kd d) 3} (hu0 : u ≠ 0)
+    (hmax : IsMaxIsotropic ℂ 3 (ann ℂ 3 (bcS (Kd d) ℂ 3 u)))
+    (hbc : bcSubV (Kd d) ℂ 3 (ann (Kd d) 3 u) = ann ℂ 3 (bcS (Kd d) ℂ 3 u))
+    (h : IsDefinedOverV ℚ ℂ 3 (bcSubV (Kd d) ℂ 3 (ann (Kd d) 3 u))) :
+    σS 3 d u ∈ Submodule.span (Kd d) {u} := by
+  obtain ⟨W₀, hW₀⟩ := h
+  rw [hbc] at hW₀
+  have h1 : ann ℂ 3 (bcS (Kd d) ℂ 3 (σS 3 d u)) = ann ℂ 3 (bcS (Kd d) ℂ 3 u) := by
+    rw [← s10_cc_bcS, s10_ann_conjS, hW₀, s10_map_conjVL_bcSubV]
+  have hu0' : bcS (Kd d) ℂ 3 u ≠ 0 := fun h0 => hu0 (s10_bcS_injective (by rw [h0, map_zero]))
+  exact s10_mem_span_of_bcS hu0 (chevalley_III_1_4_unique ℂ 3 _ _ hu0' hmax h1)
+
+/-- If `σ` fixes the line `K u` (`u ≠ 0`), then the base change to `ℂ` of `ker m_u ⊆ V_K` is
+defined over `ℚ`: `ker m_u` is `σ`-stable (`σ(ker m_u) = ker m_{σ u}`), hence the base change of its
+rational points (`s10_isDefinedOverV_of_σ`). -/
+theorem s10_isDefinedOver_of_σ_mem_span {d : ℚ} (hd : 0 < d) {u : S (Kd d) 3} (hu0 : u ≠ 0)
+    (h : σS 3 d u ∈ Submodule.span (Kd d) {u}) :
+    IsDefinedOverV ℚ ℂ 3 (bcSubV (Kd d) ℂ 3 (ann (Kd d) 3 u)) := by
+  obtain ⟨c, hc⟩ := Submodule.mem_span_singleton.mp h
+  have hc0 : c ≠ 0 := by
+    rintro rfl
+    rw [zero_smul] at hc
+    exact hu0 (s10_conjS_injective (Kd.σ d) (by rw [map_zero]; exact hc.symm))
+  have hσ : ∀ y ∈ ann (Kd d) 3 u, σV 3 d y ∈ ann (Kd d) 3 u := by
+    intro y hy
+    have h1 := s10_ann_conjS (Kd.σ d) u
+    rw [show conjS (Kd.σ d) 3 u = c • u from hc.symm, s10_ann_smul hc0] at h1
+    rw [h1]
+    exact Submodule.mem_map_of_mem hy
+  obtain ⟨W₀, hW₀⟩ := s10_isDefinedOverV_of_σ hd _ hσ
+  exact ⟨W₀, by rw [hW₀, s10_bcSubV_bcSubV]⟩
+
+/-- **"The maximal isotropic subspaces `W₁` and `W₂` are not defined over `ℚ`"** (proof of
+Lemma 10.2.1, l. 9795), for `W₁ = g⁻¹(H¹(X)) = ker m_u`, `u = g⁻¹[pt_X]`, and
+`W₂ = g⁻¹(H¹(X̂)) = ker m_{u'}`, `u' = g⁻¹ 1`, given that `σ` permutes the lines `K u` and `K u'`
+(`hσ`, step 1 of `s10_cm_secant`). If `(W_i)_ℂ` were defined over `ℚ`, `σ` would fix the line of
+`W_i` (`s10_σ_mem_span_of_isDefinedOver`), hence, since it permutes the two lines, both lines: `W₁`
+and `W₂` would both be defined over `ℚ`, which the paper's `J`-argument excludes
+(`s10_not_fixed_lines`). -/
+theorem s10_not_isDefinedOver {d : ℚ} (hdJ : J ℚ w = d) (hd : 0 < d) (g : Spin (Kd d) 3)
+    (hg : m (Kd d) 3 (g : C (Kd d) 3) (bcS ℚ (Kd d) 3 w) = 1 + (2 * Kd.sqrtNeg d) • pt (Kd d) 3)
+    {u u' : S (Kd d) 3} (hu : u = m (Kd d) 3 ((g⁻¹ : Spin (Kd d) 3) : C (Kd d) 3) (pt (Kd d) 3))
+    (hu' : u' = m (Kd d) 3 ((g⁻¹ : Spin (Kd d) 3) : C (Kd d) 3) 1)
+    (hσ : (σS 3 d u ∈ Submodule.span (Kd d) {u} ∧ σS 3 d u' ∈ Submodule.span (Kd d) {u'}) ∨
+      (σS 3 d u ∈ Submodule.span (Kd d) {u'} ∧ σS 3 d u' ∈ Submodule.span (Kd d) {u})) :
+    ¬ IsDefinedOverV ℚ ℂ 3 (bcSubV (Kd d) ℂ 3 (ann (Kd d) 3 u)) ∧
+      ¬ IsDefinedOverV ℚ ℂ 3 (bcSubV (Kd d) ℂ 3 (ann (Kd d) 3 u')) := by
+  have hli : LinearIndependent (Kd d) ![u', u] := by
+    rw [hu, hu']
+    exact (s10_isTransversalSecant_map g⁻¹ (isTransversalSecant_one_pt (Kd d))).2.1
+  -- `σ` fixing one of the two lines fixes both, as it permutes them: then `W₁` and `W₂` are both
+  -- defined over `ℚ`, which the `J`-argument excludes
+  have key : σS 3 d u ∈ Submodule.span (Kd d) {u} ∨ σS 3 d u' ∈ Submodule.span (Kd d) {u'} →
+      False := by
+    intro h
+    have hz : ∀ x : S (Kd d) 3, σS 3 d x = 0 → x = 0 := fun x hx =>
+      s10_conjS_injective (Kd.σ d) (by rw [map_zero]; exact hx)
+    rcases hσ with ⟨h1, h2⟩ | ⟨h1, h2⟩
+    · subst hu hu'
+      exact s10_not_fixed_lines hdJ hd g hg h1 h2
+    · rcases h with h | h
+      · exact hli.ne_zero 1 (hz u (s10_eq_zero_of_mem_span_pair hli h1 h))
+      · exact hli.ne_zero 0 (hz u' (s10_eq_zero_of_mem_span_pair hli h h2))
+  have hptc : bcS (Kd d) ℂ 3 (pt (Kd d) 3) = pt ℂ 3 := s10_bcS_basisS _ _ _ _
+  refine ⟨fun h => key (Or.inl (s10_σ_mem_span_of_isDefinedOver (hli.ne_zero 1) ?_ ?_ h)),
+    fun h => key (Or.inr (s10_σ_mem_span_of_isDefinedOver (hli.ne_zero 0) ?_ ?_ h))⟩
+  · rw [hu, s10_bcS_m_spin, hptc]
+    exact (s10_isEvenPureSpinor_m _ (s10_isEvenPureSpinor_pt ℂ 3)).2
+  · rw [hu]
+    exact s10_bcSubV_ann_m _ _ s10_bcSubV_ann_pt
+  · rw [hu', s10_bcS_m_spin, map_one]
+    exact (s10_isEvenPureSpinor_m _ (s10_isEvenPureSpinor_one ℂ 3)).2
+  · rw [hu']
+    exact s10_bcSubV_ann_m _ _ s10_bcSubV_ann_one
+
+/-- **`W₁, W₂` are not defined over `ℚ`, and `σ(W₁) = W₂`** (proof of Lemma 10.2.1, l. 9792–9796):
+for `g ∈ Spin(V_K)` with `g(w) = 1 + 2√-d [pt_X]` ([Igusa, Prop. 3], last paragraph),
+`W₁ = g⁻¹(H¹(X)) = ker m_{g⁻¹[pt_X]}` and `W₂ = g⁻¹(H¹(X̂)) = ker m_{g⁻¹ 1}` are not defined over
+`ℚ`, and `σ` maps the line `ℓ̃₁ = K g⁻¹[pt_X]` onto `ℓ̃₂ = K g⁻¹ 1` (equivalently `σ(W₁) = W₂`,
+[Chevalley, III.1.4]). The steps:
+1. the pair `{W₁, W₂}` is invariant under `σ`, since `P_w` is, by Lemma 10.1.1 (l. 9796,
+   `s10_lines_σ`);
+2. `W₁` and `W₂` are not defined over `ℚ` (l. 9795, `s10_not_isDefinedOver`, with the paper's
+   `J`-argument `s10_not_fixed_lines`);
+3. hence `σ(W₁) = W₂` (l. 9796): `σ(W₁) ∈ {W₁, W₂}` by step 1, and `σ(W₁) = W₁` would make `W₁`
+   defined over `ℚ` (a `σ`-stable subspace of `V_K` is the base change of its rational points,
+   `s10_isDefinedOverV_of_σ`), against step 2.
+Departure from the paper (reason 1): the paper states the `σ`-invariance of the pair (l. 9796) after
+the claim that `W₁` and `W₂` are not defined over `ℚ` (l. 9795), but the argument for that claim
+needs it: the `J`-argument of l. 9795 applies when `W₁` and `W₂` are both defined over `ℚ`, and `W₂`
+is defined over `ℚ` when `W₁` is only because `σ` permutes the pair. Here the `σ`-invariance is
+proved first; the rest is in the paper's order. -/
 theorem s10_cm_secant (hIgusa : IgusaProp3NormalForm) {d : ℚ} (hdJ : J ℚ w = d)
     (hw : w ∈ Splus ℚ 3) (hd : 0 < d) :
     ∃ g : Spin (Kd d) 3,
       m (Kd d) 3 (g : C (Kd d) 3) (bcS ℚ (Kd d) 3 w) = 1 + (2 * Kd.sqrtNeg d) • pt (Kd d) 3 ∧
+      ¬ IsDefinedOverV ℚ ℂ 3 (bcSubV (Kd d) ℂ 3
+        (ann (Kd d) 3 (m (Kd d) 3 ((g⁻¹ : Spin (Kd d) 3) : C (Kd d) 3) (pt (Kd d) 3)))) ∧
+      ¬ IsDefinedOverV ℚ ℂ 3 (bcSubV (Kd d) ℂ 3
+        (ann (Kd d) 3 (m (Kd d) 3 ((g⁻¹ : Spin (Kd d) 3) : C (Kd d) 3) 1))) ∧
       ∃ c : Kd d, c ≠ 0 ∧
         σS 3 d (m (Kd d) 3 ((g⁻¹ : Spin (Kd d) 3) : C (Kd d) 3) (pt (Kd d) 3)) =
           c • m (Kd d) 3 ((g⁻¹ : Spin (Kd d) 3) : C (Kd d) 3) 1 := by
   subst hdJ
+  -- the normal form `g(w) = 1 + 2√-d [pt_X]` over `K` ([Igusa, Prop. 3], last paragraph; l. 9792)
   obtain ⟨g, hg⟩ := igusa_prop3_normalForm hIgusa w hw hd
-  refine ⟨g, hg, ?_⟩
-  rcases s10_lines_σ hIgusa rfl hw hd g hg with ⟨h1, h2⟩ | ⟨h1, -⟩
-  · exact (s10_not_fixed_lines rfl hd g hg h1 h2).elim
+  -- step 1 (l. 9796, used first): `σ` permutes the lines of `W₁`, `W₂`, as `P_w` is `σ`-stable
+  have hσ := s10_lines_σ hIgusa rfl hw hd g hg
+  -- step 2 (l. 9795): `W₁` and `W₂` are not defined over `ℚ`
+  obtain ⟨hn₁, hn₂⟩ := s10_not_isDefinedOver rfl hd g hg rfl rfl hσ
+  refine ⟨g, hg, hn₁, hn₂, ?_⟩
+  -- step 3 (l. 9796): `σ(W₁) ∈ {W₁, W₂}`, and `σ(W₁) = W₁` would make `W₁` defined over `ℚ`
+  have hu0 := (s10_isEvenPureSpinor_m g⁻¹ (s10_isEvenPureSpinor_pt (Kd (J ℚ w)) 3)).ne_zero
+    (by norm_num)
+  rcases hσ with ⟨h1, -⟩ | ⟨h1, -⟩
+  · exact (hn₁ (s10_isDefinedOver_of_σ_mem_span hd hu0 h1)).elim
   · obtain ⟨c, hc⟩ := Submodule.mem_span_singleton.mp h1
     refine ⟨c, ?_, hc.symm⟩
     rintro rfl
     rw [zero_smul] at hc
-    have hu0 := (s10_isEvenPureSpinor_m g⁻¹ (s10_isEvenPureSpinor_pt (Kd (J ℚ w)) 3)).ne_zero
-      (by norm_num)
     apply hu0
     apply s10_conjS_injective (Kd.σ (J ℚ w))
     rw [map_zero]
@@ -644,60 +963,11 @@ theorem s10_ηK_injective {l : Kd d} (hl : l ≠ 0) : Function.Injective (P.ηK 
   rw [ha0, hv.resolve_left hσl, add_zero]
   exact Submodule.zero_mem _
 
-theorem s10_span_bcV_eq_top : Submodule.span (Kd d) (Set.range (bcV ℚ (Kd d) 3)) = ⊤ := by
-  rw [eq_top_iff]
-  intro v _
-  have hv : v = ∑ i, v.1 (e (Kd d) 3 i) • ((f (Kd d) 3 i, 0) : V (Kd d) 3) +
-      ∑ i, v.2 i • ((0, e (Kd d) 3 i) : V (Kd d) 3) := by
-    apply s10_V_ext
-    · intro i
-      simp [Prod.fst_sum, LinearMap.sum_apply, s10_f_e]
-    · intro i
-      simp [Prod.snd_sum, Finset.sum_apply, e, Pi.single_apply]
-  rw [hv]
-  have h1 : ∀ i, ((f (Kd d) 3 i, 0) : V (Kd d) 3) = bcV ℚ (Kd d) 3 (f ℚ 3 i, 0) := by
-    intro i
-    apply s10_V_ext
-    · intro j
-      rw [s10_bcV_fst]
-      simp [s10_f_e]
-    · intro j; simp [s10_bcV_snd]
-  have h2 : ∀ i, ((0, e (Kd d) 3 i) : V (Kd d) 3) = bcV ℚ (Kd d) 3 (0, e ℚ 3 i) := by
-    intro i
-    apply s10_V_ext
-    · intro j; rw [s10_bcV_fst]; simp
-    · intro j
-      rw [s10_bcV_snd]
-      simp [e, Pi.single_apply]
-  refine add_mem (Submodule.sum_mem _ fun i _ => ?_) (Submodule.sum_mem _ fun i _ => ?_)
-  · rw [h1]; exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨_, rfl⟩)
-  · rw [h2]; exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨_, rfl⟩)
-
 theorem s10_η_injective {l : Kd d} (hl : l ≠ 0) : Function.Injective (P.η hW l) := by
   intro x y h
   apply s10_bcV_injective (F' := Kd d)
   apply s10_ηK_injective P hW hl
   rw [← s10_bcV_η, ← s10_bcV_η, h]
-
-theorem s10_η_mul (l l' : Kd d) (v : V ℚ 3) : P.η hW l (P.η hW l' v) = P.η hW (l * l') v := by
-  apply s10_bcV_injective (F' := Kd d)
-  rw [s10_bcV_η, s10_bcV_η, s10_bcV_η, s10_ηK_mul]
-
-theorem s10_η_inj_param {l l' : Kd d} (h : P.η hW l = P.η hW l') : l = l' := by
-  have hK : P.ηK hW l = P.ηK hW l' := by
-    apply LinearMap.ext_on_range (s10_span_bcV_eq_top (d := d))
-    intro v
-    rw [← s10_bcV_η, ← s10_bcV_η, h]
-  obtain ⟨a, ha⟩ : ∃ a : P.W₁, a ≠ 0 := by
-    have hfr : Module.finrank (Kd d) P.W₁ = 6 := P.isPure.2.2
-    have hpos : 0 < Module.finrank (Kd d) P.W₁ := by rw [hfr]; norm_num
-    exact Module.finrank_pos_iff_exists_ne_zero.mp hpos
-  have h1 := LinearMap.congr_fun hK a
-  rw [s10_ηK_W₁ P hW l a.2, s10_ηK_W₁ P hW l' a.2] at h1
-  have h2 : (l - l') • (a : V (Kd d) 3) = 0 := by rw [sub_smul, h1, sub_self]
-  rcases smul_eq_zero.mp h2 with h3 | h3
-  · exact sub_eq_zero.mp h3
-  · exact absurd (Subtype.ext h3) ha
 
 theorem s10_pairing_bcV (x y : V ℚ 3) :
     pairing (Kd d) 3 (bcV ℚ (Kd d) 3 x) (bcV ℚ (Kd d) 3 y) = algebraMap ℚ (Kd d) (pairing ℚ 3 x y) := by
@@ -709,25 +979,6 @@ theorem s10_pairing_W {W : Submodule (Kd d) (V (Kd d) 3)} (hW' : ∀ v ∈ W, Q 
   rw [pairing, QuadraticMap.polarBilin_apply_apply, QuadraticMap.polar, hW' _ (W.add_mem ha ha'),
     hW' _ ha, hW' _ ha', sub_zero, sub_zero]
 
-/-- `η_λ` is a similarity with multiplier `Nm(λ)`. -/
-theorem s10_pairing_η (hd : 0 < d) (l : Kd d) (x y : V ℚ 3) :
-    pairing ℚ 3 (P.η hW l x) (P.η hW l y) = Kd.Nm d l * pairing ℚ 3 x y := by
-  apply (algebraMap ℚ (Kd d)).injective
-  rw [map_mul, ← s10_pairing_bcV, ← s10_pairing_bcV, s10_bcV_η, s10_bcV_η]
-  have hNm : algebraMap ℚ (Kd d) (Kd.Nm d l) = l * Kd.σ d l := by
-    apply Subtype.ext
-    have h1 : ((algebraMap ℚ (Kd d) (Kd.Nm d l) : Kd d) : ℂ) = ((Kd.Nm d l : ℚ) : ℂ) := by simp
-    rw [h1, Kd.coe_Nm hd l, Subfield.coe_mul, Kd.coe_σ]
-  rw [hNm]
-  obtain ⟨a, ha, b, hb, hX⟩ := s10_decomp P hW (bcV ℚ (Kd d) 3 x)
-  obtain ⟨a', ha', b', hb', hY⟩ := s10_decomp P hW (bcV ℚ (Kd d) 3 y)
-  rw [hX, hY, s10_ηK_add P hW l ha hb, s10_ηK_add P hW l ha' hb']
-  have h1 := P.isPure.2.1
-  have h2 := P.isPure₂.2.1
-  simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul,
-    s10_pairing_W h1 ha ha', s10_pairing_W h2 hb hb']
-  ring
-
 end S10Eta
 
 section S10Main
@@ -735,20 +986,24 @@ section S10Main
 /-- (Proof of Lemma 10.2.1, l. 9792–9796.) The secant through `w`, with its construction: for
 `g ∈ Spin(V_K)` with `g(w) = 1 + 2√-d [pt_X]` ([Igusa, Prop. 3], last paragraph), the rational
 `K`-secant `P` with `u₁ = g⁻¹[pt_X]` and `u₂ = σ(u₁) = c · g⁻¹ 1`, so that `W₁ = g⁻¹(H¹(X))` and
-`W₂ = g⁻¹(H¹(X̂))`; `V_K = W₁ ⊕ W₂`, `w ∈ P`, and `P_K ⊗ ℂ` is the transversal secant through `w`
-of Lemma 10.1.1 and the base change of `P`. -/
+`W₂ = g⁻¹(H¹(X̂))`, which are not defined over `ℚ` (`s10_cm_secant`, where `σ(W₁) = W₂` is
+proved); `V_K = W₁ ⊕ W₂`, `w ∈ P`, and `P_K ⊗ ℂ` is the transversal secant through `w` of
+Lemma 10.1.1 and the base change of `P`. -/
 theorem s10_secant_data (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
     (hd : 0 < J ℚ w) :
     ∃ (g : Spin (Kd (J ℚ w)) 3) (c : Kd (J ℚ w)) (P : KSecant 3 (J ℚ w)), c ≠ 0 ∧
       P.u₁ = m (Kd (J ℚ w)) 3 ((g⁻¹ : Spin (Kd (J ℚ w)) 3) : C (Kd (J ℚ w)) 3)
         (pt (Kd (J ℚ w)) 3) ∧
       P.u₂ = c • m (Kd (J ℚ w)) 3 ((g⁻¹ : Spin (Kd (J ℚ w)) 3) : C (Kd (J ℚ w)) 3) 1 ∧
+      ¬ IsDefinedOverV ℚ ℂ 3 (bcSubV (Kd (J ℚ w)) ℂ 3 P.W₁) ∧
+      ¬ IsDefinedOverV ℚ ℂ 3 (bcSubV (Kd (J ℚ w)) ℂ 3 P.W₂) ∧
       IsCompl P.W₁ P.W₂ ∧ w ∈ P.Pℚ ∧
       IsTransversalSecant ℂ 3 (bcSubS (Kd (J ℚ w)) ℂ 3 P.PK)
         (bcS (Kd (J ℚ w)) ℂ 3 P.u₁) (bcS (Kd (J ℚ w)) ℂ 3 P.u₂) ∧
       bcSubS (Kd (J ℚ w)) ℂ 3 P.PK = bcSubS ℚ ℂ 3 P.Pℚ := by
-  -- the normal form `g(w) = 1 + 2√-d [pt_X]` over `K` ([Igusa, Prop. 3]); `σ` exchanges the lines
-  obtain ⟨g, hg, c, hc, hσ⟩ := s10_cm_secant hIgusa rfl hw hd
+  -- the normal form `g(w) = 1 + 2√-d [pt_X]` over `K` ([Igusa, Prop. 3]); `W₁, W₂` are not defined
+  -- over `ℚ`, and `σ` exchanges the lines `K g⁻¹[pt_X]`, `K g⁻¹ 1`
+  obtain ⟨g, hg, hn₁, hn₂, c, hc, hσ⟩ := s10_cm_secant hIgusa rfl hw hd
   have hT := s10_isTransversalSecant_map g⁻¹ (isTransversalSecant_one_pt (Kd (J ℚ w)))
   have hT' := s10_isTransversalSecant_smul_right (s10_isTransversalSecant_swap hT) hc
   have hli : LinearIndependent (Kd (J ℚ w))
@@ -764,7 +1019,13 @@ theorem s10_secant_data (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w �
     rw [← hσ, ← hu₁]
     rfl
   have hinv : bcSpin (Kd (J ℚ w)) ℂ 3 g⁻¹ = (bcSpin (Kd (J ℚ w)) ℂ 3 g)⁻¹ := map_inv _ g
-  refine ⟨g, c, P, hc, hu₁, hu₂, ?_, ?_, ?_, ?_⟩
+  refine ⟨g, c, P, hc, hu₁, hu₂, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · show ¬ IsDefinedOverV ℚ ℂ 3 (bcSubV _ ℂ 3 (ann _ 3 P.u₁))
+    rw [hu₁]
+    exact hn₁
+  · show ¬ IsDefinedOverV ℚ ℂ 3 (bcSubV _ ℂ 3 (ann _ 3 P.u₂))
+    rw [hu₂, s10_ann_smul hc]
+    exact hn₂
   · apply P.isCompl_of_inf_eq_bot
     show ann _ 3 P.u₁ ⊓ ann _ 3 P.u₂ = ⊥
     rw [hu₁, hu₂, s10_ann_smul hc, inf_comm]
@@ -800,7 +1061,7 @@ theorem s10_secant (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Spl
       IsTransversalSecant ℂ 3 (bcSubS (Kd (J ℚ w)) ℂ 3 P.PK)
         (bcS (Kd (J ℚ w)) ℂ 3 P.u₁) (bcS (Kd (J ℚ w)) ℂ 3 P.u₂) ∧
       bcSubS (Kd (J ℚ w)) ℂ 3 P.PK = bcSubS ℚ ℂ 3 P.Pℚ := by
-  obtain ⟨-, -, P, -, -, -, h⟩ := s10_secant_data hIgusa w hw hd
+  obtain ⟨-, -, P, -, -, -, -, -, h⟩ := s10_secant_data hIgusa w hw hd
   exact ⟨P, h⟩
 
 theorem s10_spinStab_eq (w : S ℚ 3) (_hw : w ∈ Splus ℚ 3) (hd : 0 < J ℚ w)
@@ -858,13 +1119,13 @@ theorem s10_eta_centralizer (w : S ℚ 3) (hw : w ∈ Splus ℚ 3) (hd : 0 < J �
         h ∈ Subgroup.centralizer (rho ℚ 3 '' (spinStab ℚ 3 w : Set (Spin ℚ 3))) ⊓
             Otilde 3 (J ℚ w) ↔
           ∃ l : (Kd (J ℚ w))ˣ, (h : V ℚ 3 →ₗ[ℚ] V ℚ 3) = P.η hW l := by
-  refine ⟨fun l l' h => Units.ext (s10_η_inj_param P hW h), fun l => ?_, fun h => ?_⟩
-  · -- `η_λ` is an injective endomorphism, hence an automorphism, and a similarity
-    refine ⟨LinearEquiv.ofInjectiveEndo (P.η hW l) (s10_η_injective P hW l.ne_zero),
-      ⟨Kd.Nm (J ℚ w) l, ⟨l, l.ne_zero, rfl⟩, fun x y => ?_⟩, rfl⟩
-    exact s10_pairing_η P hW hd l x y
+  have hP : ¬ P.IsIsotropic := fun h' => (lemma2_2_1 P hd).mp h' hW.inf_eq_bot
+  -- `η` is injective ((2.2.4), `KSecant.ηHom_injective`)
+  refine ⟨fun l l' h => Units.ext (P.ηHom_injective hd hW h), fun l => ?_, fun h => ?_⟩
+  · -- `η_λ` is an injective endomorphism, hence an automorphism; it lies in `Õ(V_ℚ)` by Lemma 2.2.4
+    let h := LinearEquiv.ofInjectiveEndo (P.η hW l) (s10_η_injective P hW l.ne_zero)
+    exact ⟨h, ((lemma2_2_4 P hd (by norm_num) hP h).mpr ⟨l, l.ne_zero, rfl⟩).1, rfl⟩
   · -- Lemma 2.2.4 with `Spin(V_ℚ)_w = Spin(V_ℚ)_P` (Remark 2.2.3)
-    have hP : ¬ P.IsIsotropic := fun h' => (lemma2_2_1 P hd).mp h' hW.inf_eq_bot
     have hstab := s10_spinStab_eq w hw hd P hW hwP
     have key := lemma2_2_4 P hd (by norm_num) hP h
     rw [Subgroup.mem_inf, Subgroup.mem_centralizer_iff]
@@ -887,8 +1148,9 @@ end S10Main
 
 The paper calls `W₁, W₂` "the two maximal isotropic subspaces of `V_ℂ` invariant under
 `Spin(V_ℚ)_w`". That no other maximal isotropic subspace is invariant needs that `Spin(V_ℚ)_w` is
-Zariski dense in `Spin(V_ℂ)_w ≅ SL(W₁)`, which the paper does not discuss. We prove the needed
-consequence directly, along the plan of `notes/proof-plans.md` (unitary transvections):
+Zariski dense in `Spin(V_ℂ)_w ≅ SL(W₁)`, which the paper does not discuss (a gap). Zariski density
+is not available in Lean, so (departure, reason 2) we prove the needed consequence directly, along
+the plan of `notes/proof-plans.md` (unitary transvections):
 
 * for an isotropic `u ∈ V_ℚ` and `f = η(√-d)`, the unipotent `E_u = 1 + ι(f u) ι(u)` (Tau Ceti's
   `spinTransvection`) lies in `Spin(V_ℚ)_P = Spin(V_ℚ)_w` and acts on `V_ℂ` by `1 + Ñ(u, u)`,
@@ -1059,67 +1321,6 @@ theorem s10_N_eq_D (i j : Fin 6) (z : V F 3) :
 
 end S10Ops
 
-section S10BCV
-
-variable {F F' : Type*} [Field F] [CharZero F] [Field F'] [CharZero F'] [Algebra F F']
-
-theorem s10_bcV_fst' (v : V F 3) (i : Fin 6) :
-    (bcV F F' 3 v).1 (e F' 3 i) = algebraMap F F' (v.1 (e F 3 i)) := by
-  show bcDual F F' 3 v.1 (e F' 3 i) = _
-  rw [← s10_bcH1_e F 3 F' i, s10_bcDual_apply_bcH1]
-
-theorem s10_bcV_snd' (v : V F 3) (i : Fin 6) :
-    (bcV F F' 3 v).2 i = algebraMap F F' (v.2 i) := rfl
-
-theorem s10_bcV_bcV {F'' : Type*} [Field F''] [CharZero F''] [Algebra F' F''] [Algebra F F'']
-    [IsScalarTower F F' F''] (x : V F 3) : bcV F' F'' 3 (bcV F F' 3 x) = bcV F F'' 3 x := by
-  apply s10_V_ext
-  · intro i
-    rw [s10_bcV_fst', s10_bcV_fst', s10_bcV_fst', ← IsScalarTower.algebraMap_apply]
-  · intro i
-    rw [s10_bcV_snd', s10_bcV_snd', s10_bcV_snd', ← IsScalarTower.algebraMap_apply]
-
-theorem s10_pairing_bcV' (x y : V F 3) :
-    pairing F' 3 (bcV F F' 3 x) (bcV F F' 3 y) = algebraMap F F' (pairing F 3 x y) := by
-  simp only [pairing, QuadraticMap.polarBilin_apply_apply, QuadraticMap.polar, ← map_add, Q_bcV,
-    map_sub]
-
-theorem s10_bcV_f (i : Fin 6) : bcV F F' 3 ((f F 3 i, 0) : V F 3) = (f F' 3 i, 0) := by
-  apply s10_V_ext
-  · intro j
-    rw [s10_bcV_fst']
-    simp [s10_f_e]
-  · intro j
-    rw [s10_bcV_snd']
-    simp
-
-theorem s10_bcV_e (i : Fin 6) : bcV F F' 3 ((0, e F 3 i) : V F 3) = (0, e F' 3 i) := by
-  apply s10_V_ext
-  · intro j
-    rw [s10_bcV_fst']
-    simp
-  · intro j
-    rw [s10_bcV_snd']
-    simp [e, Pi.single_apply]
-
-theorem s10_bcC_star (x : C F 3) : bcC F F' 3 (star x) = star (bcC F F' 3 x) := by
-  induction x using CliffordAlgebra.induction with
-  | algebraMap r =>
-    rw [star_algebraMap, AlgHom.commutes, IsScalarTower.algebraMap_apply F F' (C F' 3),
-      star_algebraMap]
-  | ι v => simp [s10_bcC_ι, star_ι]
-  | add x y hx hy => simp only [star_add, map_add, hx, hy]
-  | mul x y hx hy => simp only [star_mul, map_mul, hx, hy]
-
-/-- `ρ` commutes with change of coefficients. -/
-theorem s10_bcV_rho (g : Spin F 3) (x : V F 3) :
-    bcV F F' 3 (rho F 3 g x) = rho F' 3 (bcSpin F F' 3 g) (bcV F F' 3 x) := by
-  apply CliffordAlgebra.ι_injective (Q F' 3)
-  rw [ι_rho, ← s10_bcC_ι, ι_rho, map_mul, map_mul, s10_bcC_ι, s10_bcC_star]
-  rfl
-
-end S10BCV
-
 section S10Transvection
 
 /-- The Clifford relation on spinors: `m_x m_y = (x, y) - m_y m_x`. -/
@@ -1274,8 +1475,10 @@ discuss): a subspace `W ⊆ V_ℂ` invariant under `Spin(V_ℚ)_P` is invariant 
 isotropic, `f = η(√-d)`) lie in `Spin(V_ℚ)_P` and act by `1 + Ñ(u, u)`; a quadratic map vanishing
 on the null cone of `Q` is a multiple of `Q` (`s10_polar_mod`), and `D_{a,b}` is a combination of
 polarizations of `Ñ` whose `Q`-part is `(a, b)_V = 0`.
-Departure from the paper (a gap filled): the paper uses without comment that `W₁, W₂` are the only
-invariant maximal isotropic subspaces; this lemma, with `s10_eq_A_or_B`, proves it (plan of
+Gap in the paper (filled): the paper uses without comment that `W₁, W₂` are the only maximal
+isotropic subspaces invariant under `Spin(V_ℚ)_w` (l. 9793), which needs the Zariski density of
+`Spin(V_ℚ)_w` in `Spin(V_ℂ)_w ≅ SL(W₁)`. Departure from the paper (reason 2): Zariski density is not
+available in Lean; this lemma, with `s10_eq_A_or_B`, proves the consequence needed (plan of
 `notes/proof-plans.md`). -/
 theorem s10_D_mem (hd : 0 < d) (W : Submodule ℂ (V ℂ 3))
     (hinv : IsInvariantUnder ℚ ℂ 3 P.spinPℚ W) {a b : V (Kd d) 3} (ha : a ∈ P.W₁)
@@ -1382,98 +1585,6 @@ theorem s10_D_mem (hd : 0 < d) (W : Submodule ℂ (V ℂ 3))
 
 end S10Dense
 
-section S10Frame
-
-set_option linter.unusedSectionVars false
-
-variable {F F' : Type*} [Field F] [CharZero F] [Field F'] [CharZero F'] [Algebra F F']
-
-theorem s10_rho_rho_inv (g : Spin F 3) (v : V F 3) : rho F 3 g (rho F 3 g⁻¹ v) = v := by
-  have hρmul : ∀ a b : Spin F 3, rho F 3 (a * b) = rho F 3 a * rho F 3 b := fun a b =>
-    CliffordAlgebra.spinVectorAction_mul _ a b
-  rw [← LinearEquiv.mul_apply, ← hρmul, mul_inv_cancel]
-  exact congrArg (fun e : V F 3 ≃ₗ[F] V F 3 => e v) (CliffordAlgebra.spinVectorAction_one _)
-
-theorem s10_rho_inv_rho (g : Spin F 3) (v : V F 3) : rho F 3 g⁻¹ (rho F 3 g v) = v := by
-  have := s10_rho_rho_inv g⁻¹ v
-  rwa [inv_inv] at this
-
-theorem s10_bcSubV_map_rho (g : Spin F 3) (A : Submodule F (V F 3)) :
-    bcSubV F F' 3 (A.map (rho F 3 g).toLinearMap) =
-      (bcSubV F F' 3 A).map (rho F' 3 (bcSpin F F' 3 g)).toLinearMap := by
-  rw [bcSubV, bcSubV, Submodule.map_span, Submodule.map_coe, Set.image_image, Set.image_image]
-  congr 1
-  exact Set.image_congr fun x _ => s10_bcV_rho g x
-
-theorem s10_bcSubV_bot_prod_top :
-    bcSubV F F' 3 ((⊥ : Submodule F (Module.Dual F (H1 F 3))).prod ⊤) =
-      (⊥ : Submodule F' (Module.Dual F' (H1 F' 3))).prod ⊤ := by
-  apply le_antisymm
-  · rw [bcSubV, Submodule.span_le]
-    rintro _ ⟨x, hx, rfl⟩
-    have h1 : x.1 = 0 := by simpa using (Submodule.mem_prod.mp hx).1
-    refine Submodule.mem_prod.mpr ⟨?_, Submodule.mem_top⟩
-    rw [Submodule.mem_bot]
-    show bcDual F F' 3 x.1 = 0
-    rw [h1, map_zero]
-  · intro y hy
-    have h1 : y.1 = 0 := by simpa using (Submodule.mem_prod.mp hy).1
-    have hy' : y = ∑ i : Fin 6, y.2 i • ((0, e F' 3 i) : V F' 3) := by
-      refine Prod.ext ?_ ?_
-      · simp [h1, Prod.fst_sum]
-      · funext k
-        simp [Prod.snd_sum, Finset.sum_apply, e, Pi.single_apply]
-    rw [hy']
-    exact Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ (Submodule.subset_span
-      ⟨(0, e F 3 i), Submodule.mem_prod.mpr ⟨Submodule.zero_mem _, Submodule.mem_top⟩,
-        s10_bcV_e i⟩)
-
-theorem s10_bcSubV_top_prod_bot :
-    bcSubV F F' 3 ((⊤ : Submodule F (Module.Dual F (H1 F 3))).prod ⊥) =
-      (⊤ : Submodule F' (Module.Dual F' (H1 F' 3))).prod ⊥ := by
-  apply le_antisymm
-  · rw [bcSubV, Submodule.span_le]
-    rintro _ ⟨x, hx, rfl⟩
-    have h2 : x.2 = 0 := by simpa using (Submodule.mem_prod.mp hx).2
-    refine Submodule.mem_prod.mpr ⟨Submodule.mem_top, ?_⟩
-    rw [Submodule.mem_bot]
-    show bcH1 F F' 3 x.2 = 0
-    rw [h2, map_zero]
-  · intro y hy
-    have h2 : y.2 = 0 := by simpa using (Submodule.mem_prod.mp hy).2
-    have hy' : y = ∑ i : Fin 6, y.1 (e F' 3 i) • ((f F' 3 i, 0) : V F' 3) := by
-      refine Prod.ext ?_ ?_
-      · simp only [Prod.fst_sum, Prod.smul_fst]
-        exact s10_dual_eq_sum y.1
-      · simp [h2, Prod.snd_sum]
-    rw [hy']
-    exact Submodule.sum_mem _ fun i _ => Submodule.smul_mem _ _ (Submodule.subset_span
-      ⟨(f F 3 i, 0), Submodule.mem_prod.mpr ⟨Submodule.mem_top, Submodule.zero_mem _⟩,
-        s10_bcV_f i⟩)
-
-/-- The coordinatewise action of a field automorphism fixes the vectors defined over `ℚ`. -/
-theorem s10_conjV_bcV (c : F ≃+* F) (x : V ℚ 3) : conjV c 3 (bcV ℚ F 3 x) = bcV ℚ F 3 x := by
-  apply s10_V_ext
-  · intro i
-    rw [s10_conjV_fst]
-    simp only [LinearMap.sum_apply, LinearMap.smul_apply, s10_f_e, smul_eq_mul, mul_ite, mul_one,
-      mul_zero, Finset.sum_ite_eq', Finset.mem_univ, ite_true]
-    rw [s10_bcV_fst', eq_ratCast, map_ratCast]
-  · intro i
-    rw [s10_conjV_snd, Function.comp_apply, s10_bcV_snd', eq_ratCast, map_ratCast]
-
-theorem s10_map_conjVL_bcSubV (c : F ≃+* F) (W₀ : Submodule ℚ (V ℚ 3)) :
-    (bcSubV ℚ F 3 W₀).map (s10_conjVL c) = bcSubV ℚ F 3 W₀ := by
-  rw [bcSubV, Submodule.map_span, Set.image_image]
-  congr 1
-  exact Set.image_congr fun x _ => s10_conjV_bcV c x
-
-theorem s10_σS_σS {d : ℚ} (x : S (Kd d) 3) : σS 3 d (σS 3 d x) = x := by
-  have := s10_conjS_symm_conjS (Kd.σ d) x
-  rwa [show (Kd.σ d).symm = Kd.σ d from RingEquiv.ext fun z => rfl] at this
-
-end S10Frame
-
 /-! ## Lemma 10.2.1 -/
 
 /-- **Lemma 10.2.1** (`lemma-imaginary-quadratic-field-is-centralizer-sixfold-case`), first
@@ -1482,8 +1593,19 @@ isotropic subspaces `W₁, W₂` of `V_ℂ` invariant under `Spin(V_ℚ)_w` (act
 `Spin(V_ℚ) → Spin(V_ℂ)` and `ρ`) are defined over `K` — they are the base changes of subspaces
 `W₁, W₂ ⊆ V_K` — but not over `ℚ`, and `σ(W₁) = W₂`.
 Reading: "the two maximal isotropic subspaces of `V_ℂ` invariant under `Spin(V_ℚ)_w`" asserts that
-there are exactly two such subspaces; this is stated as the equivalence below (it uses that
-`Spin(V_ℚ)_w` is Zariski dense in `Spin(V_ℂ)_w ≅ SL(W₁)`, which the paper does not discuss).
+there are exactly two such subspaces; this is stated as the equivalence below.
+The proof is the paper's (l. 9792–9796): `g(w) = 1 + 2√-d [pt_X]` for some `g ∈ Spin(V_K)`
+([Igusa, Prop. 3]), `W₁ = g⁻¹(H¹(X))` and `W₂ = g⁻¹(H¹(X̂))` with `W₁ ∩ W₂ = 0`; `W₁, W₂` are not
+defined over `ℚ` (the `J`-argument) and `σ(W₁) = W₂` (`s10_cm_secant`); `Spin(V_ℚ)_w` fixes the pure
+spinors of `P_w`, so it leaves `W₁` and `W₂` invariant.
+Gap in the paper (filled): that no other maximal isotropic subspace is invariant needs that
+`Spin(V_ℚ)_w` is Zariski dense in `Spin(V_ℂ)_w ≅ SL(W₁)`, which the paper does not discuss.
+Departure from the paper (reason 2): Zariski density is not available in Lean; the proof replaces
+it by the unitary transvections in `Spin(V_ℚ)_P = Spin(V_ℚ)_w` (`s10_D_mem`), which leave only `W₁`
+and `W₂` invariant (`s10_eq_A_or_B`).
+Departure from the paper (reason 1): the `σ`-invariance of the pair `{W₁, W₂}` (l. 9796) is proved
+before the claim that `W₁, W₂` are not defined over `ℚ` (l. 9795), whose argument needs it; see
+`s10_cm_secant`.
 Conditional on [Igusa, Prop. 3] (the normal form, `IgusaProp3NormalForm`), which the proof uses and
 this project assumes (see `WeilClasses/External/Igusa/README.md`). -/
 theorem lemma10_2_1 (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)
@@ -1496,7 +1618,11 @@ theorem lemma10_2_1 (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Sp
       ¬ IsDefinedOverV ℚ ℂ 3 (bcSubV (Kd (J ℚ w)) ℂ 3 W₁) ∧
       ¬ IsDefinedOverV ℚ ℂ 3 (bcSubV (Kd (J ℚ w)) ℂ 3 W₂) ∧
       σV 3 (J ℚ w) '' (W₁ : Set (V (Kd (J ℚ w)) 3)) = (W₂ : Set (V (Kd (J ℚ w)) 3)) := by
-  obtain ⟨g, c, P, hc, hu₁, hu₂, hW, hwP, hT, hPK⟩ := s10_secant_data hIgusa w hw hd
+  -- l. 9792–9796: `g(w) = 1 + 2√-d [pt_X]`, the `K`-secant `P` with `u₁ = g⁻¹[pt_X]`,
+  -- `u₂ = σ(u₁) ∈ K g⁻¹ 1`, so `W₁ = g⁻¹(H¹(X))` and `W₂ = g⁻¹(H¹(X̂))`, which are not defined over
+  -- `ℚ` (l. 9795) and satisfy `σ(W₁) = W₂` (l. 9796) (`s10_cm_secant` for the order of the steps)
+  obtain ⟨g, c, P, hc, hu₁, hu₂, hn₁, hn₂, hW, hwP, hT, hPK⟩ := s10_secant_data hIgusa w hw hd
+  -- l. 9798 (Remark 2.2.3): `Spin(V_ℚ)_w = Spin(V_ℚ)_P`
   have hstab := s10_spinStab_eq w hw hd P hW hwP
   set gc := bcSpin (Kd (J ℚ w)) ℂ 3 g with hgc
   have hinv : bcSpin (Kd (J ℚ w)) ℂ 3 g⁻¹ = gc⁻¹ := map_inv _ g
@@ -1544,22 +1670,7 @@ theorem lemma10_2_1 (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Sp
     exact Submodule.subset_span ⟨P.u₂, Submodule.subset_span (by simp), rfl⟩
   have hinvA : ∀ u ∈ bcSubS ℚ ℂ 3 P.Pℚ, IsInvariantUnder ℚ ℂ 3 (spinStab ℚ 3 w) (ann ℂ 3 u) :=
     fun u hu h hh v hv => s10_rho_mem_ann_of_fix _ (hfix h hh u hu) v hv
-  -- complex conjugation exchanges `(W₁)_ℂ` and `(W₂)_ℂ`
-  have hconj1 : (ann ℂ 3 (bcS (Kd (J ℚ w)) ℂ 3 P.u₁)).map (s10_conjVL s10_cc) =
-      ann ℂ 3 (bcS (Kd (J ℚ w)) ℂ 3 P.u₂) := by
-    rw [← s10_ann_conjS, s10_cc_bcS]
-    rfl
-  have hconj2 : (ann ℂ 3 (bcS (Kd (J ℚ w)) ℂ 3 P.u₂)).map (s10_conjVL s10_cc) =
-      ann ℂ 3 (bcS (Kd (J ℚ w)) ℂ 3 P.u₁) := by
-    rw [← s10_ann_conjS, s10_cc_bcS, show σS 3 (J ℚ w) P.u₂ = P.u₁ from s10_σS_σS P.u₁]
-  have hne : ann ℂ 3 (bcS (Kd (J ℚ w)) ℂ 3 P.u₁) ≠ ann ℂ 3 (bcS (Kd (J ℚ w)) ℂ 3 P.u₂) := by
-    intro h
-    have h1 := hT.2.2.2.2.1
-    rw [← h, inf_idem] at h1
-    have h2 := hT.2.2.1.2.2
-    rw [h1, finrank_bot] at h2
-    norm_num at h2
-  refine ⟨P.W₁, P.W₂, ?_, fun W => ⟨?_, ?_⟩, ?_, ?_, ?_⟩
+  refine ⟨P.W₁, P.W₂, ?_, fun W => ⟨?_, ?_⟩, hn₁, hn₂, ?_⟩
   · -- `W₁ ≠ W₂` (they are transversal and nonzero)
     intro h
     have h1 : P.W₁ = ⊥ := by
@@ -1568,8 +1679,8 @@ theorem lemma10_2_1 (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Sp
     have h2 : Module.finrank (Kd (J ℚ w)) P.W₁ = 2 * 3 := P.isPure.2.2
     rw [h1, finrank_bot] at h2
     norm_num at h2
-  · -- the invariant maximal isotropic subspaces are `(W₁)_ℂ` and `(W₂)_ℂ` (density of
-    -- `Spin(V_ℚ)_w` in `SL(W₁)`, through the unitary transvections)
+  · -- the invariant maximal isotropic subspaces are `(W₁)_ℂ` and `(W₂)_ℂ` (the density gap,
+    -- filled by the unitary transvections, `s10_D_mem`)
     rintro ⟨hmax, hinvW⟩
     have hinvP : IsInvariantUnder ℚ ℂ 3 P.spinPℚ W := by rw [← hstab]; exact hinvW
     set W' := W.map (rho ℂ 3 gc).toLinearMap with hW'
@@ -1618,20 +1729,7 @@ theorem lemma10_2_1 (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Sp
       exact ⟨hT.2.2.1.2, hinvA _ hu₁c⟩
     · rw [hA2]
       exact ⟨hT.2.2.2.1.2, hinvA _ hu₂c⟩
-  · -- not defined over `ℚ`: a rational subspace is stable under complex conjugation, which
-    -- exchanges `(W₁)_ℂ` and `(W₂)_ℂ` (since `σ(ℓ̃₁) = ℓ̃₂`, by the paper's `J`-argument in
-    -- `s10_not_fixed_lines`; see `s10_cm_secant`)
-    rintro ⟨W₀, hW₀⟩
-    rw [hA1] at hW₀
-    have := hconj1
-    rw [hW₀, s10_map_conjVL_bcSubV, ← hW₀] at this
-    exact hne this
-  · rintro ⟨W₀, hW₀⟩
-    rw [hA2] at hW₀
-    have := hconj2
-    rw [hW₀, s10_map_conjVL_bcSubV, ← hW₀] at this
-    exact hne this.symm
-  · -- `σ(W₁) = W₂`
+  · -- `σ(W₁) = W₂` (`u₂ = σ(u₁)`)
     ext y
     constructor
     · rintro ⟨x, hx, rfl⟩
@@ -1675,7 +1773,8 @@ theorem lemma10_2_1_centralizer (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (h
     have h1 := LinearMap.congr_fun (hf x) ((y : V ℚ 3 ≃ₗ[ℚ] V ℚ 3) v)
     have h2 := LinearMap.congr_fun (hf y) v
     simp only [LinearEquiv.coe_coe] at h1 h2
-    rw [← s10_η_mul P hW, ← h2, ← h1]
+    -- `η` is a homomorphism ((2.2.4), `KSecant.η_mul`)
+    rw [P.η_mul hd hW, Module.End.mul_apply, ← h2, ← h1]
     rfl
 
 /-- (Proof of Lemma 10.2.1, l. 9792–9796, with Lemma 10.1.1.) For `w ∈ S⁺_ℚ` with
@@ -1683,7 +1782,8 @@ theorem lemma10_2_1_centralizer (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (h
 is `P : KSecant 3 d` (an even pure spinor `u₁ ∈ S⁺_K` and `u₂ = σ(u₁)`) with `V_K = W₁ ⊕ W₂`, whose
 rational plane `P ⊆ S⁺_ℚ` contains `w`, such that `P_K ⊗ ℂ` is the transversal secant through `w`
 of Lemma 10.1.1, spanned by `u₁, u₂`, and is the base change of `P` ("`P_w` is defined over
-`ℚ`").
+`ℚ`"). That `u₂ = σ(u₁)` spans the second pure spinor line of `P_K` is `σ(W₁) = W₂` (l. 9796,
+`s10_cm_secant`).
 Conditional on [Igusa, Prop. 3] (the normal form, `IgusaProp3NormalForm`), which the proof uses and
 this project assumes (see `WeilClasses/External/Igusa/README.md`). -/
 theorem lemma10_2_1_secant (hIgusa : IgusaProp3NormalForm) (w : S ℚ 3) (hw : w ∈ Splus ℚ 3)

@@ -1,6 +1,6 @@
 module
 
-public import WeilClasses.PureSpinor.Stabilizer
+public import WeilClasses.PureSpinor.Lemma2_2_1
 public import WeilClasses.External.Igusa.Sec2_4
 import WeilClasses.External.Chevalley.Sec2_1
 import WeilClasses.External.Chevalley.Sec2_2
@@ -27,6 +27,10 @@ results over an arbitrary field `F` of characteristic zero, for two even pure sp
   `w = a u₁ + b u₂` with `a, b ≠ 0`, the stabilizer of `w` is `Spin(V)_{u₁,u₂}` (pointwise
   stabilizer of `u₁, u₂`) if `n` is odd, and has `Spin(V)_{u₁,u₂}` as identity component, with two
   components, if `n` is even (`F`-points: normal of index at most `2`).
+
+The restriction maps `annRestrict`, `pairRestrict` are defined in `WeilClasses.PureSpinor.Defs`.
+The paper's §2.2 cites these statements by name in `WeilClasses.PureSpinor.Stabilizer` (the claims
+after Lemma 2.2.1, Lemma 2.2.2 and Remark 2.2.3), which imports this file.
 -/
 
 @[expose] public section

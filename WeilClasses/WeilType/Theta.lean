@@ -1679,13 +1679,18 @@ convention of [Huybrechts, Lemma 1.2.15], which the proof cites), `P = P_Θ`, an
 of `X × X̂` in the paper's convention (footnote in §2.4; `productStructure`). With the standard
 Hodge structure `-I` instead, `g_P` would be positive definite. The paper takes `d` a
 positive integer and `Θ` integral; `0 < n` makes `P_Θ` a secant (the paper's standing assumption is
-`n ≥ 2`). -/
+`n ≥ 2`).
+
+Gap in the paper (filled): the proof (TeX 1374, "Let `x` be a class in `V_ℚ`") computes `g_P(x, x)`
+for `x ∈ V_ℚ` (`y ∈ H¹(X, K)*`); `g_P(x, x) < 0` on `V_ℚ` only gives a negative semi-definite real
+form. The same computation is done here for `x ∈ V_ℝ` (`y ∈ H¹(X, ℂ)*`, `y = a + i b` with `a`, `b`
+real). -/
 theorem proposition2_4_4 (hd : 0 < d) (hn : 0 < n) (J : Module.End ℝ (H1 ℝ n))
     (hJ : IsComplexStructure J) (Θ : S ℚ n) (hΘ : IsAmple n J Θ) (x : V ℝ n) (hx : x ≠ 0) :
     (PTheta n d hd Θ hΘ.mem_exteriorPower_two (hΘ.ne_zero_of_pos hn)).gP
       (PTheta_isCompl n d hd Θ _ _ hΘ.bijective_thetaMap) J x x < 0 := by
-  -- The paper writes the computation for `x ∈ V_ℚ` (with `y ∈ H¹(X, K)*`); negative definiteness of
-  -- the real form `g_P` needs every `x ∈ V_ℝ`, and the same computation applies with `y ∈ H¹(X, ℂ)*`.
+  -- (Gap in the paper, see the docstring.) The computation is done for `x ∈ V_ℝ`, with
+  -- `y ∈ H¹(X, ℂ)*`.
   have hP := PTheta_assumption2_4_1 n d hd hn J hJ Θ hΘ
   have hΘ2 := hΘ.mem_exteriorPower_two
   have hξ2 : bcS ℚ ℂ n Θ ∈ ⋀[ℂ]^2 (H1 ℂ n) := s24b_bcS_mem_exteriorPower ℚ ℂ n hΘ2

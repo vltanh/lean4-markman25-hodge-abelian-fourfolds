@@ -19,8 +19,8 @@ of the Chern characters `wᵢ = ch(Fᵢ)` (see `WeilClasses.Secant.Defs`).
   as the class `KSecant.hClass ∈ ⋀² V_ℚ`.
 * **Lemma 6.2.3** (`lemma6_2_3`, `lemma6_2_3_unique` (`ℓ` does not depend on the `Fᵢ`)) with
   **(6.2.4)** (`equation6_2_4_exists`, as printed; `equation6_2_4`, for the class `c₁(N_g)` of
-  (6.1.8)) and the claims of its proof (`lemma6_2_3_rhoPrime_invariant`,
-  `lemma6_2_3_lowest`, `lemma6_2_3_injective`, `lemma6_2_3_c1N`).
+  (6.1.8)) and the claims of its proof (`lemma6_2_3_rhoPrime_invariant`, `lemma6_2_3_lowest`,
+  `lemma6_2_3_injective`, `s62_coset_inv` (TeX lines 2462–2464), `lemma6_2_3_c1N`).
 * **Remark 6.2.4** (`remark6_2_4`, `remark6_2_4_ell`).
 * **Lemma 6.2.5** (`lemma6_2_5`: Proposition 6.1.2 for abelian surfaces) with **(6.2.5)**
   (`equation6_2_5`) and the claim of its proof that `ℓ` is the `H²_P`-component of `-c₁(𝒫)/2`
@@ -41,6 +41,19 @@ of the Chern characters `wᵢ = ch(Fᵢ)` (see `WeilClasses.Secant.Defs`).
   are the same for `I_{V_ℝ}` and the standard structure `-I_{V_ℝ}`).
 * `k` is "the minimal non-negative integer such that `ch_k(Φ(F₂ ⊠ F₁^∨)) ≠ 0`", i.e. the least `j`
   with `projDeg (2j) β ≠ 0` (`IsLeast`).
+* `Ξ_P` is `Spin(V)_P`-invariant because `ρ(Spin(V_ℚ)_P)` commutes with `f` (Lemma 2.2.4, TeX lines
+  862 and 1240; `s62_rhoExt_hClass`).
+
+## Departures
+
+In the proof of Lemma 6.2.3 (reason 2; see its docstring): the complete reducibility of the
+representation of the arithmetic group `Spin(V)_P` on `H^{2k+2}` (TeX lines 2462–2464) is replaced
+by a `Spin(V)_P`-invariant pairing nondegenerate on `β_k ∪ H²` (`s62_coset_inv`), as the
+decomposition `H² = H²_P + ℚ Ξ_P` uses an invariant pairing of `H²`
+(`KSecant.exteriorPower_two_eq`); hard Lefschetz for `Ξ_P` is replaced by the algebraic Lefschetz
+property of the nondegenerate `2`-form `Ξ_P` (`lemma6_2_3_injective`). The `(1,1)`-type of `ℓ`,
+which the paper does not prove, is obtained from Proposition 6.1.2 (gap filled). Lemma 6.2.5 and
+(6.2.5) are the case `n = 2` of Proposition 6.1.2 (authorized departure, `notes/design.md`).
 
 ## Left out (sheaf-theoretic)
 
@@ -920,6 +933,71 @@ theorem s62_rhoExt_top (g : Spin F n) {z₀ : ExtV F n}
     have := congrArg Subtype.val hc; simpa using this.symm
   rw [hc', map_smul, hg]
 
+/-! ### Poincaré duality for `∫_{X̂ × X}` (moved here from `WeilClasses.Orlov.Sec6_4`) -/
+
+omit [CharZero F] in
+theorem s62_basisExt_mem (S : Finset (Fin (2 * n + 2 * n))) :
+    basisExt F n S ∈ ⋀[F]^S.card (V F n) := by
+  rw [basisExt, ExteriorAlgebra.basis_apply_ofCard (b := basisV F n) (rfl : S.card = S.card)]
+  exact ExteriorAlgebra.ιMulti_range F _ ⟨_, rfl⟩
+
+omit [CharZero F] in
+/-- `∫_{X̂ × X}` vanishes outside the top degree `4n`. -/
+theorem s62_integralExt_projDeg (m : ℕ) (hm : m ≠ 4 * n) (x : ExtV F n) :
+    integralExt F n (projDeg F n m x) = 0 := by
+  have : (integralExt F n) ∘ₗ (projDeg F n m) = 0 := by
+    refine (basisExt F n).ext fun S => ?_
+    rw [LinearMap.comp_apply, LinearMap.zero_apply, s62_projDeg_of_mem F n (s62_basisExt_mem F n S)]
+    split_ifs with h
+    · rw [integralExt, Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_apply, ite_eq_right]
+      rintro rfl
+      rw [Finset.card_univ, Fintype.card_fin] at h
+      omega
+    · rw [map_zero]
+  exact LinearMap.congr_fun this x
+
+omit [CharZero F] in
+theorem s62_integralExt_of_mem {m : ℕ} {z : ExtV F n} (hz : z ∈ ⋀[F]^m (V F n)) (hm : m ≠ 4 * n) :
+    integralExt F n z = 0 := by
+  rw [← s62_projDeg_self F n hz]; exact s62_integralExt_projDeg F n m hm z
+
+/-- `φ_𝒫 ⊗ ψ_{𝒫⁻¹[n]}` is injective (`φ_𝒫` and `ψ_{𝒫⁻¹[n]}` are mutually inverse). -/
+theorem s62_PiMap_injective : Function.Injective (PiMap F n) := by
+  have hinv : ∀ x, kunnethHatX F n (TensorProduct.map (psiPinvShift F n) (phiP F n)
+      ((kunnethXHat F n).symm (PiMap F n x))) = x := by
+    intro x
+    have hP : PiMap F n x = kunnethXHat F n (TensorProduct.map (phiP F n) (psiPinvShift F n)
+        ((kunnethHatX F n).symm x)) := rfl
+    rw [hP, LinearEquiv.symm_apply_apply, ← LinearMap.comp_apply (TensorProduct.map _ _),
+      ← TensorProduct.map_comp, psiPinvShift_comp_phiP, phiP_comp_psiPinvShift,
+      TensorProduct.map_id, LinearMap.id_apply, LinearEquiv.apply_symm_apply]
+  intro x y hxy
+  rw [← hinv x, ← hinv y, hxy]
+
+/-- Poincaré duality for `∫_{X̂ × X}`: a class `z ∈ ⋀^d V` with `∫ z ∧ y = 0` for all
+`y ∈ ⋀^{4n-d} V` is `0`. By Lemma 6.3.2, `(Π₀ z, y) = ±∫ z ∧ y` for `Π₀ = φ_𝒫 ⊗ ψ_{𝒫⁻¹}`, the
+pairing `( , )` is nondegenerate (`s61_extPairing_nondeg`) and `Π₀ = (-1)ⁿ Π` is injective. -/
+theorem s62_eq_zero_of_integralExt_mul {d : ℕ} (hd : d ≤ 4 * n) {z : ExtV F n}
+    (hz : z ∈ ⋀[F]^d (V F n))
+    (h : ∀ y ∈ ⋀[F]^(4 * n - d) (V F n), integralExt F n (z * y) = 0) : z = 0 := by
+  -- `∫ z ∧ y = 0` for every `y`: only the degree-`(4n - d)` part of `y` contributes
+  have hall : ∀ y : ExtV F n, integralExt F n (z * y) = 0 := by
+    intro y
+    induction y using DirectSum.Decomposition.inductionOn (fun i : ℕ => ⋀[F]^i (V F n)) with
+    | zero => rw [mul_zero, map_zero]
+    | @homogeneous j y =>
+      obtain ⟨y, hy⟩ := y
+      show integralExt F n (z * y) = 0
+      by_cases hj : j = 4 * n - d
+      · subst hj; exact h y hy
+      · exact s62_integralExt_of_mem F n (SetLike.mul_mem_graded hz hy) (by omega)
+    | add y y' hy hy' => rw [mul_add, map_add, hy, hy', add_zero]
+  -- `(Π₀ z, y) = ±∫ z ∧ y = 0` for every `y` (Lemma 6.3.2), so `Π₀ z = 0`
+  have h0 : PiMap0 F n z = 0 :=
+    s61_extPairing_nondeg F n fun y => by rw [lemma6_3_2 F n d hz y, hall y, mul_zero]
+  apply s62_PiMap_injective F n
+  rw [s61_PiMap_eq_smul, LinearMap.smul_apply, h0, smul_zero, map_zero]
+
 /-! ### The canonical element `Σᵢ eᵢ ∧ fᵢ` -/
 
 /-- `x ↦ θ ↦ π_X^*x ∪ π_X̂^*θ`, bilinear. -/
@@ -1463,14 +1541,15 @@ theorem s62_rhoExt_hClass_of_comm (P : KSecant n d) (hW : IsCompl P.W₁ P.W₂)
   simp only [KSecant.XiQ, LinearMap.BilinForm.compLeft_apply]
   rw [← hcomm', s62_rho_symm_pairing]
 
-/-- `h = Ξ_P^♯` is invariant under `Spin(V_ℚ)_P`: `ρ(g)` is an isometry commuting with `f`
-(Lemma 3.1.1). -/
+/-- `h = Ξ_P^♯` is invariant under `Spin(V_ℚ)_P`: `ρ(g)` is an isometry commuting with
+`f = η_{√-d}`, by Lemma 2.2.4 (its direction "`⇐`", `KSecant.s22b_η_commute`: "The image of `η`
+clearly centralizes `ρ(Spin(V_ℚ)_P)`", TeX line 862; the paper takes the properties of `f` from
+Lemma 2.2.4, TeX line 1240). -/
 theorem s62_rhoExt_hClass (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
     (hP : Assumption2_4_1 P J) (g : Spin ℚ n) (hg : g ∈ P.spinPℚ) :
-    rhoExt ℚ n g (P.hClass hP.isCompl) = P.hClass hP.isCompl := by
-  have hmem : rho ℚ n g ∈ (P.SOplusf hP.isCompl : Set (V ℚ n ≃ₗ[ℚ] V ℚ n)) :=
-    (lemma3_1_1 P J hP).2 ▸ ⟨g, hg, rfl⟩
-  exact s62_rhoExt_hClass_of_comm P hP.isCompl g hmem.2.1
+    rhoExt ℚ n g (P.hClass hP.isCompl) = P.hClass hP.isCompl :=
+  s62_rhoExt_hClass_of_comm P hP.isCompl g fun x =>
+    (P.s22b_η_commute hP.pos hP.isCompl (Kd.sqrtNeg d) g hg x).symm
 
 
 theorem s62_hClass_mem_invQ (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
@@ -1947,7 +2026,10 @@ theorem lemma6_2_3_rhoPrime_invariant (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.
 
 /-- **(6.2.4)** (`eq-N-g-beta`): for `g ∈ Spin(V)_P`, `β = ch(N_g) ρ_g(β)`, where `N_g` is the line
 bundle of (6.1.8) (`ρ'_g = ch(N_g) ∪ ρ_g`; in the model `ch(N_g) = exp(c)`, `c = c₁(N_g) ∈ ⋀² V_ℚ`,
-which exists by `equation6_1_8_integral`). Here `β = φ(w₂ ⊗ τ w₁)` with `w₁, w₂ ∈ P`. -/
+which exists by (6.1.8), `equation6_1_8`, and is integral by `equation6_1_8_integral`). Here
+`β = φ(w₂ ⊗ τ w₁)` with `w₁, w₂ ∈ P`.
+Proof (TeX lines 2449–2456): `β` is `ρ'_g`-invariant (`lemma6_2_3_rhoPrime_invariant`) and
+`ρ'_g = exp(c) ∪ ρ_g`. -/
 theorem equation6_2_4 (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) (g : Spin ℚ n)
     (hg : g ∈ P.spinPZ) (c : ExtV ℚ n)
     (hc : ∀ x : ExtV ℚ n, rhoPrime ℚ n g x = IsNilpotent.exp c * rhoExt ℚ n g x) :
@@ -1956,7 +2038,9 @@ theorem equation6_2_4 (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w
 
 /-- **(6.2.4)** (`eq-N-g-beta`), as printed: given `g ∈ Spin(V)_P` there exists a topological
 complex line bundle `N_g` on `X × X̂` such that `β = ch(N_g) ρ_g(β)`. Model: an integral class
-`c = c₁(N_g) ∈ H²(X × X̂, ℤ)` with `β = exp(c) ρ_g(β)`. -/
+`c = c₁(N_g) ∈ H²(X × X̂, ℤ)` with `β = exp(c) ρ_g(β)`.
+Proof: "by Equation (6.1.8)" (TeX line 2456), for the integral `g`: `equation6_1_8_integral`
+([Orlov, Th. 2.10]) and `equation6_2_4`. -/
 theorem equation6_2_4_exists (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) (g : Spin ℚ n)
     (hg : g ∈ P.spinPZ) :
     ∃ c ∈ ⋀[ℚ]^2 (V ℚ n), c ∈ ExtZ n ∧
@@ -1964,7 +2048,7 @@ theorem equation6_2_4_exists (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw
   obtain ⟨c, hc2, hcZ, hc⟩ := equation6_1_8_integral n g (Subgroup.mem_inf.mp hg).1
   exact ⟨c, hc2, hcZ, equation6_2_4 P w₁ w₂ hw₁ hw₂ g hg c hc⟩
 
-/-- (Proof of Lemma 6.2.3, TeX lines 2459–2461) If `k < n` is the least `j` with `β_j ≠ 0`, then
+/-- (Proof of Lemma 6.2.3, TeX line 2458) If `k < n` is the least `j` with `β_j ≠ 0`, then
 `β_k` is `Spin(V)_P`-invariant with respect to `ρ` (by the minimality of `k`) and hence a non-zero
 multiple of `Ξ_P^k` (`h^k`, `h = Ξ_P^♯`), by `k < dim X` (Lemma 2.2.7). -/
 theorem lemma6_2_3_lowest (hP : Assumption2_4_1 P J) (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ)
@@ -1975,10 +2059,12 @@ theorem lemma6_2_3_lowest (hP : Assumption2_4_1 P J) (w₁ w₂ : S ℚ n) (hw�
         projDeg ℚ n (2 * k) (secantSqClass ℚ n w₂ w₁) = c • P.hClass hP.isCompl ^ k := by
   have hlow : ∀ j < k, projDeg ℚ n (2 * j) (secantSqClass ℚ n w₂ w₁) = 0 := fun j hj => by
     by_contra h; exact absurd (hk.2 h) (by omega)
-  -- `β_k` is `ρ`-invariant by the minimality of `k`: `β = ch(N_g) ρ_g(β)` ((6.2.4))
+  -- `β_k` is `ρ`-invariant by the minimality of `k`: `β = ch(N_g) ρ_g(β)` ((6.2.4), with the
+  -- class `c₁(N_g)` of (6.1.8), [Orlov, Th. 2.10])
   have hinv : projDeg ℚ n (2 * k) (secantSqClass ℚ n w₂ w₁) ∈ invariantsExt ℚ n P.spinPZ := by
     intro g hg
-    obtain ⟨c, hc2, -, hc⟩ := equation6_2_4_exists P w₁ w₂ hw₁ hw₂ g hg
+    obtain ⟨c, hc2, hcg⟩ := equation6_1_8 ℚ n g
+    have hc := equation6_2_4 P w₁ w₂ hw₁ hw₂ g hg c hcg
     have h1 := (s62_projDeg_exp_mul ℚ n hc2 (rhoExt ℚ n g (secantSqClass ℚ n w₂ w₁)) k
       (fun j hj => by rw [s62_projDeg_rhoExt, hlow j hj, map_zero])).1
     rw [← hc, s62_projDeg_rhoExt] at h1
@@ -2000,15 +2086,16 @@ theorem lemma6_2_3_lowest (hP : Assumption2_4_1 P J) (w₁ w₂ : S ℚ n) (hw�
     refine ⟨c, ?_, hc.symm⟩
     rintro rfl; apply hβk; rw [← hc, zero_smul]
 
-/-- (Proof of Lemma 6.2.3, TeX lines 2461–2462) "the homomorphism
+/-- (Proof of Lemma 6.2.3, TeX line 2458) "the homomorphism
 `β_k ∪ (•) : H²(X × X̂, ℚ) → H^{2k+2}(X × X̂, ℚ)` is injective, as `Ξ_P` is ample" (hard Lefschetz;
 `k < n` and `dim(X × X̂) = 2n`).
 
-Departure from the paper: the paper invokes the hard Lefschetz theorem for the ample class `Ξ_P`
-(Hodge theory, not available in Lean). Here `β_k = c Ξ_P^k` (`c ≠ 0`, `lemma6_2_3_lowest`) and the
-injectivity of `Ξ_P^k ∪ (•)` on `⋀² V_ℚ` (`k + 2 ≤ 2n`) is the algebraic Lefschetz property of the
-nondegenerate `2`-form `Ξ_P`: the operator `Λ` of the `sl₂`-triple of `h = Ξ_P^♯`
-(`s62_lam`, `[Λ, L_h] = 2p - 4n` on `⋀^p V`, from `f² = -d` and `(f x, y) = -(x, f y)`).
+Departure from the paper (reason 2): the paper invokes the hard Lefschetz theorem for the ample
+class `Ξ_P` (Hodge theory, not available in Lean). Here `β_k = c Ξ_P^k` (`c ≠ 0`,
+`lemma6_2_3_lowest`) and the injectivity of `Ξ_P^k ∪ (•)` on `⋀² V_ℚ` (`k + 2 ≤ 2n`) is the
+algebraic Lefschetz property of the nondegenerate `2`-form `Ξ_P`: the operator `Λ` of the
+`sl₂`-triple of `h = Ξ_P^♯` (`s62_lam`, `[Λ, L_h] = 2p - 4n` on `⋀^p V`, from `f² = -d` and
+`(f x, y) = -(x, f y)`).
 Ampleness (`hample`) is not used. -/
 theorem lemma6_2_3_injective (hP : Assumption2_4_1 P J)
     (hample : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl (productStructure n J) x x)
@@ -2033,7 +2120,8 @@ theorem lemma6_2_3_injective (hP : Assumption2_4_1 P J)
 
 
 /-- (6.2.4) in degree `2k + 2`: `β_{k+1} = ρ_g(β_{k+1}) + c₁(N_g) β_k`, for the lowest degree
-`2k` of `β`. -/
+`2k` of `β`; hence "the coset `β_{k+1} + β_k ∪ H²` is `Spin(V)_P`-invariant" (TeX lines 2462–2463,
+used in `lemma6_2_3`). -/
 theorem s62_deg_succ (hP : Assumption2_4_1 P J) (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ)
     (hw₂ : w₂ ∈ P.Pℚ) (k : ℕ)
     (hk : IsLeast {j : ℕ | projDeg ℚ n (2 * j) (secantSqClass ℚ n w₂ w₁) ≠ 0} k) (hkn : k < n)
@@ -2051,10 +2139,137 @@ theorem s62_deg_succ (hP : Assumption2_4_1 P J) (w₁ w₂ : S ℚ n) (hw₁ : w
     hβk] at h1
   exact h1
 
-/-- The ring identity `ρB' + (l + c) B = B' + l B` from `B' = ρB' + c B`. -/
-theorem s62_ring_aux' {R : Type*} [Ring R] (B B' ρB' c l : R) (E1 : B' = ρB' + c * B) :
-    ρB' + (l + c) * B = B' + l * B := by
-  rw [E1, add_mul]; abel
+/-- (Proof of Lemma 6.2.3, TeX lines 2462–2464) The pairing `B(x, y) = ∫ x ∧ y ∧ Ξ_P^{2n-2k-2}` of
+`H^{2k+2}(X × X̂, ℚ)` is nondegenerate on `N = β_k ∪ H²(X × X̂, ℚ)`, for `β_k = c Ξ_P^k`, `c ≠ 0`,
+`k < n`: `B(β_k b, β_k a) = c² ∫ (Ξ_P^{2n-2} ∧ a) ∧ b` (classes of degree `2` are central), the map
+`a ↦ Ξ_P^{2n-2} ∧ a` is injective on `H²` (the Lefschetz property of the nondegenerate `2`-form
+`Ξ_P`, from the `sl₂`-triple of `h = Ξ_P^♯` as in `lemma6_2_3_injective`) and `∫_{X̂ × X}` is a
+perfect pairing (Poincaré duality, by Lemma 6.3.2: `s62_eq_zero_of_integralExt_mul`). -/
+theorem s62_pairing_nondeg (hP : Assumption2_4_1 P J) {k : ℕ} (hkn : k < n) {βk : ExtV ℚ n}
+    {c : ℚ} (hc : c ≠ 0) (hβk : βk = c • P.hClass hP.isCompl ^ k) {a : ExtV ℚ n}
+    (ha : a ∈ ⋀[ℚ]^2 (V ℚ n))
+    (h0 : ∀ b ∈ ⋀[ℚ]^2 (V ℚ n),
+      integralExt ℚ n (βk * b * (βk * a) * P.hClass hP.isCompl ^ (2 * n - 2 * k - 2)) = 0) :
+    a = 0 := by
+  have hh : P.hClass hP.isCompl ∈ ⋀[ℚ]^2 (V ℚ n) := formToExt2_mem ℚ n _
+  have hz : P.hClass hP.isCompl ^ (2 * n - 2) * a ∈ ⋀[ℚ]^(4 * n - 2) (V ℚ n) := by
+    have := SetLike.mul_mem_graded (A := fun i : ℕ => ⋀[ℚ]^i (V ℚ n))
+      (s62_pow_mem ℚ n hh (2 * n - 2)) ha
+    rwa [show 2 * (2 * n - 2) + 2 = 4 * n - 2 by omega] at this
+  -- `∫ (Ξ_P^{2n-2} ∧ a) ∧ b = c⁻² B(β_k b, β_k a) = 0` for all `b ∈ H²`, so `Ξ_P^{2n-2} ∧ a = 0`
+  have hz0 : P.hClass hP.isCompl ^ (2 * n - 2) * a = 0 := by
+    refine s62_eq_zero_of_integralExt_mul ℚ n (by omega) hz fun b hb => ?_
+    rw [show 4 * n - (4 * n - 2) = 2 by omega] at hb
+    have hbc : ∀ x, Commute b x := fun x => s62_commute_of_mem_two ℚ n hb x
+    have hac : ∀ x, Commute a x := fun x => s62_commute_of_mem_two ℚ n ha x
+    have key : βk * b * (βk * a) * P.hClass hP.isCompl ^ (2 * n - 2 * k - 2) =
+        (c * c) • (P.hClass hP.isCompl ^ (2 * n - 2) * a * b) := by
+      rw [hβk]
+      simp only [smul_mul_assoc, mul_smul_comm, smul_smul]
+      congr 1
+      set h := P.hClass hP.isCompl
+      calc h ^ k * b * (h ^ k * a) * h ^ (2 * n - 2 * k - 2)
+          = h ^ k * (b * (h ^ k * a * h ^ (2 * n - 2 * k - 2))) := by simp only [mul_assoc]
+        _ = h ^ k * (h ^ k * a * h ^ (2 * n - 2 * k - 2) * b) := by rw [(hbc _).eq]
+        _ = h ^ k * (h ^ k * (a * h ^ (2 * n - 2 * k - 2))) * b := by simp only [mul_assoc]
+        _ = h ^ k * (h ^ k * (h ^ (2 * n - 2 * k - 2) * a)) * b := by rw [(hac _).eq]
+        _ = h ^ (k + k + (2 * n - 2 * k - 2)) * a * b := by
+          rw [pow_add, pow_add]; simp only [mul_assoc]
+        _ = h ^ (2 * n - 2) * a * b := by
+          rw [show k + k + (2 * n - 2 * k - 2) = 2 * n - 2 by omega]
+    have hb0 := h0 b hb
+    rw [key, map_smul, smul_eq_mul] at hb0
+    exact (mul_eq_zero.mp hb0).resolve_left (mul_ne_zero hc hc)
+  -- Lefschetz: `Ξ_P^{2n-2} ∪ (•)` is injective on `H²` (`(2n - 2) + 2 ≤ 2n`)
+  refine s62_sl2_injective ℚ n (s62_lam ℚ n (P.fη hP.isCompl) d) hh ?_
+    (s62_lam_one ℚ n _ _) (s62_lam_two ℚ n _ _) (2 * n - 2) (by omega) ha hz0
+  exact s62_lam_spec ℚ n hh (P.fη hP.isCompl) d hP.pos.ne' (s62_contractLeft_hClass P hP.isCompl)
+    (fun x => by
+      have := LinearMap.congr_fun (P.fη_comp_fη hP.isCompl) x
+      simpa using this)
+    (P.pairing_fη_left hP.isCompl)
+
+/-- (Proof of Lemma 6.2.3, TeX lines 2462–2464) "The coset `β_{k+1} + β_k ∪ H²(X × X̂, ℚ)` is
+`Spin(V)_P`-invariant. Hence, `β_{k+1}` belongs to the sum of `β_k ∪ H²(X × X̂, ℚ)` and the
+`Spin(V)_P`-invariant subspace `H^{2k+2}(X × X̂, ℚ)^{Spin(V)_P}`": for `N = β_k ∪ H²` with
+`β_k = c Ξ_P^k`, `c ≠ 0`, `k < n`, if `ρ_g(y) - y ∈ N` for all `g ∈ Spin(V)_P`, then
+`y - β_k a₀` is `Spin(V)_P`-invariant for some `a₀ ∈ H²`.
+
+Departure from the paper (reason 2): the paper's "Hence" uses that `N` has a `Spin(V)_P`-invariant
+complement in `H^{2k+2}`, i.e. the complete reducibility of the representation of the arithmetic
+group `Spin(V)_P` on `H^{2k+2}`, which rests on its Zariski density (not available in Lean). Here
+the invariant complement is the orthogonal `N^⊥` of `N` for the pairing
+`B(x, y) = ∫ x ∧ y ∧ Ξ_P^{2n-2k-2}` of `H^{2k+2}`, which is `Spin(V)_P`-invariant (`Ξ_P` is
+invariant, `s62_rhoExt_hClass`, and `ρ_g` preserves `∫`, `s61_integralExt_rhoExt`) and nondegenerate
+on `N` (`s62_pairing_nondeg`). So `y = β_k a₀ + p` with `β_k a₀` the `B`-orthogonal projection of
+`y` to `N` (Riesz representation for the nondegenerate restriction of `B` to `N`) and `p ∈ N^⊥`;
+`ρ_g(p) - p` lies in `N` (the coset `y + N` is invariant) and in `N^⊥` (`B` and `N` are invariant),
+hence vanishes. -/
+theorem s62_coset_inv (hP : Assumption2_4_1 P J) {k : ℕ} (hkn : k < n) {βk : ExtV ℚ n} {c : ℚ}
+    (hc : c ≠ 0) (hβk : βk = c • P.hClass hP.isCompl ^ k) (y : ExtV ℚ n)
+    (hy : ∀ g ∈ P.spinPZ, ∃ a ∈ ⋀[ℚ]^2 (V ℚ n), rhoExt ℚ n g y - y = βk * a) :
+    ∃ a ∈ ⋀[ℚ]^2 (V ℚ n), y - βk * a ∈ invariantsExt ℚ n P.spinPZ := by
+  have : Module.Finite ℚ (ExtV ℚ n) := Module.Finite.of_basis (basisExt ℚ n)
+  have hinvh : ∀ g ∈ P.spinPZ, rhoExt ℚ n g (P.hClass hP.isCompl) = P.hClass hP.isCompl :=
+    fun g hg => s62_rhoExt_hClass P J hP g (Subgroup.mem_inf.mp hg).2
+  have hinvβ : ∀ g ∈ P.spinPZ, rhoExt ℚ n g βk = βk := fun g hg => by
+    rw [hβk, map_smul, map_pow, hinvh g hg]
+  -- `B(x, z) = ∫ x ∧ z ∧ Ξ_P^{2n-2k-2}` is `Spin(V)_P`-invariant
+  have hB : ∀ g ∈ P.spinPZ, ∀ x z : ExtV ℚ n,
+      integralExt ℚ n (rhoExt ℚ n g x * rhoExt ℚ n g z *
+        P.hClass hP.isCompl ^ (2 * n - 2 * k - 2)) =
+        integralExt ℚ n (x * z * P.hClass hP.isCompl ^ (2 * n - 2 * k - 2)) := by
+    intro g hg x z
+    rw [← s61_integralExt_rhoExt ℚ n g (x * z * P.hClass hP.isCompl ^ (2 * n - 2 * k - 2)),
+      map_mul (rhoExt ℚ n g), map_mul (rhoExt ℚ n g), map_pow (rhoExt ℚ n g), hinvh g hg]
+  -- the restriction of `B` to `N`, as a bilinear form on `H²` (`b, a ↦ B(β_k b, β_k a)`); it is
+  -- nondegenerate
+  let C : LinearMap.BilinForm ℚ (⋀[ℚ]^2 (V ℚ n)) :=
+    ((LinearMap.mul ℚ (ExtV ℚ n)).compl₁₂
+      (LinearMap.mulLeft ℚ βk ∘ₗ (⋀[ℚ]^2 (V ℚ n)).subtype)
+      (LinearMap.mulLeft ℚ βk ∘ₗ (⋀[ℚ]^2 (V ℚ n)).subtype)).compr₂
+      (integralExt ℚ n ∘ₗ LinearMap.mulRight ℚ (P.hClass hP.isCompl ^ (2 * n - 2 * k - 2)))
+  have hCnd : C.flip.Nondegenerate :=
+    LinearMap.BilinForm.Nondegenerate.ofSeparatingLeft fun a ha =>
+      Subtype.ext (s62_pairing_nondeg P J hP hkn hc hβk a.2 fun b hb => ha ⟨b, hb⟩)
+  -- the `B`-orthogonal projection `β_k a₀` of `y` to `N`: `B(β_k b, β_k a₀) = B(β_k b, y)` for all
+  -- `b ∈ H²` (Riesz representation for the nondegenerate form)
+  let φ : Module.Dual ℚ (⋀[ℚ]^2 (V ℚ n)) :=
+    (integralExt ℚ n ∘ₗ LinearMap.mulRight ℚ (P.hClass hP.isCompl ^ (2 * n - 2 * k - 2)) ∘ₗ
+      LinearMap.mulRight ℚ y ∘ₗ LinearMap.mulLeft ℚ βk) ∘ₗ (⋀[ℚ]^2 (V ℚ n)).subtype
+  obtain ⟨a₀, ha₀⟩ : ∃ a₀ : ⋀[ℚ]^2 (V ℚ n), a₀ = (C.flip.toDual hCnd).symm φ := ⟨_, rfl⟩
+  have hrep : ∀ b ∈ ⋀[ℚ]^2 (V ℚ n),
+      integralExt ℚ n (βk * b * (βk * a₀) * P.hClass hP.isCompl ^ (2 * n - 2 * k - 2)) =
+        integralExt ℚ n (βk * b * y * P.hClass hP.isCompl ^ (2 * n - 2 * k - 2)) := by
+    intro b hb
+    have := LinearMap.BilinForm.apply_toDual_symm_apply (hB := hCnd) φ ⟨b, hb⟩
+    rw [← ha₀] at this
+    exact this
+  refine ⟨(a₀ : ExtV ℚ n), a₀.2, ?_⟩
+  -- `p = y - β_k a₀ ∈ N^⊥`
+  have hp : ∀ b ∈ ⋀[ℚ]^2 (V ℚ n),
+      integralExt ℚ n (βk * b * (y - βk * a₀) * P.hClass hP.isCompl ^ (2 * n - 2 * k - 2)) = 0 := by
+    intro b hb
+    rw [mul_sub, sub_mul, map_sub, hrep b hb, sub_self]
+  intro g hg
+  -- `ρ_g(p) - p ∈ N`: the coset `y + N` is invariant
+  obtain ⟨a, ha, hya⟩ := hy g hg
+  have ha' : a - (rhoExt ℚ n g a₀ - a₀) ∈ ⋀[ℚ]^2 (V ℚ n) :=
+    Submodule.sub_mem _ ha (Submodule.sub_mem _ (s62_rhoExt_mem ℚ n g a₀.2) a₀.2)
+  have hN : rhoExt ℚ n g (y - βk * a₀) - (y - βk * a₀) = βk * (a - (rhoExt ℚ n g a₀ - a₀)) := by
+    rw [map_sub, map_mul, hinvβ g hg, mul_sub, mul_sub, ← hya]
+    abel
+  -- `ρ_g(p) - p ∈ N^⊥`: `B` is invariant and `N` is `ρ_g`-stable
+  have hperp : ∀ b ∈ ⋀[ℚ]^2 (V ℚ n), integralExt ℚ n (βk * b * (βk * (a - (rhoExt ℚ n g a₀ - a₀))) *
+      P.hClass hP.isCompl ^ (2 * n - 2 * k - 2)) = 0 := by
+    intro b hb
+    have hb' : rhoExt ℚ n g⁻¹ b ∈ ⋀[ℚ]^2 (V ℚ n) := s62_rhoExt_mem ℚ n g⁻¹ hb
+    have hρb : βk * b = rhoExt ℚ n g (βk * rhoExt ℚ n g⁻¹ b) := by
+      rw [map_mul, hinvβ g hg, s62_rhoExt_inv]
+    rw [← hN, mul_sub, sub_mul, map_sub, hp b hb, sub_zero, hρb, hB g hg, hp _ hb']
+  -- hence `ρ_g(p) = p`
+  rw [s62_pairing_nondeg P J hP hkn hc hβk ha' hperp, mul_zero, sub_eq_zero] at hN
+  exact hN
 
 /-- The ring identity behind `c₁(N_g) = ρ_g(ℓ) - ℓ` (proof of Lemma 6.2.3): from
 `β_{k+1} = ρ_g(β_{k+1}) + c β_k` and `ρ_g(β_{k+1}) + ρ_g(ℓ) β_k = β_{k+1} + ℓ β_k`,
@@ -2068,7 +2283,7 @@ theorem s62_ring_aux {R : Type*} [Ring R] (B B' ρB' c l ρl : R) (E1 : B' = ρB
       _ = B' - ρB' := by abel
   rw [sub_mul, sub_mul, h1, h2, sub_self]
 
-/-- The step of the proof of Lemma 6.2.3 (TeX lines 2477–2491): if `γ = β_{k+1} + ℓ β_k` is
+/-- The step of the proof of Lemma 6.2.3 (TeX lines 2472–2481): if `γ = β_{k+1} + ℓ β_k` is
 `Spin(V)_P`-invariant (`ℓ ∈ H²`), then `c₁(N_g) = ρ_g(ℓ) - ℓ` for every `g ∈ Spin(V)_P`, by the
 injectivity of `β_k ∪ (•)` on `H²`. -/
 theorem s62_c1N_of_gamma (hP : Assumption2_4_1 P J)
@@ -2157,64 +2372,117 @@ least `j` with `ch_j ≠ 0`; invariance for the `ρ`-action of the integral grou
 literally (uniqueness among the `(1,1)`-classes of `H²_P`); the proof gives uniqueness in all of
 `H²_P` (`lemma6_2_3_unique`).
 
-Departure from the paper: (a) the paper infers from "the coset `β_{k+1} + β_k ∪ H²` is
-`Spin(V)_P`-invariant" that `β_{k+1} ∈ β_k ∪ H² + H^{2k+2}(X × X̂, ℚ)^{Spin(V)_P}`; this uses that the
-representation of the arithmetic group `Spin(V)_P` on `H^{2k+2}` is completely reducible, which the
-paper does not prove (it needs the Zariski density of `Spin(V)_P`, not available in Lean). Instead,
-`-½ c₁(𝒫) = ℓ + ι` with `ℓ ∈ H²_P` and `ι` invariant (`KSecant.s62_two_le_sup`: `H² = H²_P ⊕ H²^{Spin(V)_P}`,
-proved from the invariant nondegenerate pairing of `⋀² V` and `KSecant.H2P_inf_invQ`), and
-`γ = β_{k+1} + ℓ β_k` is invariant by Proposition 6.1.2 (`ρ'_g = exp(½[c₁(𝒫) - ρ_g c₁(𝒫)]) ∪ ρ_g`).
-From there the proof is the paper's (`c₁(N_g) = ρ_g(ℓ) - ℓ` by the injectivity of `β_k ∪ (•)`,
-uniqueness, invariance of `α`). (b) The paper does not show that `ℓ` is of type `(1,1)`; here it
-follows from `ℓ = -½ c₁(𝒫) - ι`: `c₁(𝒫)` is of type `(1,1)` and the invariant `ι` is a Hodge class
-(Lemma 2.2.7). -/
+Proof (the paper's, TeX lines 2438–2490): `β = φ(w₂ ⊗ τ w₁)` is `ρ'`-invariant
+(`lemma6_2_3_rhoPrime_invariant`, Remark 5.2.3), so `β = ch(N_g) ρ_g(β)` for `g ∈ Spin(V)_P`
+((6.2.4), with `c₁(N_g)` the class of (6.1.8), [Orlov, Th. 2.10]); `β_k` is invariant and a non-zero
+multiple of `Ξ_P^k` (`lemma6_2_3_lowest`, Lemma 2.2.7) and `β_k ∪ (•)` is injective on `H²`
+(`lemma6_2_3_injective`). The coset `β_{k+1} + β_k ∪ H²` is invariant ((6.2.4) in degree `2k + 2`,
+`s62_deg_succ`), hence `β_{k+1} = β_k a₀ + p` with `p` invariant (`s62_coset_inv`); writing
+`-a₀ = ℓ + ι` with `ℓ ∈ H²_P` and `ι` invariant (`H² = H²_P ⊕ H²^{Spin(V)_P}`,
+`KSecant.s62_two_le_sup`; the paper's `H² = H²_P + ℚ Ξ_P`, TeX line 2416), `γ = β_{k+1} + β_k ℓ =
+p - β_k ι` is invariant. Then `c₁(N_g) = ρ_g(ℓ) - ℓ` by the injectivity of `β_k ∪ (•)`
+(`s62_c1N_of_gamma`), which gives the invariance of `α`, the uniqueness of `ℓ` and its independence
+of the `Fᵢ` (`s62_unique`, `lemma6_2_3_unique`), as in the paper.
+
+Departure from the paper (reason 2), at two steps: (a) "Hence, `β_{k+1}` belongs to the sum of
+`β_k ∪ H²` and `H^{2k+2}(X × X̂, ℚ)^{Spin(V)_P}`" (TeX lines 2462–2464) uses the complete
+reducibility of the representation of the arithmetic group `Spin(V)_P` on `H^{2k+2}` (its Zariski
+density, not available in Lean); here the invariant complement of `β_k ∪ H²` is its orthogonal for
+the `Spin(V)_P`-invariant pairing `B(x, y) = ∫ x ∧ y ∧ Ξ_P^{2n-2k-2}`, which is nondegenerate on
+`β_k ∪ H²` (`s62_coset_inv`, `s62_pairing_nondeg`); (b) the hard Lefschetz theorem for the ample
+class `Ξ_P` (TeX line 2458) is replaced by the algebraic Lefschetz property of the
+nondegenerate `2`-form `Ξ_P` (`lemma6_2_3_injective`; also used in (a)).
+
+Gap in the paper (filled), reason 1: the paper does not show that `ℓ` is of type `(1,1)`. Here: by
+Proposition 6.1.2, the class `½[c₁(𝒫) - ρ_g(c₁(𝒫))]` satisfies (6.1.8) for `g`, so it equals
+`ρ_g(ℓ) - ℓ` (`s62_c1N_of_gamma`); thus `ℓ + ½ c₁(𝒫)` is `Spin(V)_P`-invariant, hence a Hodge class
+(Lemma 2.2.7), and `c₁(𝒫)` is of type `(1,1)`. (So `ℓ` is the `H²_P`-component of `-½ c₁(𝒫)`, the
+claim of the proof of Lemma 6.2.5, `ell_eq_proj_c1P`.) Proposition 6.1.2 is proved here without
+Lemma 6.2.3 (authorized departure, `proposition6_1_2`), so this is not circular; it is used only for
+the type of `ℓ`. -/
 theorem lemma6_2_3 (hP : Assumption2_4_1 P J)
     (hample : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl (productStructure n J) x x)
     (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) (k : ℕ)
     (hk : IsLeast {j : ℕ | projDeg ℚ n (2 * j) (secantSqClass ℚ n w₂ w₁) ≠ 0} k) (hkn : k < n) :
     ∃! ℓ : ExtV ℚ n, ℓ ∈ hodgeClassesV n (productStructure n J) 1 ∧ ℓ ∈ P.H2P ∧
       IsNilpotent.exp ℓ * secantSqClass ℚ n w₂ w₁ ∈ invariantsExt ℚ n P.spinPZ := by
-  have hc := s62_c1P_mem ℚ n
-  have hc' : (2 : ℚ)⁻¹ • c1P ℚ n ∈ ⋀[ℚ]^2 (V ℚ n) := Submodule.smul_mem _ _ hc
-  -- `H² = H²_P ⊕ H²^{Spin(V)_P}`: write `-½ c₁(𝒫) = ℓ + ι`, `ℓ ∈ H²_P`, `ι` invariant
-  obtain ⟨ℓ, hℓ, ι, hι, hdec⟩ : ∃ ℓ ∈ P.H2P, ∃ ι ∈ P.invQ 2, ℓ + ι = -((2 : ℚ)⁻¹ • c1P ℚ n) :=
-    Submodule.mem_sup.mp (P.s62_two_le_sup hP.pos hP.nonIsotropic (neg_mem hc'))
+  -- `β_k` is invariant and `β_k = c Ξ_P^k` with `c ≠ 0` (`k < dim X`)
+  obtain ⟨hβk, c, hc0, hck⟩ := lemma6_2_3_lowest P J hP w₁ w₂ hw₁ hw₂ k hk hkn
+  -- "The coset `β_{k+1} + β_k ∪ H²` is `Spin(V)_P`-invariant": by (6.2.4) in degree `2k + 2`,
+  -- `ρ_g(β_{k+1}) - β_{k+1} = -c₁(N_g) β_k`, with `c₁(N_g)` the class of (6.1.8)
+  have hcoset : ∀ g ∈ P.spinPZ, ∃ a ∈ ⋀[ℚ]^2 (V ℚ n),
+      rhoExt ℚ n g (projDeg ℚ n (2 * k + 2) (secantSqClass ℚ n w₂ w₁)) -
+        projDeg ℚ n (2 * k + 2) (secantSqClass ℚ n w₂ w₁) =
+        projDeg ℚ n (2 * k) (secantSqClass ℚ n w₂ w₁) * a := by
+    intro g hg
+    obtain ⟨cg, hcg2, hcg⟩ := equation6_1_8 ℚ n g
+    have E1 := s62_deg_succ P J hP w₁ w₂ hw₁ hw₂ k hk hkn g hg cg hcg2 hcg
+    refine ⟨-cg, neg_mem hcg2, ?_⟩
+    calc rhoExt ℚ n g (projDeg ℚ n (2 * k + 2) (secantSqClass ℚ n w₂ w₁)) -
+          projDeg ℚ n (2 * k + 2) (secantSqClass ℚ n w₂ w₁)
+        = rhoExt ℚ n g (projDeg ℚ n (2 * k + 2) (secantSqClass ℚ n w₂ w₁)) -
+          (rhoExt ℚ n g (projDeg ℚ n (2 * k + 2) (secantSqClass ℚ n w₂ w₁)) +
+            cg * projDeg ℚ n (2 * k) (secantSqClass ℚ n w₂ w₁)) := by rw [← E1]
+      _ = projDeg ℚ n (2 * k) (secantSqClass ℚ n w₂ w₁) * -cg := by
+        rw [mul_neg, ← (s62_commute_of_mem_two ℚ n hcg2 _).eq]
+        abel
+  -- "Hence, `β_{k+1}` belongs to the sum of `β_k ∪ H²` and `H^{2k+2}(X × X̂, ℚ)^{Spin(V)_P}`"
+  -- (departure (a): an invariant pairing instead of complete reducibility, see the docstring)
+  obtain ⟨a₀, ha₀, hp⟩ := s62_coset_inv P J hP hkn hc0 hck _ hcoset
+  -- "Thus, there exists `ℓ ∈ H²_P` such that `γ := β_{k+1} + β_k ℓ` is invariant": with
+  -- `H² = H²_P ⊕ H²^{Spin(V)_P}`, write `-a₀ = ℓ + ι`; then `γ = (β_{k+1} - β_k a₀) - β_k ι`
+  obtain ⟨ℓ, hℓ, ι, hι, hdec⟩ : ∃ ℓ ∈ P.H2P, ∃ ι ∈ P.invQ 2, ℓ + ι = -a₀ :=
+    Submodule.mem_sup.mp (P.s62_two_le_sup hP.pos hP.nonIsotropic (neg_mem ha₀))
   have hℓ2 := P.H2P_le hℓ
-  have hℓeq : ℓ = -((2 : ℚ)⁻¹ • c1P ℚ n) - ι := by rw [← hdec]; abel
-  -- "the coset `β_{k+1} + β_k ∪ H²` is invariant, hence `β_{k+1} ∈ β_k ∪ H² + H^{2k+2}^{Spin(V)_P}`":
-  -- `γ := β_{k+1} + ℓ β_k` is invariant (departure: from Proposition 6.1.2, see the docstring)
   have hγ : projDeg ℚ n (2 * k + 2) (secantSqClass ℚ n w₂ w₁) +
       ℓ * projDeg ℚ n (2 * k) (secantSqClass ℚ n w₂ w₁) ∈ invariantsExt ℚ n P.spinPZ := by
-    intro g hg
-    have hβk := (lemma6_2_3_lowest P J hP w₁ w₂ hw₁ hw₂ k hk hkn).1 g hg
-    have hcg : (2 : ℚ)⁻¹ • (c1P ℚ n - rhoExt ℚ n g (c1P ℚ n)) ∈ ⋀[ℚ]^2 (V ℚ n) :=
-      Submodule.smul_mem _ _ (Submodule.sub_mem _ hc (s62_rhoExt_mem ℚ n g hc))
-    have E1 := s62_deg_succ P J hP w₁ w₂ hw₁ hw₂ k hk hkn g hg _ hcg (proposition6_1_2 ℚ n g)
-    have hρℓ : rhoExt ℚ n g ℓ = ℓ + (2 : ℚ)⁻¹ • (c1P ℚ n - rhoExt ℚ n g (c1P ℚ n)) := by
-      rw [hℓeq, map_sub, map_neg, map_smul, hι.2 g hg, smul_sub]
+    have heq : projDeg ℚ n (2 * k + 2) (secantSqClass ℚ n w₂ w₁) +
+        ℓ * projDeg ℚ n (2 * k) (secantSqClass ℚ n w₂ w₁) =
+        (projDeg ℚ n (2 * k + 2) (secantSqClass ℚ n w₂ w₁) -
+          projDeg ℚ n (2 * k) (secantSqClass ℚ n w₂ w₁) * a₀) -
+          projDeg ℚ n (2 * k) (secantSqClass ℚ n w₂ w₁) * ι := by
+      rw [(s62_commute_of_mem_two ℚ n hℓ2 _).eq, show ℓ = -a₀ - ι by rw [← hdec]; abel, mul_sub,
+        mul_neg]
       abel
-    rw [map_add, map_mul, hβk, hρℓ]
-    exact s62_ring_aux' _ _ _ _ _ E1
-  -- `c₁(N_g) = ρ_g(ℓ) - ℓ`, hence `α = exp(ℓ) β` is invariant
+    rw [heq]
+    intro g hg
+    rw [map_sub, hp g hg, map_mul, hβk g hg, hι.2 g hg]
+  -- `c₁(N_g) = ρ_g(ℓ) - ℓ` (injectivity of `β_k ∪ (•)`), hence `α = exp(ℓ) β` is invariant
   have hα : IsNilpotent.exp ℓ * secantSqClass ℚ n w₂ w₁ ∈ invariantsExt ℚ n P.spinPZ := by
     intro g hg
-    obtain ⟨c, hc2, hcg⟩ := equation6_1_8 ℚ n g
-    have hcℓ := s62_c1N_of_gamma P J hP hample w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ2 hγ g hg c hc2 hcg
-    have hβ := equation6_2_4 P w₁ w₂ hw₁ hw₂ g hg c hcg
+    obtain ⟨cg, hcg2, hcg⟩ := equation6_1_8 ℚ n g
+    have hcℓ := s62_c1N_of_gamma P J hP hample w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ2 hγ g hg cg hcg2 hcg
+    have hβ := equation6_2_4 P w₁ w₂ hw₁ hw₂ g hg cg hcg
     have hρβ : rhoExt ℚ n g (secantSqClass ℚ n w₂ w₁) =
-        IsNilpotent.exp (-c) * secantSqClass ℚ n w₂ w₁ := by
+        IsNilpotent.exp (-cg) * secantSqClass ℚ n w₂ w₁ := by
       conv_rhs => rw [hβ]
-      rw [← mul_assoc, s62_exp_neg_mul ℚ n hc2, one_mul]
+      rw [← mul_assoc, s62_exp_neg_mul ℚ n hcg2, one_mul]
     rw [map_mul, s62_rhoExt_exp ℚ n g hℓ2, hρβ, ← mul_assoc,
-      ← s62_exp_add ℚ n (s62_rhoExt_mem ℚ n g hℓ2) (neg_mem hc2), hcℓ,
+      ← s62_exp_add ℚ n (s62_rhoExt_mem ℚ n g hℓ2) (neg_mem hcg2), hcℓ,
       show rhoExt ℚ n g ℓ + -(rhoExt ℚ n g ℓ - ℓ) = ℓ by abel]
   refine ⟨ℓ, ⟨?_, hℓ, hα⟩, fun ℓ' ⟨_, hℓ', hα'⟩ =>
     s62_unique P J hP hample w₁ w₂ w₁ w₂ hw₁ hw₂ hw₁ hw₂ k k hk hkn hk hkn ℓ' ℓ hℓ' hℓ
       hα' hα⟩
-  -- `ℓ = -½ c₁(𝒫) - ι` is of type `(1,1)`: `c₁(𝒫)` is, and so is the invariant `ι` (Lemma 2.2.7)
+  -- gap in the paper (filled): `ℓ` is of type `(1,1)`. By Proposition 6.1.2,
+  -- `½[c₁(𝒫) - ρ_g(c₁(𝒫))]` satisfies (6.1.8), so it is `ρ_g(ℓ) - ℓ`: `ℓ + ½c₁(𝒫)` is invariant,
+  -- hence a Hodge class (Lemma 2.2.7); and `c₁(𝒫)` is of type `(1,1)`
+  have hc := s62_c1P_mem ℚ n
+  have hc' : (2 : ℚ)⁻¹ • c1P ℚ n ∈ ⋀[ℚ]^2 (V ℚ n) := Submodule.smul_mem _ _ hc
+  have hinv' : ℓ + (2 : ℚ)⁻¹ • c1P ℚ n ∈ P.invQ 2 := by
+    refine ⟨Submodule.add_mem _ hℓ2 hc', fun g hg => ?_⟩
+    have hcg : (2 : ℚ)⁻¹ • (c1P ℚ n - rhoExt ℚ n g (c1P ℚ n)) ∈ ⋀[ℚ]^2 (V ℚ n) :=
+      Submodule.smul_mem _ _ (Submodule.sub_mem _ hc (s62_rhoExt_mem ℚ n g hc))
+    have h1 := s62_c1N_of_gamma P J hP hample w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ2 hγ g hg _ hcg
+      (proposition6_1_2 ℚ n g)
+    rw [map_add, map_smul]
+    calc rhoExt ℚ n g ℓ + (2 : ℚ)⁻¹ • rhoExt ℚ n g (c1P ℚ n)
+        = (rhoExt ℚ n g ℓ - ℓ) + ℓ + (2 : ℚ)⁻¹ • rhoExt ℚ n g (c1P ℚ n) := by abel
+      _ = ℓ + (2 : ℚ)⁻¹ • c1P ℚ n := by rw [← h1, smul_sub]; abel
+  have hℓeq : ℓ = (ℓ + (2 : ℚ)⁻¹ • c1P ℚ n) - (2 : ℚ)⁻¹ • c1P ℚ n := by abel
   rw [hℓeq]
-  exact Submodule.sub_mem _ (neg_mem (Submodule.smul_mem _ _ (s62_c1P_hodge J hP.isComplex)))
-    (lemma2_2_7_hodge P hP.pos hP.nonIsotropic J hP.isComplex hP.hodge 1 hι)
+  exact Submodule.sub_mem _
+    (lemma2_2_7_hodge P hP.pos hP.nonIsotropic J hP.isComplex hP.hodge 1 hinv')
+    (Submodule.smul_mem _ _ (s62_c1P_hodge J hP.isComplex))
 
 /-- **Lemma 6.2.3** (`ch-3-alpha-is-second-partial-of-J`), last sentence: "The class `ℓ` depends on
 the secant line `P`, but not on the choice of `Fᵢ`, `i = 1, 2`." If `(w₁, w₂)` and `(w₁', w₂')` are
@@ -2233,7 +2501,7 @@ theorem lemma6_2_3_unique (hP : Assumption2_4_1 P J)
     ℓ = ℓ' :=
   s62_unique P J hP hample w₁ w₂ w₁' w₂' hw₁ hw₂ hw₁' hw₂' k k' hk hkn hk' hkn' ℓ ℓ' hℓ hℓ' hα hα'
 
-/-- (Proof of Lemma 6.2.3, TeX lines 2488–2491) `c₁(N_g) = ρ_g(ℓ) - ℓ` for all `g ∈ Spin(V)_P`, where
+/-- (Proof of Lemma 6.2.3, TeX lines 2478–2481) `c₁(N_g) = ρ_g(ℓ) - ℓ` for all `g ∈ Spin(V)_P`, where
 `ℓ` is the class of Lemma 6.2.3 and `c₁(N_g) = c` is the class of (6.1.8)
 (`ρ'_g = exp(c) ∪ ρ_g`). -/
 theorem lemma6_2_3_c1N (hP : Assumption2_4_1 P J)
@@ -2380,11 +2648,18 @@ variable (F : Type*) [Field F] [CharZero F]
 /-- **Lemma 6.2.5** (`example-conjecture-holds-for-abelian-surfaces`). Proposition 6.1.2 holds in case
 `X` is an abelian surface (`n = 2`): `ρ'_g = exp(½[c₁(𝒫) - ρ_g(c₁(𝒫))]) ∪ ρ_g`.
 
-The paper proves this from ideal sheaves of points on `X` and a Zariski-density argument, and then
-deduces Proposition 6.1.2 for all `n` from it. Here Proposition 6.1.2 is proved for every `n` by the
-authorized algebraic departure (`notes/design.md`), and this lemma is its case `n = 2`
-(`proposition6_1_2`). As there, `g` ranges over `Spin(V_F)` for every field `F` of characteristic
-`0` (the paper: the integral `Spin(V)`). -/
+Departure from the paper (reason 2; authorized with Proposition 6.1.2, `notes/design.md`): the
+paper's proof (TeX lines 2537–2575) takes for `F₁, F₂` ideal sheaves of length-`n` subschemes of `X`
+(Chern character `w_n = (1, 0, -n)`), computes the first graded summands of the Chern character of
+`E = Rπ_{23,*}(π₁^*F₁^∨ ⊗ 𝓕₂)` by the proof of [Markman, generalized Kummers, Prop. 11.2],
+identifies the class `ℓ` of Lemma 6.2.3 with the projection of `-c₁(𝒫)/2` to `H²_P` by
+Remark 6.2.4, deduces (6.2.5) for `g ∈ Spin(V)_P`, extends it by the cocycle identity (6.1.9) to the
+subgroup `Γ ⊆ Spin(V)` generated by these groups `Spin(V)_P`, and concludes by the Zariski density
+of `Γ` in `Spin(V_ℚ)` ([Verbitsky, Th. 2.1]). The sheaves, the Chern character computation and the
+Zariski density are not available in Lean. Here Proposition 6.1.2 is proved for every `n` by the
+authorized algebraic argument (`proposition6_1_2`), and this lemma is its case `n = 2`. As there,
+`g` ranges over `Spin(V_F)` for every field `F` of characteristic `0` (the paper: the integral
+`Spin(V)`). -/
 theorem lemma6_2_5 (g : Spin F 2) (x : ExtV F 2) :
     rhoPrime F 2 g x =
       IsNilpotent.exp ((2 : F)⁻¹ • (c1P F 2 - rhoExt F 2 g (c1P F 2))) * rhoExt F 2 g x :=
@@ -2395,10 +2670,10 @@ is the class of (6.1.8) (`ρ'_g = exp(c₁(N_g)) ∪ ρ_g`, `c₁(N_g) ∈ H²`)
 `g ∈ Spin(V)_P` and every negative definite rational plane `P` containing `w_n`; in the model it holds
 for every `g ∈ Spin(V_F)` (Proposition 6.1.2), which is what the paper concludes.
 
-Departure from the paper (part of the authorized departure for Lemma 6.2.5): the paper obtains
-(6.2.5) from the Chern character of `Rπ_{23,*}(π₁^*F₁^∨ ⊗ 𝓕₂)` for ideal sheaves of points and
-Remark 6.2.4; here it follows from Lemma 6.2.5 (Proposition 6.1.2) applied to `1`, since `c₁(N_g)` is
-determined by `ρ'_g(1) = exp(c₁(N_g))`. -/
+Departure from the paper (reason 2; part of the authorized departure for Lemma 6.2.5): the paper
+obtains (6.2.5) from the Chern character of `Rπ_{23,*}(π₁^*F₁^∨ ⊗ 𝓕₂)` for ideal sheaves of points
+and Remark 6.2.4; here it follows from Lemma 6.2.5 (Proposition 6.1.2) applied to `1`, since
+`c₁(N_g)` is determined by `ρ'_g(1) = exp(c₁(N_g))`. -/
 theorem equation6_2_5 (g : Spin F 2) (c : ExtV F 2) (hc2 : c ∈ ⋀[F]^2 (V F 2))
     (hc : ∀ x : ExtV F 2, rhoPrime F 2 g x = IsNilpotent.exp c * rhoExt F 2 g x) :
     c = (2 : F)⁻¹ • (c1P F 2 - rhoExt F 2 g (c1P F 2)) := by
