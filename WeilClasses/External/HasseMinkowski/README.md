@@ -21,7 +21,7 @@ edits are listed at the end. This project's documents do not describe these file
 The development also proves the isotropy form of the Hasse–Minkowski theorem (`HasseMinkowski.hasseMinkowski`),
 Hilbert symbols at every place with Hilbert reciprocity, and the Hasse invariant.
 
-Two edits were needed to compile against this project's Mathlib commit (`ec6a61c`, four days after lean-pool's):
+lean-pool's generated import list (`Imports.lean`) is not copied. Two edits were needed to compile against this project's Mathlib commit (`ec6a61c`, four days after lean-pool's):
 `RankTwo.lean` imports `Mathlib.Tactic.LinearCombination`, which lean-pool's Mathlib reached transitively; and in
 `Padics/Squares.lean` two norm identities `‖x - 1‖ = ‖z‖` for `z = ⟨x - 1, _⟩ : ℤ_[p]` are closed by `rfl`
 instead of `simp`.
