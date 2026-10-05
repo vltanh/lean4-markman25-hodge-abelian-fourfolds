@@ -1994,7 +1994,7 @@ theorem weilDomain_eq_image_OmegaP (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 
     obtain ⟨hIP, hcs, hν, hpos⟩ := s24b_cor3_2_3_hyps n d hd hn I hI
     have hc := corollary3_2_3_comm (PStd n d hd hn) (s8_J0 n) hP I hIP hcs hν hpos
     have h11 := corollary3_2_3_type11 (PStd n d hd hn) (s8_J0 n) hP I hIP
-    have hpol := corollary3_2_3_polarization (PStd n d hd hn) (s8_J0 n) hP I
+    have hpol := corollary3_2_3_polarization (PStd n d hd hn) (s8_J0 n) hP
     have hIso : ∀ x y, pairing ℝ n (I x) (I y) = pairing ℝ n x y := by
       obtain ⟨g, -, hgI⟩ := hIP
       intro x y

@@ -962,7 +962,7 @@ theorem map_m_tmul_of_mem_Pℚ (g : Spin ℚ n) (hg : g ∈ P.spinPℚ) (p q : S
 
 /-- (§6.4, TeX lines 2863–2865; §2.2 "`ℓ̃₁ ⊗ ℓ̃₁ ≅ det₁`") `Spin(V_K)_{ℓ₁,ℓ₂}` acts on `ℓ̃₁^{⊗2}` by the
 character `det₁`. -/
-theorem map_m_u₁_tmul_u₁ (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) :
+theorem map_m_u₁_tmul_u₁ (g : P.spinL₁L₂) :
     TensorProduct.map (m (Kd d) n ((g : Spin (Kd d) n) : C (Kd d) n))
         (m (Kd d) n ((g : Spin (Kd d) n) : C (Kd d) n)) (P.u₁ ⊗ₜ[Kd d] P.u₁) =
       P.det₁ g • (P.u₁ ⊗ₜ[Kd d] P.u₁) := by
@@ -972,7 +972,7 @@ theorem map_m_u₁_tmul_u₁ (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.
   rw [TensorProduct.map_tmul, h1, TensorProduct.smul_tmul_smul, ← P.χ₁_sq g, sq]
 
 /-- (§6.4) `Spin(V_K)_{ℓ₁,ℓ₂}` acts on `ℓ̃₂^{⊗2}` by the character `det₂`. -/
-theorem map_m_u₂_tmul_u₂ (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) :
+theorem map_m_u₂_tmul_u₂ (g : P.spinL₁L₂) :
     TensorProduct.map (m (Kd d) n ((g : Spin (Kd d) n) : C (Kd d) n))
         (m (Kd d) n ((g : Spin (Kd d) n) : C (Kd d) n)) (P.u₂ ⊗ₜ[Kd d] P.u₂) =
       P.det₂ g • (P.u₂ ⊗ₜ[Kd d] P.u₂) := by
@@ -1025,7 +1025,7 @@ theorem exists_det₁_ne (hd : 0 < d) (hP : ¬ P.IsIsotropic) :
     have : (2 : ℕ) ^ (2 * n) ≠ 1 := (Nat.one_lt_two_pow (by omega)).ne'
     exact_mod_cast this
   refine ⟨⟨g, by rw [hdet₁]; exact h1⟩, ⟨g, ?_⟩⟩
-  rw [P.det₂_eq_inv hd hW g, hdet₁]
+  rw [P.det₂_eq_inv hW g, hdet₁]
   intro h
   have h2 : (2 : Kd d) ^ (2 * n) * 2 ^ (2 * n) = 1 := by
     nth_rewrite 2 [h]; exact mul_inv_cancel₀ (pow_ne_zero _ two_ne_zero)
@@ -1220,7 +1220,7 @@ theorem proposition6_4_1_1_line₁ (P : KSecant n d) (J : Module.End ℝ (H1 ℝ
   -- `φ'(ℓ̃₁²)` has weight `2n`; its projection `v` is invariant and transforms by `det₁`
   obtain ⟨hF, hinv, hne, hchar⟩ := s62_line P hd hP'
     (Submodule.subset_span (Set.mem_insert _ _)) hu0 P.det₁
-    (fun h => P.map_m_u₁_tmul_u₁ hd hW h) ⟨h₁, hh₁⟩
+    (fun h => P.map_m_u₁_tmul_u₁ h) ⟨h₁, hh₁⟩
   refine ⟨hF, ?_⟩
   -- `(⋀^{2n} V_K)^{Spin(V)_P} = det₁ ⊕ det₂ ⊕ 1` (Lemma 2.2.7): `v` lies in `⋀^{2n} W₁`
   have hv := hinv
@@ -1266,11 +1266,11 @@ theorem proposition6_4_1_1_line₂ (P : KSecant n d) (J : Module.End ℝ (H1 ℝ
   have hu0 : P.u₂ ⊗ₜ[Kd d] P.u₂ ≠ 0 := (P.linIndep.tmul_of_isDomain P.linIndep).ne_zero (1, 1)
   obtain ⟨⟨h₁, hh₁⟩, ⟨h₂, hh₂⟩⟩ := P.exists_det₁_ne hd hP'
   have hh₁' : P.det₂ h₁ ≠ 1 := by
-    rw [P.det₂_eq_inv hd hW]; exact fun h => hh₁ (inv_eq_one.mp h)
+    rw [P.det₂_eq_inv hW]; exact fun h => hh₁ (inv_eq_one.mp h)
   -- `φ'(ℓ̃₂²)` has weight `2n`; its projection `v` is invariant and transforms by `det₂`
   obtain ⟨hF, hinv, hne, hchar⟩ := s62_line P hd hP'
     (Submodule.subset_span (Set.mem_insert_of_mem _ (Set.mem_singleton _))) hu0 P.det₂
-    (fun h => P.map_m_u₂_tmul_u₂ hd hW h) ⟨h₁, hh₁'⟩
+    (fun h => P.map_m_u₂_tmul_u₂ h) ⟨h₁, hh₁'⟩
   refine ⟨hF, ?_⟩
   have hv := hinv
   rw [lemma2_2_7_K_eq P hd hP'] at hv

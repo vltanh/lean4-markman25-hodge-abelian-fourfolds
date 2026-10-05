@@ -1397,7 +1397,7 @@ theorem corollary3_2_3_weil (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
 [van Geemen, Def. 4.9]: `f^*Ξ_P = d Ξ_P`, i.e. `Ξ_P(f x, f y) = d Ξ_P(x, y)` (which gives
 `η(k)^*Ξ_P = Nm(k) Ξ_P` for all `k ∈ K`, `WeilClasses.vanGeemen_def4_9`). -/
 theorem corollary3_2_3_polarization (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
-    (hP : Assumption2_4_1 P J) (I : Module.End ℝ (V ℝ n))
+    (hP : Assumption2_4_1 P J)
     (x y : V ℚ n) :
     P.XiQ hP.isCompl (P.fη hP.isCompl x) (P.fη hP.isCompl y) = d * P.XiQ hP.isCompl x y :=
   -- `Ξ_P(f x, f y) = (f²x, f y)_V = d (f x, y)_V = d Ξ_P(x, y)`

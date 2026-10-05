@@ -572,7 +572,7 @@ theorem pairingW₂_rho (g : P.spinL₁L₂) (y : V (Kd d) n)
     _ = pairing (Kd d) n (rho (Kd d) n ((g : Spin (Kd d) n)⁻¹) x) y := by rw [s22a_rho_inv_rho]
 
 /-- "**`det₂(s) = det₁(s)⁻¹`**" (§2.2), for `s ∈ Spin(V_K)_{ℓ₁,ℓ₂}`. -/
-theorem det₂_eq_inv (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) :
+theorem det₂_eq_inv (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) :
     P.det₂ g = (P.det₁ g)⁻¹ := by
   set e := LinearEquiv.ofBijective P.pairingW₂ (P.pairingW₂_bijective hW) with he
   set B : Module.End (Kd d) P.W₁ :=
@@ -663,7 +663,7 @@ noncomputable def restrictW₁P : P.spinPK →* (Module.End (Kd d) P.W₁)ˣ :=
 /-- Every `A ∈ SL(W₁)` is `ρ(g)|_{W₁}` for some `g ∈ Spin(V_K)_P`: by [Igusa, Lemma 1]
 (`range_restrictW₁`; `det A = 1 = 1²`), `A = ρ(g₀)|_{W₁}` with `g₀ ∈ Spin(V_K)_{ℓ₁,ℓ₂}`; then
 `χ₁(g₀)² = det₁(g₀) = 1` and `χ₁ χ₂ = 1`, so `g₀` or `-g₀` fixes `u₁` and `u₂`. -/
-theorem s22a_exists_spinPK (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (A : Module.End (Kd d) P.W₁)
+theorem s22a_exists_spinPK (hW : P.W₁ ⊓ P.W₂ = ⊥) (A : Module.End (Kd d) P.W₁)
     (hA : LinearMap.det A = 1) :
     ∃ g : P.spinPK, ((P.restrictW₁P g : (Module.End (Kd d) P.W₁)ˣ) : Module.End (Kd d) P.W₁) = A := by
   have hAu : IsUnit A := (LinearMap.isUnit_iff_isUnit_det A).mpr (by rw [hA]; exact isUnit_one)
@@ -747,7 +747,7 @@ theorem s22a_restrict_aux (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
       have hdetA : LinearMap.det (A : Module.End (Kd d) P.W₁) = 1 := by
         have := congrArg Units.val (MonoidHom.mem_ker.mp hA)
         simpa using this
-      obtain ⟨g, hg⟩ := P.s22a_exists_spinPK hd hW (A : Module.End (Kd d) P.W₁) hdetA
+      obtain ⟨g, hg⟩ := P.s22a_exists_spinPK hW (A : Module.End (Kd d) P.W₁) hdetA
       exact ⟨g, Units.ext hg⟩
 
 /-- `det(ρ(g)|_{W₁}) = 1` for `g ∈ Spin(V_K)_P` (`lemma2_2_2_restrict`). -/
@@ -795,7 +795,7 @@ theorem s22a_toSL_bijective (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥)
         1 := by
       rw [LinearMap.det_toLin]
       exact M.2
-    obtain ⟨g, hg⟩ := P.s22a_exists_spinPK hd hW _ hA
+    obtain ⟨g, hg⟩ := P.s22a_exists_spinPK hW _ hA
     refine ⟨g, Subtype.ext ?_⟩
     show LinearMap.toMatrix B B ((P.restrictW₁P g : (Module.End (Kd d) P.W₁)ˣ) :
       Module.End (Kd d) P.W₁) = _
@@ -908,7 +908,7 @@ of `w` ([Igusa, Lemma 2]: its identity component is `Spin(V_K)_P`). Identity com
 groups are not available, and on `K`-points two subgroups of index `2` of the stabilizer need not
 coincide a priori. Here `P_K` is the joint kernel of the infinitesimal stabilizer of `w`
 (`s22a_fix_iff`), which depends only on `w`. -/
-theorem _root_.WeilClasses.remark2_2_3_determines (hd : 0 < d) (hn : 3 ≤ n)
+theorem _root_.WeilClasses.remark2_2_3_determines (hn : 3 ≤ n)
     (hW : P.W₁ ⊓ P.W₂ = ⊥) (w : S (Kd d) n) (hwP : w ∈ P.PK)
     (hw₁ : w ∉ Submodule.span (Kd d) {P.u₁}) (hw₂ : w ∉ Submodule.span (Kd d) {P.u₂})
     (P' : KSecant n d) (hW' : P'.W₁ ⊓ P'.W₂ = ⊥) (hwP' : w ∈ P'.PK) :

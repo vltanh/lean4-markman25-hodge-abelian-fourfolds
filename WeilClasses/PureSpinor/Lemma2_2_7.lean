@@ -2476,11 +2476,11 @@ theorem s22b_χ₂_eq_one (g : Spin ℚ n) (hg : g ∈ P.spinPℚ) :
 theorem s22b_mem_spinPℚ_of_mem_spinPZ {g : Spin ℚ n} (hg : g ∈ P.spinPZ) : g ∈ P.spinPℚ :=
   (Subgroup.mem_inf.mp (show g ∈ SpinZ n ⊓ P.spinPℚ from hg)).2
 
-theorem s22b_det₁_eq_one (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) (g : Spin ℚ n)
+theorem s22b_det₁_eq_one (g : Spin ℚ n)
     (hg : g ∈ P.spinPℚ) : P.det₁ ⟨_, P.s22b_bcSpin_mem_spinL₁L₂ g hg⟩ = 1 := by
   rw [← P.χ₁_sq, s22b_χ₁_eq_one g hg, one_pow]
 
-theorem s22b_det₂_eq_one (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) (g : Spin ℚ n)
+theorem s22b_det₂_eq_one (g : Spin ℚ n)
     (hg : g ∈ P.spinPℚ) : P.det₂ ⟨_, P.s22b_bcSpin_mem_spinL₁L₂ g hg⟩ = 1 := by
   rw [← P.χ₂_sq, s22b_χ₂_eq_one g hg, one_pow]
 
@@ -2490,7 +2490,7 @@ theorem s22b_top₁_inv (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
     (g : Spin ℚ n) (hg : g ∈ P.spinPZ) : rhoExt (Kd d) n (bcSpin ℚ (Kd d) n g) x = x := by
   have hg' := s22b_mem_spinPℚ_of_mem_spinPZ hg
   have h := s22b_rhoExt_top₁ ⟨_, P.s22b_bcSpin_mem_spinL₁L₂ g hg'⟩ x hx
-  rwa [s22b_det₁_eq_one hd hW g hg', one_smul] at h
+  rwa [s22b_det₁_eq_one g hg', one_smul] at h
 
 /-- `⋀^{2n} W₂` is fixed by `Spin(V)_P`. -/
 theorem s22b_top₂_inv (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
@@ -2498,7 +2498,7 @@ theorem s22b_top₂_inv (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
     (g : Spin ℚ n) (hg : g ∈ P.spinPZ) : rhoExt (Kd d) n (bcSpin ℚ (Kd d) n g) x = x := by
   have hg' := s22b_mem_spinPℚ_of_mem_spinPZ hg
   have h := s22b_rhoExt_top₂ hW ⟨_, P.s22b_bcSpin_mem_spinL₁L₂ g hg'⟩ x hx
-  rwa [s22b_det₂_eq_one hd hW g hg', one_smul] at h
+  rwa [s22b_det₂_eq_one g hg', one_smul] at h
 
 theorem s22b_repr_basis (hW : IsCompl P.W₁ P.W₂) (S T : Finset (Fin (2 * n + 2 * n))) :
     (P.s22b_bV hW).ExteriorAlgebra.repr ((P.s22b_bV hW).ExteriorAlgebra S) T =
@@ -2959,7 +2959,7 @@ theorem s22b_exists_det_ne_one (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) :
     have h' : ((2 ^ (2 * n) : ℕ) : Kd d) = ((1 : ℕ) : Kd d) := by push_cast; exact h
     exact absurd (Nat.cast_injective h') (by omega)
   refine ⟨g, by rw [h1]; exact h2, ?_⟩
-  rw [P.det₂_eq_inv hd hW.inf_eq_bot, h1]
+  rw [P.det₂_eq_inv hW.inf_eq_bot, h1]
   exact fun h => h2 (inv_eq_one.mp h)
 
 /-- An invariant of `Spin(V_K)_{ℓ₁,ℓ₂}` is a combination of powers of `ω`. -/

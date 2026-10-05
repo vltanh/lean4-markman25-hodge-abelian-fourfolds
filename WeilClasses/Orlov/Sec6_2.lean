@@ -2285,7 +2285,6 @@ theorem s62_ring_aux {R : Type*} [Ring R] (B B' ρB' c l ρl : R) (E1 : B' = ρB
 `Spin(V)_P`-invariant (`ℓ ∈ H²`), then `c₁(N_g) = ρ_g(ℓ) - ℓ` for every `g ∈ Spin(V)_P`, by the
 injectivity of `β_k ∪ (•)` on `H²`. -/
 theorem s62_c1N_of_gamma (hP : Assumption2_4_1 P J)
-    (hample : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl (productStructure n J) x x)
     (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) (k : ℕ)
     (hk : IsLeast {j : ℕ | projDeg ℚ n (2 * j) (secantSqClass ℚ n w₂ w₁) ≠ 0} k) (hkn : k < n)
     (ℓ : ExtV ℚ n) (hℓ2 : ℓ ∈ ⋀[ℚ]^2 (V ℚ n))
@@ -2333,7 +2332,7 @@ theorem s62_c1N (hP : Assumption2_4_1 P J)
       ℓ * projDeg ℚ n (2 * k) (secantSqClass ℚ n w₂ w₁) ∈ invariantsExt ℚ n P.spinPZ := by
     intro g' hg'
     rw [← (s62_projDeg_exp_mul ℚ n hℓ2 _ k hlow).2, ← s62_projDeg_rhoExt, hα g' hg']
-  exact s62_c1N_of_gamma P J hP hample w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ2 hγ g hg c hc2 hc
+  exact s62_c1N_of_gamma P J hP w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ2 hγ g hg c hc2 hc
 
 /-- The uniqueness of `ℓ` in Lemma 6.2.3 (`lemma6_2_3_unique`). -/
 theorem s62_unique (hP : Assumption2_4_1 P J)
@@ -2449,7 +2448,7 @@ theorem lemma6_2_3 (hP : Assumption2_4_1 P J)
   have hα : IsNilpotent.exp ℓ * secantSqClass ℚ n w₂ w₁ ∈ invariantsExt ℚ n P.spinPZ := by
     intro g hg
     obtain ⟨cg, hcg2, hcg⟩ := equation6_1_8 ℚ n g
-    have hcℓ := s62_c1N_of_gamma P J hP hample w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ2 hγ g hg cg hcg2 hcg
+    have hcℓ := s62_c1N_of_gamma P J hP w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ2 hγ g hg cg hcg2 hcg
     have hβ := equation6_2_4 P w₁ w₂ hw₁ hw₂ g hg cg hcg
     have hρβ : rhoExt ℚ n g (secantSqClass ℚ n w₂ w₁) =
         IsNilpotent.exp (-cg) * secantSqClass ℚ n w₂ w₁ := by
@@ -2470,7 +2469,7 @@ theorem lemma6_2_3 (hP : Assumption2_4_1 P J)
     refine ⟨Submodule.add_mem _ hℓ2 hc', fun g hg => ?_⟩
     have hcg : (2 : ℚ)⁻¹ • (c1P ℚ n - rhoExt ℚ n g (c1P ℚ n)) ∈ ⋀[ℚ]^2 (V ℚ n) :=
       Submodule.smul_mem _ _ (Submodule.sub_mem _ hc (s62_rhoExt_mem ℚ n g hc))
-    have h1 := s62_c1N_of_gamma P J hP hample w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ2 hγ g hg _ hcg
+    have h1 := s62_c1N_of_gamma P J hP w₁ w₂ hw₁ hw₂ k hk hkn ℓ hℓ2 hγ g hg _ hcg
       (proposition6_1_2 ℚ n g)
     rw [map_add, map_smul]
     calc rhoExt ℚ n g ℓ + (2 : ℚ)⁻¹ • rhoExt ℚ n g (c1P ℚ n)
