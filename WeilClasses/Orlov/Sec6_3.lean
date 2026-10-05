@@ -719,12 +719,14 @@ variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
 /-! ## Combinatorics of the proof of Lemma 6.3.1 -/
 
+omit [CharZero F] in
 /-- (§6.3, TeX line 2693) `ε_{K,K^c} = (-1)^{Σ(K) - k(k+1)/2}` (`Σ(K) ≥ k(k+1)/2`, so the natural
 subtraction is the integer one). -/
 theorem epsSign_compl (K : Finset (Fin (2 * n))) :
     epsSign F n K Kᶜ = (-1 : F) ^ (sumIdx n K - K.card * (K.card + 1) / 2) := by
   rw [s61_epsSign_eq, ite_eq_left disjoint_compl_right, ← s61_inv_compl_add n K, Nat.add_sub_cancel]
 
+omit [CharZero F] in
 /-- (§6.3, TeX line 2694) `ε_{K^c,K} = (-1)^k ε_{K,K^c} = (-1)^{Σ(K) - k(k-1)/2}`. -/
 theorem epsSign_compl_swap (K : Finset (Fin (2 * n))) :
     epsSign F n Kᶜ K = (-1 : F) ^ K.card * epsSign F n K Kᶜ ∧
@@ -743,6 +745,7 @@ theorem epsSign_compl_swap (K : Finset (Fin (2 * n))) :
   · exact s61_neg_one_pow_congr (by omega)
   · exact s61_neg_one_pow_congr (by omega)
 
+omit [CharZero F] in
 /-- (§6.3, TeX line 2695) Poincaré duality `PD_X` sends `e_K` to `∫_X e_K ∧ (•) = ε_{K,K^c}
 f_{K^c}`:
 `PD_X(s)` pairs with `t` to `∫_X s ∧ t` (under `H^k(X̂) = H^k(X)*`, `⟨f_A, e_B⟩ = δ_{AB}`). -/
@@ -758,6 +761,7 @@ theorem PDX_spec (s t : S F n) : pairSHatS F n (PDX F n s) t = integral F n (s *
     · rw [ite_eq_right h, ite_eq_right h, smul_zero]
   exact congrArg (fun B : S F n →ₗ[F] S F n →ₗ[F] F => B s t) h
 
+omit [CharZero F] in
 /-- (§6.3, TeX lines 2697–2703) `μ^*(π₁^*e_K ∧ π₂^*e_L) = Σ_{I ⊆ K} ε_{I,I'} ε_{I',L} π₁^*e_I ∧
 π₂^*(e_{I' ∪ L})`, `I' = K \ I`. -/
 theorem muStar_basis (K L : Finset (Fin (2 * n))) :
@@ -836,6 +840,7 @@ theorem psiPinvShift_basis (K : Finset (Fin (2 * n))) :
   rw [psiPinvShift_eq_phiPX F n K.card hK, huybrechts_lemma9_23_X F n K.card hK, sd_PDX_basisS,
     smul_smul, smul_smul, hsgn]
 
+omit [CharZero F] in
 /-- `σ_J ε_{J,J^c} = (-1)^{Σ(J) - |J|}`. -/
 theorem s61_sigma_eps (J : Finset (Fin (2 * n))) :
     (-1 : F) ^ (J.card * (J.card + 3) / 2) * epsSign F n J Jᶜ =
@@ -880,6 +885,7 @@ theorem equation6_3_1 (K L : Finset (Fin (2 * n))) :
     refine Finset.sum_congr rfl fun I hI => ?_
     rw [Finset.sdiff_sdiff_eq_self (Finset.mem_powerset.mp hI), s61_sigma_eps]
 
+omit [CharZero F] in
 /-- (§6.3, TeX line 2785) `δ_K(f₁ ∧ ⋯ ∧ f_{2n}) = (-1)^{Σ(K) - |K|} f_{K^c}`, where
 `δ_K = δ_{e_{i₁}} ⋯ δ_{e_{i_k}}` (`i₁ < ⋯ < i_k`) and `δ_{e_i}` is contraction with
 `B₀(e_i, ·) = (e_i, ·)_V`. -/
@@ -915,6 +921,7 @@ theorem delta_prod_ptHat (K : Finset (Fin (2 * n))) :
     congr 2
     omega
 
+omit [CharZero F] in
 /-- (§6.3, TeX lines 2767–2786) `φ̃(e_K ⊗ e_L) = Σ_{I ⊆ K} ε_{I',I} (-1)^{ℓ(ℓ-1)/2}
 (-1)^{Σ(I') - |I'|} ε_{I,L} f_{(I')^c} ∧ e_{I∪L}`, `ℓ = |L|`, `I' = K \ I`. -/
 theorem varphiTilde_basis (K L : Finset (Fin (2 * n))) :

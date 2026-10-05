@@ -97,6 +97,7 @@ section HelpersField
 
 variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
 
+omit [CharZero F] in
 /-- `m_{(θ, w)} = L_w + D_θ`. -/
 theorem s21_m_ι_apply (θ : Module.Dual F (H1 F n)) (w : H1 F n) (x : S F n) :
     m F n (ι (Q F n) (θ, w)) x = ExteriorAlgebra.ι F w * x + D F n θ x := by
@@ -193,6 +194,7 @@ theorem s21_conj_ι {x : (C F n)ˣ} {v : V F n} (hx : (x : C F n) = ι (Q F n) v
       ι (Q F n) ((Q F n v)⁻¹ • (QuadraticMap.polar (Q F n) v l • v - Q F n v • l)) := by
   rw [s21_inv_eq_of_val_eq_ι hx hv, hx, mul_smul_comm, ι_mul_ι_mul_ι, ← map_smul]
 
+omit [CharZero F] in
 /-- `m_v` shifts the parity of `S`. -/
 theorem s21_m_ι_mem_evenOdd (v : V F n) {i : ZMod 2} {s : S F n}
     (hs : s ∈ evenOdd (0 : QuadraticForm F (H1 F n)) i) :
@@ -204,6 +206,7 @@ theorem s21_m_ι_mem_evenOdd (v : V F n) {i : ZMod 2} {s : S F n}
     (Submodule.mul_mem_mul (ι_mem_evenOdd_one _ w) hs)
   rwa [add_comm] at this
 
+omit [CharZero F] in
 /-- An odd element of `C(V_F)` shifts the parity of `S`. -/
 theorem s21_m_mem_evenOdd_of_odd (x : C F n) (hx : x ∈ evenOdd (Q F n) 1) (i : ZMod 2)
     (s : S F n) (hs : s ∈ evenOdd (0 : QuadraticForm F (H1 F n)) i) :
@@ -365,6 +368,7 @@ noncomputable def mEquiv : C F n ≃ₐ[F] Module.End F (S F n) :=
 theorem mEquiv_apply (x : C F n) : mEquiv F n x = m F n x :=
   congrFun (AlgEquiv.coe_ofBijective _ _) x
 
+omit [CharZero F] in
 /-- "**We get the embedding `m : V → End(S)`**" (2.1.2): `v ↦ m_v` is injective. -/
 theorem m_ι_injective : Function.Injective fun v : V F n => m F n (ι (Q F n) v) := by
   -- `m_{(θ, w)}(1) = w` and `m_{(θ, w)}(e_i) = w ∧ e_i + θ(e_i)`.
@@ -392,6 +396,7 @@ theorem m_ι_injective : Function.Injective fun v : V F n => m F n (ι (Q F n) v
   rw [hθ]
   rfl
 
+omit [CharZero F] in
 /-- The analogue `m_{v₁} ∘ m_{v₂} + m_{v₂} ∘ m_{v₁} = (v₁, v₂)_V · id_S` of the Clifford relation
 (2.1.1) (§2.1). -/
 theorem m_ι_mul_add_mul_swap (v₁ v₂ : V F n) :
@@ -505,6 +510,7 @@ theorem neg_conj_ι_eq_reflection (v : V F n)
   congr 2
   field_simp
 
+omit [CharZero F] in
 /-- **Odd elements swap the half-spin representations** (§2.1): an element `x ∈ C(V)^odd` maps `S⁺`
 to `S⁻` under `m`. -/
 theorem m_mem_Sminus_of_odd (x : C F n) (hx : x ∈ evenOdd (Q F n) 1) (s : S F n)
@@ -512,6 +518,7 @@ theorem m_mem_Sminus_of_odd (x : C F n) (hx : x ∈ evenOdd (Q F n) 1) (s : S F 
   have := s21_m_mem_evenOdd_of_odd x hx 0 s hs
   rwa [zero_add] at this
 
+omit [CharZero F] in
 /-- **Odd elements swap the half-spin representations** (§2.1): an element `x ∈ C(V)^odd` maps `S⁻`
 to `S⁺` under `m`. -/
 theorem m_mem_Splus_of_odd (x : C F n) (hx : x ∈ evenOdd (Q F n) 1) (s : S F n)
@@ -552,11 +559,13 @@ theorem m_ι_mul_m_ι_of_pairing_eq_two (v : V F n) (hv : pairing F n v v = 2) :
   have hQ : Q F n v = 1 := s21_Q_eq_one hv
   rw [← map_mul, ι_sq_scalar, hQ, map_one, map_one]
 
+omit [CharZero F] in
 /-- If `(v, v)_V = 2` then `m_v` maps `S⁺` to `S⁻` (§2.1). -/
 theorem m_ι_mem_Sminus_of_pairing_eq_two (v : V F n) (s : S F n)
     (hs : s ∈ Splus F n) : m F n (ι (Q F n) v) s ∈ Sminus F n :=
   m_mem_Sminus_of_odd F n _ (ι_mem_evenOdd_one _ v) s hs
 
+omit [CharZero F] in
 /-- If `(v, v)_V = 2` then `m_v` maps `S⁻` to `S⁺` (§2.1). -/
 theorem m_ι_mem_Splus_of_pairing_eq_two (v : V F n) (s : S F n)
     (hs : s ∈ Sminus F n) : m F n (ι (Q F n) v) s ∈ Splus F n :=

@@ -549,6 +549,7 @@ theorem s62_D_pt_eq_zero_iff (θ : Module.Dual F (H1 F n)) : D F n θ (pt F n) =
   rw [LinearMap.zero_apply]
   exact (smul_eq_zero.mp h1.symm).resolve_right (s62_pt_ne_zero F n)
 
+omit [CharZero F] in
 theorem s62_ann_one : ann F n 1 = LinearMap.range (LinearMap.inl F (Module.Dual F (H1 F n))
     (H1 F n)) := by
   ext v
@@ -560,6 +561,7 @@ theorem s62_ann_one : ann F n 1 = LinearMap.range (LinearMap.inl F (Module.Dual 
   · rintro ⟨θ, rfl⟩
     simp
 
+omit [CharZero F] in
 theorem s62_ann_pt : ann F n (pt F n) = LinearMap.range (LinearMap.inr F (Module.Dual F (H1 F n))
     (H1 F n)) := by
   ext v
@@ -571,6 +573,7 @@ theorem s62_ann_pt : ann F n (pt F n) = LinearMap.range (LinearMap.inr F (Module
   · rintro ⟨w, rfl⟩
     rfl
 
+omit [CharZero F] in
 theorem s62_isEvenPureSpinor_one : IsEvenPureSpinor F n 1 := by
   refine ⟨CliffordAlgebra.one_le_evenOdd_zero _ (Submodule.one_le.mp le_rfl), ?_, ?_⟩
   · intro v hv
@@ -580,6 +583,7 @@ theorem s62_isEvenPureSpinor_one : IsEvenPureSpinor F n 1 := by
   · rw [s62_ann_one, LinearMap.finrank_range_of_inj LinearMap.inl_injective,
       Subspace.dual_finrank_eq, s62_finrank_H1]
 
+omit [CharZero F] in
 theorem s62_isEvenPureSpinor_pt : IsEvenPureSpinor F n (pt F n) := by
   refine ⟨?_, ?_, ?_⟩
   · have h := s62_pt_mem F n
@@ -592,6 +596,7 @@ theorem s62_isEvenPureSpinor_pt : IsEvenPureSpinor F n (pt F n) := by
     simp
   · rw [s62_ann_pt, LinearMap.finrank_range_of_inj LinearMap.inr_injective, s62_finrank_H1]
 
+omit [CharZero F] in
 theorem s62_ann_pt_inf_ann_one : ann F n (pt F n) ⊓ ann F n 1 = ⊥ := by
   rw [s62_ann_pt, s62_ann_one, eq_bot_iff]
   rintro v ⟨⟨w, rfl⟩, ⟨θ, hθ⟩⟩

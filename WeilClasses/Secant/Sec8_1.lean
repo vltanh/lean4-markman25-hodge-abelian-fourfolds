@@ -135,27 +135,32 @@ theorem s8_thetaInv_antisymm {Θ : S F n} (hΘ : Θ ∈ ⋀[F]^2 (H1 F n))
   have hw' : contractOne F n Θ y' = w' := (LinearEquiv.ofBijective _ hθ).apply_symm_apply w'
   rw [← hw, ← hw', s8_theta_antisymm hΘ]
 
+omit [CharZero F] in
 theorem s8_fOfTheta_apply (θ : Module.Dual F (H1 F n) →ₗ[F] H1 F n) (hθ : Function.Bijective θ)
     (w : H1 F n) : fOfTheta θ hθ w = -(LinearEquiv.ofBijective θ hθ).symm w := rfl
 
+omit [CharZero F] in
 /-- `f(θ y) = -y`. -/
 theorem s8_fOfTheta_theta (θ : Module.Dual F (H1 F n) →ₗ[F] H1 F n) (hθ : Function.Bijective θ)
     (y : Module.Dual F (H1 F n)) : fOfTheta θ hθ (θ y) = -y := by
   rw [s8_fOfTheta_apply, neg_inj]
   exact (LinearEquiv.ofBijective θ hθ).symm_apply_apply y
 
+omit [CharZero F] in
 /-- `θ(f w) = -w`. -/
 theorem s8_theta_fOfTheta (θ : Module.Dual F (H1 F n) →ₗ[F] H1 F n) (hθ : Function.Bijective θ)
     (w : H1 F n) : θ (fOfTheta θ hθ w) = -w := by
   rw [s8_fOfTheta_apply, map_neg, neg_inj]
   exact (LinearEquiv.ofBijective θ hθ).apply_symm_apply w
 
+omit [CharZero F] in
 theorem s8_hdgMatrix_apply (θ : Module.Dual F (H1 F n) →ₗ[F] H1 F n) (hθ : Function.Bijective θ)
     (a : Matrix (Fin 2) (Fin 2) F) (v : V F n) :
     hdgMatrix θ hθ a v =
       (a 1 0 • fOfTheta θ hθ v.2 + a 1 1 • v.1, a 0 0 • v.2 - a 0 1 • θ v.1) := by
   simp [hdgMatrix, sub_eq_add_neg]
 
+omit [CharZero F] in
 /-- The matrices (8.1.2) compose as `2 × 2` matrices (`f⁻¹ f = id`, `f f⁻¹ = id`). -/
 theorem s8_hdgMatrix_comp (θ : Module.Dual F (H1 F n) →ₗ[F] H1 F n) (hθ : Function.Bijective θ)
     (a b : Matrix (Fin 2) (Fin 2) F) :
@@ -165,6 +170,7 @@ theorem s8_hdgMatrix_comp (θ : Module.Dual F (H1 F n) →ₗ[F] H1 F n) (hθ : 
     s8_fOfTheta_theta, s8_theta_fOfTheta, Matrix.mul_apply, Fin.sum_univ_two]
   ext1 <;> simp only <;> module
 
+omit [CharZero F] in
 theorem s8_hdgMatrix_one (θ : Module.Dual F (H1 F n) →ₗ[F] H1 F n) (hθ : Function.Bijective θ) :
     hdgMatrix θ hθ 1 = LinearMap.id := by
   refine LinearMap.ext fun v => ?_
@@ -209,7 +215,7 @@ theorem hdgMatrix_pairing (Θ : S F n) (hΘ : Θ ∈ ⋀[F]^2 (H1 F n))
     ring
   rw [s8_hdgMatrix_apply, s8_hdgMatrix_apply, s8_pairing_apply, s8_pairing_apply,
     Matrix.det_fin_two]
-  simp only [map_add, map_sub, map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul]
+  simp only [map_sub, map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul]
   linear_combination (a 1 0 * a 0 0) * I1 x.2 y.2 - (a 1 1 * a 0 1) * I3 x.1 y.1 -
     (a 1 0 * a 0 1) * (I2 x.2 y.1 + I2 y.2 x.1)
 
@@ -223,6 +229,7 @@ theorem s8_rho_mul (g h : Spin F n) :
 theorem s8_rho_one : (rho F n 1 : V F n →ₗ[F] V F n) = LinearMap.id := by
   simp [rho]
 
+omit [CharZero F] in
 theorem s8_Q_nondegenerate : (Q F n).Nondegenerate :=
   TauCeti.nondegenerate_dualProd (Module.eval_apply_injective F)
 
@@ -260,6 +267,7 @@ theorem s8_exists_rho_id_add_sum {ι : Type*} (s : Finset ι) (N : ι → V F n 
       LinearMap.comp_add, LinearMap.id_comp, LinearMap.id_comp, h0]
     abel
 
+omit [CharZero F] in
 theorem s8_polar_Q (x y : V F n) : QuadraticMap.polar (Q F n) x y = x.1 y.2 + y.1 x.2 :=
   s8_pairing_apply F n x y
 
@@ -279,7 +287,7 @@ theorem s8_exists_rho_upper {Θ : S F n} (hΘ : Θ ∈ ⋀[F]^2 (H1 F n))
   have hlift : ∀ i, ∃ g : Spin F n, (rho F n g : V F n →ₗ[F] V F n) = LinearMap.id + N i := by
     intro i
     obtain ⟨g, hg⟩ := s8_exists_rho_transvection (u := (0, e F n i)) (w := (0, γ i))
-      (by simp [Q]) (by simp [Q]) (by simp [s8_polar_Q])
+      (by simp [Q]) (by simp [Q]) (by simp [])
     refine ⟨g, LinearMap.ext fun v => ?_⟩
     rw [LinearEquiv.coe_coe, hg, LinearMap.add_apply, LinearMap.id_apply, hNapp, s8_polar_Q,
       s8_polar_Q]
@@ -321,7 +329,7 @@ theorem s8_exists_rho_lower {Θ : S F n} (hΘ : Θ ∈ ⋀[F]^2 (H1 F n))
   have hlift : ∀ i, ∃ g : Spin F n, (rho F n g : V F n →ₗ[F] V F n) = LinearMap.id + N i := by
     intro i
     obtain ⟨g, hg⟩ := s8_exists_rho_transvection (u := (f F n i, 0)) (w := (β i, 0))
-      (by simp [Q]) (by simp [Q]) (by simp [s8_polar_Q])
+      (by simp [Q]) (by simp [Q]) (by simp [])
     refine ⟨g, LinearMap.ext fun v => ?_⟩
     rw [LinearEquiv.coe_coe, hg, LinearMap.add_apply, LinearMap.id_apply, hNapp, s8_polar_Q,
       s8_polar_Q]
@@ -374,7 +382,7 @@ theorem exists_rho_eq_hdgMatrix (Θ : S F n) (hΘ : Θ ∈ ⋀[F]^2 (H1 F n))
     ext i j
     fin_cases i <;> fin_cases j <;>
       simp [Matrix.mul_apply, Fin.sum_univ_two] <;> field_simp <;>
-        first | ring1 | linear_combination ha | linear_combination -ha
+        first | ring1 | linear_combination ha
   by_cases h10 : a 1 0 = 0
   · -- `a = [[1, 0], [1, 1]] a'` with `a'₁₀ = -a₀₀ ≠ 0`
     have h00 : a 0 0 ≠ 0 := by
@@ -696,12 +704,13 @@ theorem s8_eq_sum_proj (s : S F n) :
     rw [Fintype.card_fin] at this
     omega
   rw [Finset.sum_eq_single K.card]
-  · rw [s8_proj_of_mem hK, if_pos rfl]
+  · rw [s8_proj_of_mem hK, ite_eq_left rfl]
   · intro k _ hk
-    rw [s8_proj_of_mem hK, if_neg (Ne.symm hk), smul_zero]
+    rw [s8_proj_of_mem hK, ite_eq_right (Ne.symm hk), smul_zero]
   · intro h
     exact absurd (Finset.mem_range.mpr hcard) h
 
+omit [CharZero F] in
 /-- The number operator on `S`: `Σᵢ eᵢ ∧ (fᵢ ⌋ s) = Σ_k k s_k`. -/
 theorem s8_numberOp_S (s : S F n) :
     ∑ i, ExteriorAlgebra.ι F (e F n i) * D F n (f F n i) s =
@@ -713,7 +722,7 @@ theorem s8_numberOp_S (s : S F n) :
   refine Finset.sum_congr rfl fun k _ => ?_
   have := s8_numberOp (Pi.basisFun F (Fin (2 * n))) (s8_proj_mem s k)
   refine Eq.trans (Finset.sum_congr rfl fun i _ => ?_) this
-  simp only [Pi.basisFun_apply, Module.Basis.coord_apply, Pi.basisFun_repr]
+  simp only [Pi.basisFun_apply]
   rfl
 
 /-- A spinor killed by every `D_y`, `y ∈ H¹(X̂)` (i.e. `H¹(X̂) × 0 ⊆ ker m_s`) is a scalar. -/
@@ -726,10 +735,10 @@ theorem s8_eq_algebraMap_of_contract {s : S F n} (h : ∀ y, D F n y s = 0) :
     by_cases hk2 : k < 2 * n + 1
     · have := congrArg (GradedAlgebra.proj (fun i : ℕ => ⋀[F]^i (H1 F n)) k) hN
       rw [map_zero, map_sum, Finset.sum_eq_single k] at this
-      · rw [map_smul, s8_proj_of_mem (s8_proj_mem s k), if_pos rfl] at this
+      · rw [map_smul, s8_proj_of_mem (s8_proj_mem s k), ite_eq_left rfl] at this
         exact (smul_eq_zero.mp this.symm).resolve_left (by exact_mod_cast hk.ne')
       · intro j _ hj
-        rw [map_smul, s8_proj_of_mem (s8_proj_mem s j), if_neg hj, smul_zero]
+        rw [map_smul, s8_proj_of_mem (s8_proj_mem s j), ite_eq_right hj, smul_zero]
       · intro h'
         exact absurd (Finset.mem_range.mpr hk2) h'
     · exact s8_mem_bot_of_lt F n (by omega) (s8_proj_mem s k)
@@ -777,11 +786,11 @@ theorem s8_eq_smul_pt_of_mul {s : S F n} (h : ∀ w, ExteriorAlgebra.ι F w * s 
     by_cases hk2 : k < 2 * n + 1
     · have := congrArg (GradedAlgebra.proj (fun i : ℕ => ⋀[F]^i (H1 F n)) k) hdual
       rw [map_zero, map_sub, map_smul, map_sum, Finset.sum_eq_single k] at this
-      · rw [map_smul, s8_proj_of_mem (s8_proj_mem s k), if_pos rfl, ← sub_smul] at this
+      · rw [map_smul, s8_proj_of_mem (s8_proj_mem s k), ite_eq_left rfl, ← sub_smul] at this
         refine (smul_eq_zero.mp this.symm).resolve_left ?_
         exact sub_ne_zero.mpr (by exact_mod_cast (Ne.symm hk))
       · intro j _ hj
-        rw [map_smul, s8_proj_of_mem (s8_proj_mem s j), if_neg hj, smul_zero]
+        rw [map_smul, s8_proj_of_mem (s8_proj_mem s j), ite_eq_right hj, smul_zero]
       · intro h'
         exact absurd (Finset.mem_range.mpr hk2) h'
     · exact s8_mem_bot_of_lt F n (by omega) (s8_proj_mem s k)
@@ -832,8 +841,8 @@ theorem s8_D_mul_of_mem_two {Θ : S F n} (hΘ : Θ ∈ ⋀[F]^2 (H1 F n))
     simp only [mul_sub, sub_mul, mul_smul_comm, smul_mul_assoc, mul_assoc]
     abel
   | zero => simp
-  | add a b _ _ ha hb => simp only [add_mul, map_add, ha, hb, LinearMap.add_apply]; abel
-  | smul c a _ ha => simp only [smul_mul_assoc, map_smul, ha, LinearMap.smul_apply, smul_add]
+  | add a b _ _ ha hb => simp only [add_mul, map_add, ha, hb]; abel
+  | smul c a _ ha => simp only [smul_mul_assoc, map_smul, ha, smul_add]
 
 /-- `y ⌋ Θ^{m+1} = (m+1) θ(y) ∧ Θ^m` for `Θ ∈ H²`. -/
 theorem s8_D_pow_succ {Θ : S F n} (hΘ : Θ ∈ ⋀[F]^2 (H1 F n)) (y : Module.Dual F (H1 F n))
@@ -903,22 +912,26 @@ theorem s8_rho_expSpin (u : S F n) (hu : u ∈ ⋀[F]^2 (H1 F n)) (v : V F n) :
     rho F n (s8_expSpin u hu) v = (v.1, v.2 - contractOne F n u v.1) :=
   chevalley_III_1_7_rho F n u hu v
 
+omit [CharZero F] in
 theorem s8_mem_ann_iff (s : S F n) (v : V F n) :
     v ∈ ann F n s ↔ ExteriorAlgebra.ι F v.2 * s + D F n v.1 s = 0 := by
-  simp only [ann, LinearMap.mem_ker, mOf, LinearMap.coe_comp, Function.comp_apply,
+  simp only [ann, LinearMap.mem_ker, mOf,
     AlgHom.toLinearMap_apply, LinearMap.applyₗ_apply_apply, m, CliffordAlgebra.lift_ι_apply,
     cliffordOp, L, LinearMap.add_apply, LinearMap.comp_apply, LinearMap.snd_apply,
     LinearMap.fst_apply, LinearMap.mul_apply']
 
+omit [CharZero F] in
 theorem s8_inl_mem_ann_one (y : Module.Dual F (H1 F n)) : ((y, 0) : V F n) ∈ ann F n 1 := by
   rw [s8_mem_ann_iff]
   simp [D]
 
+omit [CharZero F] in
 theorem s8_m_inv_m (g : Spin F n) (s : S F n) :
     m F n ((g⁻¹ : Spin F n) : C F n) (m F n (g : C F n) s) = s := by
   rw [← Module.End.mul_apply, ← map_mul, ← Submonoid.coe_mul, inv_mul_cancel, OneMemClass.coe_one,
     map_one, Module.End.one_apply]
 
+omit [CharZero F] in
 theorem s8_m_injective (g : Spin F n) : Function.Injective (m F n (g : C F n)) := by
   intro x y hxy
   rw [← s8_m_inv_m g x, ← s8_m_inv_m g y, hxy]
@@ -1009,7 +1022,7 @@ theorem s8_m_exp_mem_span {F : Type*} [Field F] [CharZero F] {Θ : S F n}
   · simp only [map_neg, map_smul, s8_fOfTheta_theta, smul_neg, neg_neg, smul_smul]
     rw [← add_smul, show a 1 0 * (k * c⁻¹) + a 1 1 * c⁻¹ = c * c⁻¹ by ring,
       mul_inv_cancel₀ hk, one_smul]
-  · simp only [map_smul, smul_neg, smul_smul, sub_eq_add_neg, ← neg_smul, ← add_smul]
+  · simp only [map_smul, smul_smul, sub_eq_add_neg, ← neg_smul, ← add_smul]
     congr 1
     field_simp
     ring
@@ -1277,7 +1290,7 @@ theorem iota_tau_extends (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
     have h := s8_m_exp_mem_span hΘK hθ _ g hg k (by simpa using hk)
     convert h using 4
     simp only [Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.head_cons, zero_mul, zero_add, one_mul,
+      Matrix.empty_val', Matrix.cons_val_fin_one, zero_mul, zero_add, one_mul,
       add_zero, neg_div, one_div, neg_smul]
   · -- `A(H¹(X̂)) = H¹(X)`: the line of `1` goes to that of `[pt]`, i.e. of `Θⁿ`
     obtain ⟨hpt, -⟩ := s8_m_one_eq_smul_pt hθ _ hdet (by simp) g hg
@@ -1297,7 +1310,7 @@ theorem iota_tau_extends (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
       have h := s8_rho_mem_ann g h0
       rw [← LinearEquiv.coe_coe, hg, s8_hdgMatrix_apply] at h
       simp only [Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
-        Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.head_cons, map_neg,
+        Matrix.empty_val', Matrix.cons_val_fin_one, map_neg,
         s8_fOfTheta_theta, neg_neg, one_smul, zero_smul, add_zero, map_zero, smul_zero,
         sub_zero] at h
       rw [s8_mem_ann_iff] at h
@@ -1520,9 +1533,9 @@ theorem alphaPP_expansion (d : ℚ) (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 
   congr 1
   -- the part of degree `< 5`: the pairs `(i, j)` with `i + 2j < 5`
   rw [s8_sum_range_of_vanish _ (by omega : 5 ≤ n + 5) (fun i hi _ => Finset.sum_eq_zero
-    fun j _ => if_neg (by omega))]
+    fun j _ => ite_eq_right (by omega))]
   rw [Finset.sum_congr rfl fun i _ => s8_sum_range_of_vanish _ (by omega : 3 ≤ n + 3)
-    (fun j hj _ => if_neg (by omega))]
+    (fun j hj _ => ite_eq_right (by omega))]
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
   norm_num
   -- compare the coefficients of `Θᵏ`, `k ≤ 4`, when `k ≤ n` (else `Θᵏ = 0`)
@@ -1588,9 +1601,9 @@ theorem betaPP_expansion (d : ℚ) (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 �
   congr 1
   -- the part of degree `< 5`: the pairs `(i, j)` with `i + 2j + 1 < 5`
   rw [s8_sum_range_of_vanish _ (by omega : 4 ≤ n + 5) (fun i hi _ => Finset.sum_eq_zero
-    fun j _ => if_neg (by omega))]
+    fun j _ => ite_eq_right (by omega))]
   rw [Finset.sum_congr rfl fun i _ => s8_sum_range_of_vanish _ (by omega : 2 ≤ n + 3)
-    (fun j hj _ => if_neg (by omega))]
+    (fun j hj _ => ite_eq_right (by omega))]
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
   norm_num
   -- compare the coefficients of `Θᵏ`, `1 ≤ k ≤ 4`, when `k ≤ n` (else `Θᵏ = 0`)
@@ -1840,13 +1853,13 @@ theorem saturated_of_q_eq_one (d : ℚ) (hn : 1 ≤ n) (Θ : S ℚ n)
     rw [Finset.sum_eq_single_of_mem 0 (Finset.mem_range.mpr (by omega))]
     · rw [Finset.sum_eq_single_of_mem 0 (Finset.mem_range.mpr (by omega))]
       · simp
-      · intro j _ hj; rw [if_neg (by omega), smul_zero]
-    · intro i _ hi; exact Finset.sum_eq_zero fun j _ => by rw [if_neg (by omega), smul_zero]
+      · intro j _ hj; rw [ite_eq_right (by omega), smul_zero]
+    · intro i _ hi; exact Finset.sum_eq_zero fun j _ => by rw [ite_eq_right (by omega), smul_zero]
   have hP0β : GradedAlgebra.proj (fun i : ℕ => ⋀[ℚ]^i (H1 ℚ n)) 0 (betaPP Θ d ρ τ 1) = 0 := by
     rw [s8_betaPP_double Θ hΘ d ρ τ 1 hq1]
     simp only [map_sum, map_smul, s8_proj_pow hΘ]
     exact Finset.sum_eq_zero fun i _ => Finset.sum_eq_zero fun j _ => by
-      rw [if_neg (by omega), smul_zero]
+      rw [ite_eq_right (by omega), smul_zero]
   have hP2α : GradedAlgebra.proj (fun i : ℕ => ⋀[ℚ]^i (H1 ℚ n)) 2 (alphaPP Θ d ρ τ 1) =
       (ρ : ℚ) • Θ := by
     rw [s8_alphaPP_double Θ hΘ d ρ τ 1 hq1]
@@ -1854,16 +1867,16 @@ theorem saturated_of_q_eq_one (d : ℚ) (hn : 1 ≤ n) (Θ : S ℚ n)
     rw [Finset.sum_eq_single_of_mem 1 (Finset.mem_range.mpr (by omega))]
     · rw [Finset.sum_eq_single_of_mem 0 (Finset.mem_range.mpr (by omega))]
       · simp
-      · intro j _ hj; rw [if_neg (by omega), smul_zero]
-    · intro i _ hi; exact Finset.sum_eq_zero fun j _ => by rw [if_neg (by omega), smul_zero]
+      · intro j _ hj; rw [ite_eq_right (by omega), smul_zero]
+    · intro i _ hi; exact Finset.sum_eq_zero fun j _ => by rw [ite_eq_right (by omega), smul_zero]
   have hP2β : GradedAlgebra.proj (fun i : ℕ => ⋀[ℚ]^i (H1 ℚ n)) 2 (betaPP Θ d ρ τ 1) = Θ := by
     rw [s8_betaPP_double Θ hΘ d ρ τ 1 hq1]
     simp only [map_sum, map_smul, s8_proj_pow hΘ]
     rw [Finset.sum_eq_single_of_mem 0 (Finset.mem_range.mpr (by omega))]
     · rw [Finset.sum_eq_single_of_mem 0 (Finset.mem_range.mpr (by omega))]
       · simp
-      · intro j _ hj; rw [if_neg (by omega), smul_zero]
-    · intro i _ hi; exact Finset.sum_eq_zero fun j _ => by rw [if_neg (by omega), smul_zero]
+      · intro j _ hj; rw [ite_eq_right (by omega), smul_zero]
+    · intro i _ hi; exact Finset.sum_eq_zero fun j _ => by rw [ite_eq_right (by omega), smul_zero]
   -- degree `0`: `a ∈ ℤ`
   have h0 := s8_proj_mem_SZ hab 0
   rw [map_add, map_smul, map_smul, hP0α, hP0β, smul_zero, add_zero] at h0
@@ -1948,11 +1961,11 @@ theorem s8_double_sum_diag {M' : Type*} [AddCommMonoid M'] (g : ℕ → ℕ → 
     (hMN : M + 1 ≤ N) :
     ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N, (if j + k = M then g j k else 0) =
       ∑ j ∈ Finset.range (M + 1), g j (M - j) := by
-  rw [s8_sum_range_of_vanish _ hMN (fun j hj _ => Finset.sum_eq_zero fun k _ => if_neg (by omega))]
+  rw [s8_sum_range_of_vanish _ hMN (fun j hj _ => Finset.sum_eq_zero fun k _ => ite_eq_right (by omega))]
   refine Finset.sum_congr rfl fun j hj => ?_
   have hj' := Finset.mem_range.mp hj
   rw [Finset.sum_eq_single_of_mem (M - j) (Finset.mem_range.mpr (by omega))
-    (fun k _ hk => if_neg (by omega)), if_pos (by omega)]
+    (fun k _ hk => ite_eq_right (by omega)), ite_eq_left (by omega)]
 
 theorem s8_sum_choose_even_odd (m : ℕ) (hm : 1 ≤ m) :
     (∑ j ∈ Finset.range (m + 1), ((2 * m).choose (2 * j) : ℚ)) = 2 ^ (2 * m - 1) ∧
@@ -2020,8 +2033,8 @@ theorem s8_sum_if_two_mul (f : ℕ → ℕ → ℚ) (F : ℚ) (N m : ℕ) (hN : 
   rw [← s8_double_sum_diag (fun j k => f j k * F) hN]
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => ?_
   by_cases h : j + k = m
-  · rw [if_pos (by omega), if_pos h]
-  · rw [if_neg (by omega), if_neg h, mul_zero]
+  · rw [ite_eq_left (by omega), ite_eq_left h]
+  · rw [ite_eq_right (by omega), ite_eq_right h, mul_zero]
 
 theorem s8_sum_if_two_mul_add_one (f : ℕ → ℕ → ℚ) (F : ℚ) (N m : ℕ) (hm : 1 ≤ m) (hN : m ≤ N) :
     ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N,
@@ -2032,8 +2045,8 @@ theorem s8_sum_if_two_mul_add_one (f : ℕ → ℕ → ℚ) (F : ℚ) (N m : ℕ
   rw [← h]
   refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => ?_
   by_cases h : j + k = m - 1
-  · rw [if_pos (by omega), if_pos h]
-  · rw [if_neg (by omega), if_neg h, mul_zero]
+  · rw [ite_eq_left (by omega), ite_eq_left h]
+  · rw [ite_eq_right (by omega), ite_eq_right h, mul_zero]
 
 /-- The integral `∫_X τ(aα + bβ)(aα + bβ) = a² ∫ A² - b² ∫ B²` as double sums. -/
 theorem s8_chi_eq (d : ℚ) (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
@@ -2091,9 +2104,9 @@ theorem chi8_1_odd (d : ℚ) (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
   rw [s8_chi_eq d Θ hΘ hpp ρ τ q hq' a b]
   obtain ⟨k, rfl⟩ := hn
   rw [Finset.sum_eq_zero fun j _ => Finset.sum_eq_zero fun l _ => by
-      rw [if_neg (by omega), mul_zero],
+      rw [ite_eq_right (by omega), mul_zero],
     Finset.sum_eq_zero fun j _ => Finset.sum_eq_zero fun l _ => by
-      rw [if_neg (by omega), mul_zero]]
+      rw [ite_eq_right (by omega), mul_zero]]
   ring
 
 /-- (§8.1) The table of `∫_X (aα + bβ)^∨ (aα + bβ)`, `n = 2`: `-2q²(a²τ²d + b²)`. -/

@@ -185,6 +185,7 @@ theorem sc_repr_eq_zero_of_mem_Splus {z : S F n} (hz : z ∈ Splus F n)
     obtain ⟨k, hk⟩ := hK
     exact ⟨k - 1, by omega⟩
 
+omit [CharZero F] in
 /-- `Spin(V)` preserves `S⁺`. -/
 theorem sc_m_mem_Splus (g : Spin F n) {s : S F n} (hs : s ∈ Splus F n) :
     m F n (g : C F n) s ∈ Splus F n := by
@@ -218,6 +219,7 @@ noncomputable def sc_wp (a b : Fin (2 * n)) : Spin F n :=
   ⟨ι (Q F n) (sc_vW a) * ι (Q F n) (sc_vW b),
     ι_mul_ι_mem_spinGroup_of_norm_mul_norm_eq_one _ _ (by rw [sc_Q_vW, sc_Q_vW, one_mul])⟩
 
+omit [CharZero F] in
 theorem sc_m_wp (a b : Fin (2 * n)) (w : S F n) :
     m F n ((sc_wp a b : Spin F n) : C F n) w =
       m F n (ι (Q F n) (sc_vW a)) (m F n (ι (Q F n) (sc_vW b)) w) := by
@@ -249,6 +251,7 @@ theorem sc_symmDiff_singleton_of_notMem {a : Fin (2 * n)} {L : Finset (Fin (2 * 
     · exact Or.inr ⟨rfl, h⟩
     · exact Or.inl ⟨hx, fun hxa => h (hxa ▸ hx)⟩
 
+omit [CharZero F] in
 /-- `m(v_a)` maps `e_L` to `± e_{L ∆ {a}}`. -/
 theorem sc_repr_m_vW (a : Fin (2 * n)) (L : Finset (Fin (2 * n))) :
     ∃ ε : F, (ε = 1 ∨ ε = -1) ∧ ∀ w : S F n,

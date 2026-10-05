@@ -250,6 +250,7 @@ theorem s4_bcC_ι (v : V F n) :
   unfold bcC
   exact CliffordAlgebra.lift_ι_apply _ _ v
 
+omit [CharZero F] in
 theorem s4_m_ι (v : V F n) (t : S F n) :
     m F n (CliffordAlgebra.ι (Q F n) v) t = ExteriorAlgebra.ι F v.2 * t + D F n v.1 t := by
   unfold m

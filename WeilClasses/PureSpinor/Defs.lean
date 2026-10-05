@@ -49,6 +49,7 @@ def IsEvenPureSpinor (w : S F n) : Prop := w ∈ Splus F n ∧ IsMaxIsotropic F 
 /-- An odd pure spinor: `w ∈ S⁻` with `ker m_w` maximal isotropic (§2.2). -/
 def IsOddPureSpinor (w : S F n) : Prop := w ∈ Sminus F n ∧ IsMaxIsotropic F n (ann F n w)
 
+omit [CharZero F] in
 /-- `m(g⁻¹) ∘ m(g) = id` for `g ∈ Spin(V_F)`. -/
 theorem fnd_m_inv_m (g : Spin F n) (s : S F n) :
     m F n ((g⁻¹ : Spin F n) : C F n) (m F n (g : C F n) s) = s := by

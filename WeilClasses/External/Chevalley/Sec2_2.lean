@@ -80,6 +80,7 @@ omit [CharZero F] in
 private theorem sa_finrank_V : Module.finrank F (V F n) = 2 * n + 2 * n := by
   rw [Module.finrank_prod, Subspace.dual_finrank_eq, sa_finrank_H1]
 
+omit [CharZero F] in
 /-- A pure spinor is nonzero when `n > 0`. -/
 private theorem sa_ne_zero_of_isMax (hn : 0 < n) {u : S F n} (hu : IsMaxIsotropic F n (ann F n u)) :
     u ≠ 0 := by
@@ -213,6 +214,7 @@ private theorem sa_exists_polar_eq_one {v : V F n} (hv : v ≠ 0) :
     rw [sa_polar_apply]
     simp [hφ]
 
+omit [CharZero F] in
 /-- **[III.2.4], first half**: if `ker m_{u₁} ∩ ker m_{u₂} ≠ 0` then `(u₁, u₂)_S = 0`, by
 `u₁ = (m_v m_w + m_w m_v) u₁` for `v` in the intersection and `(v, w)_V = 1`, and III.2.2. -/
 private theorem sa_mukai_eq_zero_of_inf {u₁ u₂ : S F n} (h : ann F n u₁ ⊓ ann F n u₂ ≠ ⊥) :
@@ -332,6 +334,7 @@ theorem chevalley_III_2_4 (hn : 0 < n) (u₁ u₂ : S F n) (h₁ : IsEvenPureSpi
     map_one (m F n), Module.End.one_apply, sa_mukai_one_pt] at h0
   simp [hc₁0, hc₂0] at h0
 
+omit [CharZero F] in
 /-- **[Chevalley, III.2.4]**, the special case `λ₁ = λ₂` used in the proof of Lemma 2.2.1: a pure
 spinor is isotropic, `(λ, λ)_S = 0` (for `n ≥ 1`). -/
 theorem chevalley_III_2_4_self (hn : 0 < n) (u : S F n) (hu : IsEvenPureSpinor F n u) :

@@ -33,16 +33,19 @@ section OneVariety
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
+omit [CharZero F] in
 /-- **(5.2.1)** (`eq-m-dagger`) `m†_g = τ m_g τ` (the foundation's `mDagger`, defined on all of
 `C(V)`). -/
 theorem equation5_2_1 (g : Spin F n) :
     mDagger F n (g : C F n) = tau F n ∘ₗ m F n (g : C F n) ∘ₗ tau F n := rfl
 
+omit [CharZero F] in
 /-- (5.2.1) `m† : Spin(V) → GL(S)` is a homomorphism (`τ² = 1`). -/
 theorem mDagger_mul (x y : C F n) : mDagger F n (x * y) = mDagger F n x ∘ₗ mDagger F n y := by
   refine LinearMap.ext fun s => ?_
   simp [mDagger, map_mul, tau_tau]
 
+omit [CharZero F] in
 theorem mDagger_one : mDagger F n 1 = LinearMap.id := by
   refine LinearMap.ext fun s => ?_
   simp [mDagger, tau_tau]
@@ -77,6 +80,7 @@ theorem equation5_2_2 (g : Spin F n) (s t : S F n) :
 
 /-! ### Parity (used in the proof of (5.2.3)) -/
 
+omit [CharZero F] in
 /-- `m_g` preserves the parity of a class, for `g ∈ Spin(V)` (an even element of `C(V)`): the
 grading involution of `S` commutes with `m_x` up to the grading involution of `x`. -/
 private theorem involute_m (x : C F n) (s : S F n) :
@@ -233,6 +237,7 @@ private theorem PD_mDagger (h : Spin F n) (s : S F n) :
   exact h23
 
 set_option linter.unusedVariables false in
+omit [CharZero F] in
 /-- **Remark 5.2.3** (`rem-invariance-of-w-vee`), the cohomological claim: for `w ∈ S⁺`, the class
 `w^∨ = τ(w)` is `Spin(V)_w`-invariant with respect to the `m†`-action. (The geometric input, that
 `τ(ch(F)) = ch(F^∨)` for an object `F` of `Dᵇ(X)`, is left out.) -/

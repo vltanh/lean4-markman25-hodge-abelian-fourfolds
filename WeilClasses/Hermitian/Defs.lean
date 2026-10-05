@@ -1066,6 +1066,7 @@ section S3Ann
 
 variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
 
+omit [CharZero F] in
 /-- `ann(u)` is totally isotropic when `u ≠ 0`. -/
 theorem s3_Q_of_mem_ann {u : S F n} (hu : u ≠ 0) {v : V F n} (hv : v ∈ ann F n u) :
     Q F n v = 0 := by
@@ -1075,6 +1076,7 @@ theorem s3_Q_of_mem_ann {u : S F n} (hu : u ≠ 0) {v : V F n} (hv : v ∈ ann F
   rw [map_mul, Module.End.mul_apply, hv', map_zero] at h
   exact (smul_eq_zero.mp h.symm).resolve_right hu
 
+omit [CharZero F] in
 theorem s3_pairing_of_mem_ann {u : S F n} (hu : u ≠ 0) {v w : V F n} (hv : v ∈ ann F n u)
     (hw : w ∈ ann F n u) : pairing F n v w = 0 := by
   rw [QuadraticMap.polarBilin_apply_apply, QuadraticMap.polar, s3_Q_of_mem_ann hu hv,

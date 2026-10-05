@@ -102,6 +102,7 @@ theorem s24a_iotaX_ι (w : H1 F n) :
     iotaX F n (ExteriorAlgebra.ι F w) = CliffordAlgebra.ι (Q F n) ((0, w) : V F n) :=
   ExteriorAlgebra.lift_ι_apply F _ _ w
 
+omit [CharZero F] in
 /-- The spin representation of `j(s)` is cup product with `s`: `m(j(s)) = s ∪ (·)`. -/
 theorem m_jH (s : S F n) : m F n (iotaX F n s) = LinearMap.mulLeft F s := by
   -- Both sides are algebra homomorphisms `S → End(S)` in `s`; they agree on `H¹(X)`, where

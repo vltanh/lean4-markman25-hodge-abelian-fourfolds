@@ -169,8 +169,10 @@ end sa_Inter
 
 /-! ### Annihilators and the spinors killed by a subspace -/
 
+omit [CharZero F] in
 theorem sa_mOf_apply (s : S F n) (v : V F n) : mOf F n s v = m F n (ι (Q F n) v) s := rfl
 
+omit [CharZero F] in
 theorem sa_mem_ann (s : S F n) (v : V F n) : v ∈ ann F n s ↔ m F n (ι (Q F n) v) s = 0 :=
   Iff.rfl
 
@@ -197,6 +199,7 @@ noncomputable def sa_kill (W : Submodule F (V F n)) : Submodule F (S F n) where
   zero_mem' _ _ := map_zero _
   smul_mem' c a ha v hv := by rw [map_smul, ha v hv, smul_zero]
 
+omit [CharZero F] in
 theorem sa_mem_kill_iff (W : Submodule F (V F n)) (s : S F n) :
     s ∈ sa_kill W ↔ W ≤ ann F n s :=
   ⟨fun h v hv => h v hv, fun h _ hv => h hv⟩
@@ -225,6 +228,7 @@ theorem sa_isMaxIsotropic_map (a : sa_Inter F n) {W : Submodule F (V F n)}
 
 /-! ### Parity -/
 
+omit [CharZero F] in
 theorem sa_m_ι_mem_evenOdd (v : V F n) {j : ZMod 2} {s : S F n}
     (hs : s ∈ evenOdd (0 : QuadraticForm F (H1 F n)) j) :
     m F n (ι (Q F n) v) s ∈ evenOdd (0 : QuadraticForm F (H1 F n)) (j + 1) := by
@@ -234,6 +238,7 @@ theorem sa_m_ι_mem_evenOdd (v : V F n) {j : ZMod 2} {s : S F n}
   have := SetLike.mul_mem_graded (ι_mem_evenOdd_one (0 : QuadraticForm F (H1 F n)) w) hs
   rwa [add_comm] at this
 
+omit [CharZero F] in
 /-- `m` respects the `ℤ/2`-gradings of `C(V)` and `S`. -/
 theorem sa_m_mem_evenOdd {i j : ZMod 2} {x : C F n} (hx : x ∈ evenOdd (Q F n) i) {s : S F n}
     (hs : s ∈ evenOdd (0 : QuadraticForm F (H1 F n)) j) :
@@ -310,11 +315,13 @@ theorem sa_basisS_empty : basisS F n ∅ = 1 := by
   rw [sa_basisS_eq, ExteriorAlgebra.basis_apply_ofCard _ (Finset.card_empty),
     ExteriorAlgebra.ιMulti_family, ExteriorAlgebra.ιMulti_zero_apply]
 
+omit [CharZero F] in
 theorem sa_m_ι_one (v : V F n) : m F n (ι (Q F n) v) 1 = ExteriorAlgebra.ι F v.2 := by
   obtain ⟨θ, w⟩ := v
   rw [sa_m_ι_apply, mul_one,
     show D F n θ 1 = 0 from contractLeft_one (Q := (0 : QuadraticForm F (H1 F n))) θ, add_zero]
 
+omit [CharZero F] in
 /-- `ker m_1 = H* × 0`. -/
 theorem sa_ann_one : ann F n 1 = sa_W0 F n := by
   ext v
@@ -352,6 +359,7 @@ theorem sa_D_pt_eq_zero_iff (θ : Module.Dual F (H1 F n)) : D F n θ (pt F n) = 
   · rw [← sa_e_eq, h3, LinearMap.zero_apply]
   · exact absurd h3 sa_pt_ne_zero
 
+omit [CharZero F] in
 /-- `ker m_{[pt]} = 0 × H`. -/
 theorem sa_ann_pt : ann F n (pt F n) = sa_W0' F n := by
   ext ⟨θ, w⟩
@@ -381,6 +389,7 @@ theorem sa_repr_proj (i : Fin (2 * n)) (s : S F n) (K : Finset (Fin (2 * n))) :
     · simp
   · simp
 
+omit [CharZero F] in
 /-- `K(H* × 0) = F·1`. -/
 theorem sa_kill_W0 : sa_kill (sa_W0 F n) = Submodule.span F {1} := by
   apply le_antisymm
@@ -402,6 +411,7 @@ theorem sa_kill_W0 : sa_kill (sa_W0 F n) = Submodule.span F {1} := by
     intro v hv
     rw [sa_m_ι_one, (sa_mem_W0 v).mp hv, map_zero]
 
+omit [CharZero F] in
 /-- `K(0 × H) = F·[pt]`. -/
 theorem sa_kill_W0' : sa_kill (sa_W0' F n) = Submodule.span F {pt F n} := by
   apply le_antisymm
@@ -1007,6 +1017,7 @@ theorem sa_ι_mul_ptHatC (θ : Module.Dual F (H1 F n)) :
     ι (Q F n) ((θ, 0) : V F n) * ptHatC F n = 0 := by
   rw [← sa_iotaXHat_ι, ptHatC, ← map_mul, sa_ι_mul_ptHat, map_zero]
 
+omit [CharZero F] in
 /-- `v · s[pt_X̂] = (m_v s)[pt_X̂]`. -/
 theorem sa_ι_mul_iotaX_mul_ptHatC (x : V F n) (s : S F n) :
     ι (Q F n) x * iotaX F n s * ptHatC F n = iotaX F n (m F n (ι (Q F n) x) s) * ptHatC F n := by
@@ -1024,6 +1035,7 @@ theorem sa_ι_mul_iotaX_mul_ptHatC (x : V F n) (s : S F n) :
   conv_lhs => rw [hx, map_add, add_mul, add_mul]
   rw [h1, h2, sa_m_ι_apply, map_add, add_mul, add_comm]
 
+omit [CharZero F] in
 /-- `y · s[pt_X̂] = (m_y s)[pt_X̂]` for every `y ∈ C(V)`: the left ideal `C(V)·[pt_X̂]` is the spin
 representation. -/
 theorem sa_mul_iotaX_mul_ptHatC (y : C F n) (s : S F n) :
@@ -1138,9 +1150,11 @@ theorem sa_D_prod (L : List (Fin (2 * n))) (hL : L.Nodup) :
     rw [h1, sa_D_f_prod_e a L.reverse (by simpa using ha), mul_zero, sub_zero,
       show f F n a (e F n a) = 1 by simp [f, e], one_smul, ih hL']
 
+omit [CharZero F] in
 theorem sa_m_ι_inl (θ : Module.Dual F (H1 F n)) : m F n (ι (Q F n) ((θ, 0) : V F n)) = D F n θ :=
   LinearMap.ext fun s => by rw [sa_m_ι_apply, map_zero, zero_mul, zero_add]
 
+omit [CharZero F] in
 /-- `[pt_X̂] ≠ 0` in `C(V)`: `m([pt_X̂])` maps `e_{2n} ∧ ⋯ ∧ e₁` to `1`. -/
 theorem sa_ptHatC_ne_zero : ptHatC F n ≠ 0 := by
   intro h

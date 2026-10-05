@@ -216,10 +216,12 @@ noncomputable def conjV : V F n →+ V F n where
   map_zero' := by ext <;> simp
   map_add' v v' := by ext <;> simp [Finset.sum_add_distrib, add_smul]
 
+omit [CharZero F] in
 theorem conjS_map_one :
     ∑ K, c ((basisS F n).repr 1 K) • basisS F n K = 1 := by
   exact fnd_conjAux_one c (Pi.basisFun F (Fin (2 * n)))
 
+omit [CharZero F] in
 theorem conjS_map_mul (s t : S F n) :
     ∑ K, c ((basisS F n).repr (s * t) K) • basisS F n K =
       (∑ K, c ((basisS F n).repr s K) • basisS F n K) *
@@ -235,10 +237,12 @@ noncomputable def conjS : S F n →+* S F n where
   map_zero' := by simp
   map_add' s t := by simp [add_smul, Finset.sum_add_distrib]
 
+omit [CharZero F] in
 theorem conjExt_map_one :
     ∑ K, c ((basisExt F n).repr 1 K) • basisExt F n K = 1 := by
   exact fnd_conjAux_one c (basisV F n)
 
+omit [CharZero F] in
 theorem conjExt_map_mul (s t : ExteriorAlgebra F (V F n)) :
     ∑ K, c ((basisExt F n).repr (s * t) K) • basisExt F n K =
       (∑ K, c ((basisExt F n).repr s K) • basisExt F n K) *

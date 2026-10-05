@@ -559,6 +559,7 @@ omit [CharZero F] in
 theorem s8_ThetaStd_mem : ThetaStd F n ∈ ⋀[F]^2 (H1 F n) :=
   Submodule.sum_mem _ fun _ _ => s8_ι_mul_ι_mem _ _
 
+omit [CharZero F] in
 /-- `Θ³ = 6 [pt]` (`n = 3`, `ThetaStd_pow`). -/
 theorem s8_Theta_cube : ThetaStd F 3 ^ 3 = (6 : F) • pt F 3 := by
   rw [ThetaStd_pow]
@@ -772,6 +773,7 @@ theorem s8_sum_swap {ι : Type*} [Fintype ι] (a c : ι → F) (G : ι → ι �
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
 
+omit [CharZero F] in
 /-- `B^♯` has degree `2`. -/
 theorem formToExt2_mem (B : LinearMap.BilinForm F (V F n)) :
     formToExt2 F n B ∈ ⋀[F]^2 (V F n) := by

@@ -448,6 +448,7 @@ def spinStab (w : S F n) : Subgroup (Spin F n) where
     rw [← Module.End.mul_apply, ← map_mul, ← Submonoid.coe_mul, inv_mul_cancel,
       OneMemClass.coe_one, map_one, Module.End.one_apply]
 
+omit [CharZero F] in
 theorem mem_spinStab_iff (w : S F n) (g : Spin F n) :
     g ∈ spinStab F n w ↔ m F n (g : C F n) w = w :=
   Iff.rfl

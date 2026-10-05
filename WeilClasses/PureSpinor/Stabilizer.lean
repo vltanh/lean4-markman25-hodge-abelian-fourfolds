@@ -160,6 +160,7 @@ theorem s22a_eigen_first {M : Type*} [AddCommGroup M] [Module F M] (N : M →ₗ
   refine (smul_eq_zero.mp e3).resolve_left ?_
   exact mul_ne_zero (mul_ne_zero (sub_ne_zero.mpr h14) (sub_ne_zero.mpr h13)) (sub_ne_zero.mpr h12)
 
+omit [CharZero F] in
 /-- The number operator `N = Σ m_{xᵢ} m_{yᵢ}` of dual bases, as an endomorphism of `S`. -/
 theorem s22a_numOp_apply (x y : Fin (2 * n) → V F n) (r : S F n) :
     (∑ i, m F n (ι (Q F n) (x i)) * m F n (ι (Q F n) (y i))) r =
@@ -167,6 +168,7 @@ theorem s22a_numOp_apply (x y : Fin (2 * n) → V F n) (r : S F n) :
   rw [LinearMap.sum_apply]
   rfl
 
+omit [CharZero F] in
 theorem s22a_numOp_u₁ {u₁ : S F n} {x y : Fin (2 * n) → V F n} (hx : ∀ i, x i ∈ ann F n u₁)
     (hxy : ∀ i j, pairing F n (x i) (y j) = if i = j then 1 else 0) :
     (∑ i, m F n (ι (Q F n) (x i)) * m F n (ι (Q F n) (y i))) u₁ = (2 * n : F) • u₁ := by
@@ -181,6 +183,7 @@ theorem s22a_numOp_u₁ {u₁ : S F n} {x y : Fin (2 * n) → V F n} (hx : ∀ i
   push_cast
   rfl
 
+omit [CharZero F] in
 theorem s22a_numOp_u₂ {u₂ : S F n} {x y : Fin (2 * n) → V F n} (hy : ∀ i, y i ∈ ann F n u₂) :
     (∑ i, m F n (ι (Q F n) (x i)) * m F n (ι (Q F n) (y i))) u₂ = 0 := by
   rw [s22a_numOp_apply]
@@ -253,10 +256,12 @@ theorem s22a_decomp {u₁ u₂ : S F n} {x y : Fin (2 * n) → V F n}
     · rw [map_smul, LinearMap.smul_apply, e₂, smul_add, smul_smul]
     · rw [map_smul, f₂, smul_comm]
 
+omit [CharZero F] in
 theorem s22a_m_swap0 {v w : V F n} (h : pairing F n v w = 0) (s : S F n) :
     m F n (ι (Q F n) w) (m F n (ι (Q F n) v) s) = -m F n (ι (Q F n) v) (m F n (ι (Q F n) w) s) := by
   rw [s22a_m_swap, h, zero_smul, zero_sub]
 
+omit [CharZero F] in
 theorem s22a_m_sq (v : V F n) (s : S F n) :
     m F n (ι (Q F n) v) (m F n (ι (Q F n) v) s) = Q F n v • s := by
   rw [← Module.End.mul_apply, ← map_mul, ι_sq_scalar, AlgHom.commutes, Module.algebraMap_end_apply]

@@ -1,0 +1,29 @@
+name: Lean Action CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read # Read access to repository contents
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: leanprover/lean-action@v1
+      - name: Check that the audit script is current (one `import all` per module)
+        run: python3 scripts/gen_audit.py --check
+      - name: Audit axioms and dependencies
+        run: lake env lean scripts/Audit.lean
+      - name: Check the routes of the proofs against the paper's
+        run: python3 scripts/route_check.py check docs/paper_routes.tsv --accept docs/route_differences.tsv
+      - name: Check that the Challenge's definitions are a copy of WeilClasses/Defs.lean
+        run: python3 scripts/sync_challenge_defs.py --check
+      - name: Check that the documentation's links to the code are current
+        run: python3 scripts/linkify_docs.py --check
+      - name: Check the Markdown tables
+        run: python3 scripts/check_md_tables.py README.md REPORT.md CREDITS.md

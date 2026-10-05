@@ -41,6 +41,7 @@ section Helpers
 
 variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
 
+omit [CharZero F] in
 /-- `m_{(θ, w)} = L_w + D_θ`. -/
 theorem sa_m_ι_apply (θ : Module.Dual F (H1 F n)) (w : H1 F n) (x : S F n) :
     m F n (ι (Q F n) (θ, w)) x = ExteriorAlgebra.ι F w * x + D F n θ x := by
@@ -118,6 +119,7 @@ theorem sa_integral_tau_D (θ : Module.Dual F (H1 F n)) (s t : S F n) :
     rw [h4]
     abel
 
+omit [CharZero F] in
 /-- `m_v` is self-adjoint for the Mukai pairing: `(m_v s, t)_S = (s, m_v t)_S`. -/
 theorem sa_mukai_m_ι (v : V F n) (s t : S F n) :
     mukai F n (m F n (ι (Q F n) v) s) t = mukai F n s (m F n (ι (Q F n) v) t) := by
@@ -130,6 +132,7 @@ theorem sa_mukai_m_ι (v : V F n) (s t : S F n) :
   rw [show (ExteriorAlgebra.ι F w : S F n) = ι (0 : QuadraticForm F (H1 F n)) w from rfl,
     CliffordAlgebra.reverse_ι, mul_assoc]
 
+omit [CharZero F] in
 /-- **The adjoint of `m_x` is `m_{τ(x)}`**: `(m_x s, t)_S = (s, m_{τ(x)} t)_S` for every
 `x ∈ C(V_F)`, by induction on `x` from `sa_mukai_m_ι`. -/
 theorem sa_mukai_m_reverse (x : C F n) (s t : S F n) :
@@ -149,6 +152,7 @@ end Helpers
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
+omit [CharZero F] in
 /-- **[Chevalley, III.2.2]**, special case used in §2.1: each `m_v`, `v ∈ V_F`, is self-adjoint for
 the Mukai pairing: `(m_v(s), t)_S = (s, m_v(t))_S` for all `s, t ∈ S_F`. In particular
 `m_{v,+-} : S⁺ → S⁻` and `m_{v,-+} : S⁻ → S⁺` are adjoint. -/

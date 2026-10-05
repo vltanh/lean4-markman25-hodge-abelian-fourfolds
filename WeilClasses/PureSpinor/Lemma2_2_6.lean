@@ -1016,11 +1016,13 @@ section S22bSpinGeneral
 
 variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
 
+omit [CharZero F] in
 theorem s22b_m_ι_apply' (θ : Module.Dual F (H1 F n)) (w : H1 F n) (x : S F n) :
     m F n (ι (Q F n) (θ, w)) x = ExteriorAlgebra.ι F w * x + D F n θ x := by
   simp only [m, CliffordAlgebra.lift_ι_apply, cliffordOp, LinearMap.add_apply, LinearMap.coe_comp,
     Function.comp_apply, LinearMap.fst_apply, LinearMap.snd_apply, L, LinearMap.mul_apply']
 
+omit [CharZero F] in
 theorem s22b_m_anticomm (v w : V F n) (s : S F n) :
     m F n (ι (Q F n) v) (m F n (ι (Q F n) w) s) + m F n (ι (Q F n) w) (m F n (ι (Q F n) v) s) =
       pairing F n v w • s := by
@@ -1029,6 +1031,7 @@ theorem s22b_m_anticomm (v w : V F n) (s : S F n) :
     Module.algebraMap_end_apply] at h
   rw [h, QuadraticMap.polarBilin_apply_apply]
 
+omit [CharZero F] in
 theorem s22b_Q_of_mem_ann {u : S F n} (hu : u ≠ 0) {v : V F n} (hv : v ∈ ann F n u) :
     Q F n v = 0 := by
   have hv' : m F n (ι (Q F n) v) u = 0 := hv
@@ -1037,6 +1040,7 @@ theorem s22b_Q_of_mem_ann {u : S F n} (hu : u ≠ 0) {v : V F n} (hv : v ∈ ann
   rw [map_mul, Module.End.mul_apply, hv', map_zero] at h
   exact (smul_eq_zero.mp h.symm).resolve_right hu
 
+omit [CharZero F] in
 theorem s22b_pairing_of_mem_ann {u : S F n} (hu : u ≠ 0) {v w : V F n} (hv : v ∈ ann F n u)
     (hw : w ∈ ann F n u) : pairing F n v w = 0 := by
   rw [QuadraticMap.polarBilin_apply_apply, QuadraticMap.polar, s22b_Q_of_mem_ann hu hv,
@@ -1074,6 +1078,7 @@ theorem s22b_mem_even_of_involute {M : Type*} [AddCommGroup M] [Module F M]
   rw [← hsum, hx₁0, add_zero]
   exact hx₀
 
+omit [CharZero F] in
 /-- `(m_x s, t)_S = (s, m_{τ(x)} t)_S` for `x ∈ C(V_F)`, from [Chevalley, III.2.2]. -/
 theorem s22b_mukai_m_rev (x : C F n) (s t : S F n) :
     mukai F n (m F n x s) t = mukai F n s (m F n (reverse x) t) := by
@@ -1110,6 +1115,7 @@ theorem s22b_map_D (T T' : Module.End F (H1 F n)) (hT : T' ∘ₗ T = LinearMap.
     congr 2
     rw [LinearMap.comp_apply, ← LinearMap.comp_apply T' T, hT, LinearMap.id_apply]
 
+omit [CharZero F] in
 /-- Conjugating `m_v` by `⋀T`: `⋀T ∘ m_{(θ, w)} = m_{(θ ∘ T⁻¹, T w)} ∘ ⋀T`. -/
 theorem s22b_map_m_ι (T T' : Module.End F (H1 F n)) (hT : T' ∘ₗ T = LinearMap.id) (v : V F n)
     (s : S F n) :
@@ -1145,6 +1151,7 @@ theorem s22b_mukai_one_pt : mukai F n 1 (pt F n) = 1 := by
   rw [show tau F n 1 = 1 from CliffordAlgebra.reverse.map_one, one_mul, integral, pt,
     Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_eq_same]
 
+omit [CharZero F] in
 /-- `m ∘ involute = Π ∘ m ∘ Π` with `Π = ⋀(-1)` the parity operator of `S`. -/
 theorem s22b_m_involute (x : C F n) (s : S F n) :
     m F n (involute x) s =
@@ -1584,6 +1591,7 @@ section S22bVarphi
 
 variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
 
+omit [CharZero F] in
 /-- `m(ι_X(s)) = L_s`: the embedded classes of `X` act by cup product. -/
 theorem s22b_m_iotaX (s y : S F n) : m F n (iotaX F n s) y = s * y := by
   induction s using CliffordAlgebra.induction generalizing y with
@@ -1611,6 +1619,7 @@ theorem s22b_iotaXHat_ιMulti {k : ℕ} (θ : Fin k → Module.Dual F (H1 F n)) 
   funext i
   exact s22b_iotaXHat_ι (θ i)
 
+omit [CharZero F] in
 theorem s22b_m_ι_dual (θ : Module.Dual F (H1 F n)) (y : S F n) :
     m F n (ι (Q F n) (θ, (0 : H1 F n))) y = D F n θ y := by
   rw [s22b_m_ι_apply', map_zero, zero_mul, zero_add]
@@ -1632,6 +1641,7 @@ theorem s22b_D_ιMulti_eq_zero {k : ℕ} (θ : Module.Dual F (H1 F n)) (v : Fin 
     rw [h 0, zero_smul, ← show D F n θ = contractLeft (Q := (0 : QuadraticForm F (H1 F n))) θ
       from rfl, ih (Matrix.vecTail v) (fun i => h i.succ), mul_zero, sub_zero]
 
+omit [CharZero F] in
 /-- **Contracting from the front**: `θ_{k-1} ⌋ ⋯ θ_0 ⌋ (v_0 ∧ ⋯ ∧ v_{k-1}) = 1` for dual
 families. -/
 theorem s22b_contract_front {k : ℕ} (θ : Fin k → Module.Dual F (H1 F n)) (v : Fin k → H1 F n)
@@ -1681,6 +1691,7 @@ theorem s22b_neg_one_pow_choose (n : ℕ) :
         by rw [h4, mul_one]
     _ = (-1) ^ n := by rw [← mul_assoc, h3, one_mul]
 
+omit [CharZero F] in
 /-- `[pt_X̂]` acts on `S` by `y ↦ (-1)^n ∫_X y` (the footnote in the proof of Lemma 2.2.6). -/
 theorem s22b_m_ptHatC (y : S F n) :
     m F n (ptHatC F n) y = ((-1 : F) ^ n * integral F n y) • 1 := by
@@ -2191,6 +2202,7 @@ theorem varphi_tmul (u v : S F n) :
     varphi F n (u ⊗ₜ v) = iotaX F n u * ptHatC F n * iotaX F n (tau F n v) := by
   simp [varphi]
 
+omit [CharZero F] in
 /-- The footnote in the proof of Lemma 2.2.6: `m ∘ φ : S ⊗ S → End(S)` is `(-1)^n` times the map
 `s ⊗ t ↦ s ⊗ (t, ·)_S`, i.e. `m_{φ(s ⊗ t)}(x) = (-1)^n (t, x)_S s`. -/
 theorem m_varphi_tmul (s t x : S F n) :

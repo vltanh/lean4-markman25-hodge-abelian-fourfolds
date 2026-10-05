@@ -54,6 +54,7 @@ section Field
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
+omit [CharZero F] in
 /-- `m(ι(0, w)) = L_w`, exterior multiplication by `w`. -/
 theorem sd_m_ι_inr (w : H1 F n) :
     m F n (CliffordAlgebra.ι (Q F n) ((0, w) : V F n)) =
@@ -61,6 +62,7 @@ theorem sd_m_ι_inr (w : H1 F n) :
   refine LinearMap.ext fun s => ?_
   simp [m, cliffordOp, L, D]
 
+omit [CharZero F] in
 /-- `m(ι(θ, 0)) = D_θ`, contraction with `θ`. -/
 theorem sd_m_ι_inl (θ : Module.Dual F (H1 F n)) :
     m F n (CliffordAlgebra.ι (Q F n) ((θ, 0) : V F n)) =
@@ -68,6 +70,7 @@ theorem sd_m_ι_inl (θ : Module.Dual F (H1 F n)) :
   refine LinearMap.ext fun s => ?_
   simp [m, cliffordOp, L, D]
 
+omit [CharZero F] in
 /-- `m` is onto `End(S_F)`: creation and contraction operators generate `End(⋀•H¹(X, F))`. -/
 theorem sd_m_surjective : Function.Surjective (m F n) := by
   rw [← AlgHom.range_eq_top]

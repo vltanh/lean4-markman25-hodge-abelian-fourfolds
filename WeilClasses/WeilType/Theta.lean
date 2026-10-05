@@ -493,9 +493,11 @@ end S24bContrSmul
 section S24bAnn
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
+omit [CharZero F] in
 theorem s24b_m_ι (v : V F n) : m F n (CliffordAlgebra.ι (Q F n) v) = cliffordOp F n v :=
   CliffordAlgebra.lift_ι_apply _ _ _
 
+omit [CharZero F] in
 theorem s24b_mOf_one (v : V F n) : mOf F n 1 v = ExteriorAlgebra.ι F v.2 := by
   simp [mOf, s24b_m_ι, cliffordOp, L, D]
 

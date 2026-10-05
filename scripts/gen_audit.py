@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate scripts/Audit.lean from its template scripts/Audit.lean.in and the library.
 
-Run from anywhere: `python3 scripts/gen_audit.py`; then `lake env lean scripts/Audit.lean`.
+Run from anywhere: `python3 scripts/gen_audit.py` (or `--check` to verify that the file is current);
+then `lake env lean scripts/Audit.lean`.
 
 - `import all` for every module of the library (and Solution);
 - externalResults: every theorem of WeilClasses/External/, every Prop-valued definition there
@@ -123,6 +124,13 @@ t = t.replace('''meta def solutionResults : List Name :=
 t = t.replace("meta def isLibraryModule (m : Name) : Bool := (`PaperName).isPrefixOf m",
               "meta def isLibraryModule (m : Name) : Bool := (`WeilClasses).isPrefixOf m")
 t = t.replace('PaperName/External/', 'WeilClasses/External/')
-(ROOT / 'scripts/Audit.lean').write_text(t)
-print(f'{len(mods)} modules, {len(paper)} paper results, {len(external)} external/hypotheses, '
-      f'{len(sol)} challenge theorems')
+import sys
+target = ROOT / 'scripts/Audit.lean'
+if '--check' in sys.argv:
+    if not target.exists() or target.read_text() != t:
+        sys.exit('scripts/Audit.lean is out of date: run python3 scripts/gen_audit.py')
+    print('scripts/Audit.lean is up to date')
+else:
+    target.write_text(t)
+    print(f'{len(mods)} modules, {len(paper)} paper results, {len(external)} external/hypotheses, '
+          f'{len(sol)} challenge theorems')

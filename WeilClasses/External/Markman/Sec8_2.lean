@@ -61,6 +61,7 @@ section S8Pure
 
 variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
 
+omit [CharZero F] in
 /-- Vectors killing a nonzero spinor are isotropic (`m_v² = Q(v)`). -/
 theorem s8_Q_of_mem_ann {s : S F n} (hs : s ≠ 0) {v : V F n} (hv : v ∈ ann F n s) :
     Q F n v = 0 := by
@@ -72,12 +73,14 @@ theorem s8_Q_of_mem_ann {s : S F n} (hs : s ≠ 0) {v : V F n} (hv : v ∈ ann F
   rw [h3, h1, map_zero] at h2
   exact (smul_eq_zero.mp h2.symm).resolve_right hs
 
+omit [CharZero F] in
 /-- `ker m_{c s} = ker m_s` for `c ≠ 0`. -/
 theorem s8_ann_smul {c : F} (hc : c ≠ 0) (s : S F n) : ann F n (c • s) = ann F n s := by
   ext v
   rw [s8_mem_ann_iff, s8_mem_ann_iff, mul_smul_comm, map_smul, ← smul_add, smul_eq_zero,
     or_iff_right hc]
 
+omit [CharZero F] in
 /-- `ker m_1 = H¹(X̂) × 0`. -/
 theorem s8_ann_one_eq :
     ann F n 1 = LinearMap.range (LinearMap.inl F (Module.Dual F (H1 F n)) (H1 F n)) := by
@@ -91,6 +94,7 @@ theorem s8_ann_one_eq :
   · rintro ⟨y', -, rfl⟩
     exact map_zero _
 
+omit [CharZero F] in
 theorem s8_finrank_ann_one : Module.finrank F (ann F n 1) = 2 * n := by
   rw [s8_ann_one_eq, LinearMap.finrank_range_of_inj LinearMap.inl_injective,
     Subspace.dual_finrank_eq, Module.finrank_fin_fun]
@@ -183,6 +187,7 @@ theorem s8_proj_top_eq (u : S F n) :
     exact s8_integral_eq_zero_of_mem F n hk (s8_proj_mem u k)
   · simp
 
+omit [CharZero F] in
 /-- `m_{(z, 0)} = D_z`. -/
 theorem s8_m_ι_inl (z : Module.Dual F (H1 F n)) (t : S F n) :
     m F n (ι (Q F n) ((z, 0) : V F n)) t = D F n z t := by
@@ -198,6 +203,7 @@ theorem s8_exists_spin_DD (y y' : Module.Dual F (H1 F n)) :
   rw [CliffordAlgebra.coe_spinTransvection, map_add, map_one, map_mul, LinearMap.add_apply,
     Module.End.one_apply, Module.End.mul_apply, s8_m_ι_inl, s8_m_ι_inl]
 
+omit [CharZero F] in
 /-- `s ↦ s + D_{y'} D_y s` preserves the Mukai pairing ([Chevalley, III.2.2]: `D_z` is
 self-adjoint; `D_y D_{y'} = -D_{y'} D_y`, `D_{y'}² = 0`). -/
 theorem s8_mukai_DD (y y' : Module.Dual F (H1 F n)) (s t : S F n) :

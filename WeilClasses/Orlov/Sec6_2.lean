@@ -1128,6 +1128,7 @@ theorem s62_dualBasis_eq_f (i : Fin (2 * n)) : (Pi.basisFun F (Fin (2 * n))).dua
   refine LinearMap.ext fun w => ?_
   rw [Module.Basis.dualBasis_apply, Pi.basisFun_repr]; rfl
 
+omit [CharZero F] in
 theorem s62_mOf_apply (s : S F n) (v : V F n) :
     mOf F n s v = ExteriorAlgebra.ι F v.2 * s + D F n v.1 s := by
   simp only [mOf, LinearMap.comp_apply, AlgHom.toLinearMap_apply, m, CliffordAlgebra.lift_ι_apply,

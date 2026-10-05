@@ -344,12 +344,14 @@ theorem s22b_Q_nondegenerate (F : Type*) [Field F] [CharZero F] (n : ℕ) :
     (Q F n).Nondegenerate :=
   TauCeti.nondegenerate_dualProd (Module.eval_apply_injective F)
 
+omit [CharZero F] in
 theorem s22b_m_ι_ι_self (v : V F n) (s : S F n) :
     m F n (ι (Q F n) v) (m F n (ι (Q F n) v) s) = Q F n v • s := by
   have h := congrArg (fun x => m F n x s) (ι_sq_scalar (Q F n) v)
   simp only [map_mul, Module.End.mul_apply, AlgHom.commutes, Module.algebraMap_end_apply] at h
   exact h
 
+omit [CharZero F] in
 theorem s22b_m_ι_ι_swap (v w : V F n) (s : S F n) :
     m F n (ι (Q F n) v) (m F n (ι (Q F n) w) s) =
       pairing F n v w • s - m F n (ι (Q F n) w) (m F n (ι (Q F n) v) s) := by

@@ -119,6 +119,7 @@ private theorem fnd_pow (F : Type*) [Field F] (n : ℕ) (k : ℕ) :
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
+omit [CharZero F] in
 /-- `Θⁿ = n! [pt]` for `ThetaStd`: the orientation `∫_X e₁ ∧ ⋯ ∧ e_{2n} = 1` is the one for which `Θ`
 has degree `Θⁿ/n! = 1`. -/
 theorem ThetaStd_pow : ThetaStd F n ^ n = (n.factorial : F) • pt F n := by

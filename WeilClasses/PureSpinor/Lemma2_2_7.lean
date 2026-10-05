@@ -903,6 +903,7 @@ theorem s22b_rho_mem_ann_of_fix (g : Spin F n) {u : S F n} (hfix : m F n (g : C 
   have hv' : m F n (ι (Q F n) v) u = 0 := hv
   rw [hv', map_zero]
 
+omit [CharZero F] in
 theorem s22b_fix_inv (g : Spin F n) {u : S F n} (hfix : m F n (g : C F n) u = u) :
     m F n ((g⁻¹ : Spin F n) : C F n) u = u := by
   conv_lhs => rw [← hfix]
@@ -1574,6 +1575,8 @@ theorem s22b_root_mem (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
   exact P.s22b_Der_Dop_mem hd hW (P.s22b_bV hW) N z hz (P.s22b_bV_L_mem hW i)
     (P.s22b_bV_R_mem hW j) (by rw [P.s22b_pairing_bV_LR hW]; simp [hij])
 
+-- the `<;>` chain is a case split on four memberships; the linter misreads it
+set_option linter.unnecessarySeqFocus false in
 /-- Support of a `Spin(V)_P`-invariant vector: only the monomials `D(I)`, `u₁ ∧ ⋯ ∧ u_{2n}` and
 `u₁* ∧ ⋯ ∧ u_{2n}*` occur (weight zero for the torus of `sl(W₁)`). -/
 theorem s22b_inv_support (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)

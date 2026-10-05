@@ -92,6 +92,7 @@ noncomputable def L : H1 F n →ₗ[F] Module.End F (S F n) :=
 noncomputable def cliffordOp : V F n →ₗ[F] Module.End F (S F n) :=
   L F n ∘ₗ LinearMap.snd F _ _ + D F n ∘ₗ LinearMap.fst F _ _
 
+omit [CharZero F] in
 theorem cliffordOp_mul_self (v : V F n) :
     cliffordOp F n v * cliffordOp F n v = algebraMap F _ (Q F n v) := by
   obtain ⟨θ, w⟩ := v

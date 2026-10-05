@@ -457,6 +457,7 @@ theorem sc_f_eq (i : Fin (2 * n)) : f F n i = (Pi.basisFun F (Fin (2 * n))).coor
   ext x
   simp [f, Module.Basis.coord_apply]
 
+omit [CharZero F] in
 theorem sc_m_ι (θ : Module.Dual F (H1 F n)) (y : H1 F n) (s : S F n) :
     m F n (ι (Q F n) (θ, y)) s = ExteriorAlgebra.ι F y * s + D F n θ s := by
   rw [m, CliffordAlgebra.lift_ι_apply]
@@ -529,9 +530,11 @@ theorem sc_repr_D_f (i : Fin (2 * n)) (K : Finset (Fin (2 * n))) (hi : i ∈ K) 
   simpa only [LinearMap.comp_apply, LinearMap.smul_apply, Module.Basis.coord_apply,
     smul_eq_mul] using this
 
+omit [CharZero F] in
 theorem sc_mem_ann_iff (s : S F n) (v : V F n) : v ∈ ann F n s ↔ m F n (ι (Q F n) v) s = 0 := by
   simp [ann, mOf]
 
+omit [CharZero F] in
 /-- `ker m_1 = H¹(X̂) = H¹(X)* × 0`. -/
 theorem sc_mem_ann_one (v : V F n) : v ∈ ann F n 1 ↔ v.2 = 0 := by
   obtain ⟨θ, y⟩ := v
@@ -551,6 +554,7 @@ theorem sc_ι_mul_pt (y : H1 F n) : ExteriorAlgebra.ι F y * pt F n = 0 := by
 omit [CharZero F] in
 theorem sc_pt_ne_zero : pt F n ≠ 0 := (basisS F n).ne_zero _
 
+omit [CharZero F] in
 /-- `ker m_{[pt_X]} = H¹(X) = 0 × H¹(X)`. -/
 theorem sc_mem_ann_pt (v : V F n) : v ∈ ann F n (pt F n) ↔ v.1 = 0 := by
   obtain ⟨θ, y⟩ := v
@@ -590,6 +594,7 @@ theorem sc_pt_mem_Splus : pt F n ∈ Splus F n := by
   rw [h0] at h
   exact h
 
+omit [CharZero F] in
 theorem sc_finrank_ann_one : Module.finrank F (ann F n 1) = 2 * n := by
   have hker : ann F n 1 = LinearMap.ker (LinearMap.snd F (Module.Dual F (H1 F n)) (H1 F n)) := by
     ext v
@@ -600,6 +605,7 @@ theorem sc_finrank_ann_one : Module.finrank F (ann F n 1) = 2 * n := by
   rw [hker]
   exact Nat.add_left_cancel h
 
+omit [CharZero F] in
 theorem sc_finrank_ann_pt : Module.finrank F (ann F n (pt F n)) = 2 * n := by
   have hker : ann F n (pt F n) =
       LinearMap.ker (LinearMap.fst F (Module.Dual F (H1 F n)) (H1 F n)) := by
@@ -612,6 +618,7 @@ theorem sc_finrank_ann_pt : Module.finrank F (ann F n (pt F n)) = 2 * n := by
   rw [hker]
   exact Nat.add_left_cancel h
 
+omit [CharZero F] in
 theorem sc_isEvenPureSpinor_one : IsEvenPureSpinor F n 1 := by
   refine ⟨sc_one_mem_Splus, fun v hv => ?_, sc_finrank_ann_one⟩
   rw [sc_mem_ann_one] at hv
@@ -620,6 +627,7 @@ theorem sc_isEvenPureSpinor_one : IsEvenPureSpinor F n 1 := by
   rw [hv]
   simp
 
+omit [CharZero F] in
 theorem sc_isEvenPureSpinor_pt : IsEvenPureSpinor F n (pt F n) := by
   refine ⟨sc_pt_mem_Splus, fun v hv => ?_, sc_finrank_ann_pt⟩
   rw [sc_mem_ann_pt] at hv
@@ -628,6 +636,7 @@ theorem sc_isEvenPureSpinor_pt : IsEvenPureSpinor F n (pt F n) := by
   rw [hv]
   simp
 
+omit [CharZero F] in
 theorem sc_ann_one_inf_ann_pt : ann F n 1 ⊓ ann F n (pt F n) = ⊥ := by
   rw [eq_bot_iff]
   intro v hv
@@ -668,6 +677,7 @@ theorem sc_repr_D_pt (θ : Module.Dual F (H1 F n)) (K : Finset (Fin (2 * n)))
     rw [Finset.card_erase_of_mem (Finset.mem_univ i), Finset.card_univ, Fintype.card_fin]
   exact LinearMap.congr_fun h θ
 
+omit [CharZero F] in
 /-- For `w₀ = α + β [pt_X]`, every `m_v w₀` has components only in degrees `1` and `2n - 1`. -/
 theorem sc_repr_m_one_pt (α β : F) (v : V F n) (K : Finset (Fin (2 * n))) (hK1 : K.card ≠ 1)
     (hK2 : K.card ≠ 2 * n - 1) :
@@ -750,10 +760,12 @@ theorem sc_mukai_m_spin (g : Spin F n) (s t : S F n) :
     rw [hrev, spinGroup.mul_star_self_of_mem g.2, map_one]
   simpa using chevalley_III_2_1 F n (spinGroup.toUnits g) hx 1 hc s t
 
+omit [CharZero F] in
 theorem sc_m_mul (g h : Spin F n) (s : S F n) :
     m F n ((g * h : Spin F n) : C F n) s = m F n (g : C F n) (m F n (h : C F n) s) := by
   rw [Submonoid.coe_mul, map_mul, Module.End.mul_apply]
 
+omit [CharZero F] in
 theorem sc_m_injective (g : Spin F n) : Function.Injective (m F n (g : C F n)) := fun s t h => by
   rw [← fnd_m_inv_m F n g s, h, fnd_m_inv_m]
 
@@ -762,6 +774,7 @@ theorem sc_one_ne_zero : (1 : S F n) ≠ 0 := by
   have h := (basisS F n).ne_zero ∅
   rwa [basisS, sc_basis_empty] at h
 
+omit [CharZero F] in
 /-- `ker m_{c s} = ker m_s` for `c ≠ 0`. -/
 theorem sc_ann_smul (s : S F n) {c : F} (hc : c ≠ 0) : ann F n (c • s) = ann F n s := by
   ext v
@@ -778,6 +791,7 @@ theorem sc_isMaxIsotropic_m (g : Spin F n) {u : S F n} (hu : IsMaxIsotropic F n 
   · rw [LinearEquiv.finrank_map_eq]
     exact hu.2
 
+omit [CharZero F] in
 theorem sc_ne_zero_of_isMaxIsotropic (hn : 0 < n) {u : S F n}
     (hu : IsMaxIsotropic F n (ann F n u)) : u ≠ 0 := by
   rintro rfl
@@ -788,6 +802,7 @@ theorem sc_ne_zero_of_isMaxIsotropic (hn : 0 < n) {u : S F n}
   rw [htop, finrank_top, sc_finrank_V] at h
   omega
 
+omit [CharZero F] in
 theorem sc_ann_ne_bot (hn : 0 < n) {u : S F n} (hu : IsMaxIsotropic F n (ann F n u)) :
     ann F n u ≠ ⊥ := by
   intro h
@@ -981,6 +996,7 @@ theorem sc_stab_classify (hn : 3 ≤ n) (u₁ u₂ : S F n) (h₁ : IsEvenPureSp
     rw [hc₁, hc₂, sc_ann_smul _ hc₁0, sc_ann_smul _ hc₂0, inf_idem] at hxy
     exact sc_ann_ne_bot hn0 sc_isEvenPureSpinor_pt.2 hxy
 
+omit [CharZero F] in
 theorem sc_mem_fixingSpin_pair_iff (u₁ u₂ : S F n) (g : Spin F n) :
     g ∈ fixingSpin F n (Submodule.span F {u₁, u₂}) ↔
       m F n (g : C F n) u₁ = u₁ ∧ m F n (g : C F n) u₂ = u₂ := by
@@ -992,6 +1008,7 @@ theorem sc_mem_fixingSpin_pair_iff (u₁ u₂ : S F n) (g : Spin F n) :
     obtain ⟨s, t, rfl⟩ := Submodule.mem_span_pair.mp hp
     rw [map_add, map_smul, map_smul, h1, h2]
 
+omit [CharZero F] in
 theorem sc_mem_fixingSpin_singleton_iff (w : S F n) (g : Spin F n) :
     g ∈ fixingSpin F n (Submodule.span F {w}) ↔ m F n (g : C F n) w = w := by
   constructor
@@ -1184,6 +1201,7 @@ theorem sc_exists_scalar (hn : 0 < n) (u₁ u₂ : S F n) (h₁ : IsEvenPureSpin
     · rw [sc_m_mul, hc', hc'eq, hcν]
       simp [inv_neg]
 
+omit [CharZero F] in
 /-- `u₁` and `u₂` are linearly independent: `c u₁ = c' u₂` forces `c = 0`. -/
 theorem sc_eq_zero_of_smul_eq (hn : 0 < n) {u₁ u₂ : S F n} (h₁ : IsEvenPureSpinor F n u₁)
     (h₂ : IsEvenPureSpinor F n u₂) (hW : ann F n u₁ ⊓ ann F n u₂ = ⊥) {c c' : F}

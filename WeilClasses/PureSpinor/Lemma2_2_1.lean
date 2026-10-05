@@ -57,19 +57,23 @@ section S22aGeneral
 
 variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
 
+omit [CharZero F] in
 theorem s22a_m_ι_apply (θ : Module.Dual F (H1 F n)) (w : H1 F n) (x : S F n) :
     m F n (ι (Q F n) (θ, w)) x = ExteriorAlgebra.ι F w * x + D F n θ x := by
   simp only [m, CliffordAlgebra.lift_ι_apply, cliffordOp, LinearMap.add_apply, LinearMap.coe_comp,
     Function.comp_apply, LinearMap.fst_apply, LinearMap.snd_apply, L, LinearMap.mul_apply']
 
+omit [CharZero F] in
 theorem s22a_mem_ann {u : S F n} {v : V F n} :
     v ∈ ann F n u ↔ m F n (ι (Q F n) v) u = 0 := Iff.rfl
 
+omit [CharZero F] in
 theorem s22a_m_inv_m (g : Spin F n) (s : S F n) :
     m F n ((g⁻¹ : Spin F n) : C F n) (m F n (g : C F n) s) = s := by
   rw [← Module.End.mul_apply, ← map_mul, ← Submonoid.coe_mul, inv_mul_cancel, OneMemClass.coe_one,
     map_one, Module.End.one_apply]
 
+omit [CharZero F] in
 theorem s22a_m_m_inv (g : Spin F n) (s : S F n) :
     m F n (g : C F n) (m F n ((g⁻¹ : Spin F n) : C F n) s) = s := by
   rw [← Module.End.mul_apply, ← map_mul, ← Submonoid.coe_mul, mul_inv_cancel, OneMemClass.coe_one,
@@ -98,6 +102,7 @@ theorem s22a_rho_mem_ann (g : Spin F n) {u : S F n} {v : V F n} (hv : v ∈ ann 
   have hv' : m F n (ι (Q F n) v) u = 0 := hv
   rw [ι_rho, map_mul, map_mul, Module.End.mul_apply, Module.End.mul_apply, h1, hv', map_zero]
 
+omit [CharZero F] in
 /-- The Clifford relation for `m`: `m_v m_w + m_w m_v = (v, w)_V`. -/
 theorem s22a_m_anticomm (v w : V F n) (s : S F n) :
     m F n (ι (Q F n) v) (m F n (ι (Q F n) w) s) + m F n (ι (Q F n) w) (m F n (ι (Q F n) v) s) =
@@ -107,6 +112,7 @@ theorem s22a_m_anticomm (v w : V F n) (s : S F n) :
     Module.algebraMap_end_apply] at h
   rw [h, QuadraticMap.polarBilin_apply_apply]
 
+omit [CharZero F] in
 /-- `ann(u)` is totally isotropic when `u ≠ 0`. -/
 theorem s22a_Q_of_mem_ann {u : S F n} (hu : u ≠ 0) {v : V F n} (hv : v ∈ ann F n u) :
     Q F n v = 0 := by
@@ -116,6 +122,7 @@ theorem s22a_Q_of_mem_ann {u : S F n} (hu : u ≠ 0) {v : V F n} (hv : v ∈ ann
   rw [map_mul, Module.End.mul_apply, hv', map_zero] at h
   exact (smul_eq_zero.mp h.symm).resolve_right hu
 
+omit [CharZero F] in
 theorem s22a_pairing_of_mem_ann {u : S F n} (hu : u ≠ 0) {v w : V F n} (hv : v ∈ ann F n u)
     (hw : w ∈ ann F n u) : pairing F n v w = 0 := by
   rw [QuadraticMap.polarBilin_apply_apply, QuadraticMap.polar, s22a_Q_of_mem_ann hu hv,
@@ -274,6 +281,7 @@ theorem ann_m_spin (g : Spin F n) (s : S F n) :
   · rintro ⟨w, hw, rfl⟩
     exact s22a_rho_mem_ann g hw
 
+omit [CharZero F] in
 /-- `dim S⁺ = 2^{2n-1}`, so that `ℙ(S⁺_ℂ) ≅ ℙ^{2^{2n-1}-1}` (§2.2, first paragraph). (With the
 truncated subtraction of `ℕ` the formula also holds for `n = 0`.) -/
 theorem finrank_Splus : Module.finrank F (Splus F n) = 2 ^ (2 * n - 1) := by
@@ -339,6 +347,7 @@ theorem IsEvenPureSpinor.ne_zero {F : Type*} [Field F] [CharZero F] {n : ℕ} (h
   rw [htop, finrank_top, s22a_finrank_V] at h
   omega
 
+omit [CharZero F] in
 /-- **The Mukai pairing on `S⁺` is `(-1)^n`-symmetric**: `(t, s)_S = (-1)^n (s, t)_S` for
 `s, t ∈ S⁺` (in fact for all `s, t ∈ S`). For odd `n` it is alternating on `S⁺`. This is the reason
 for the correction of the second sentence of Lemma 2.2.1 (see `lemma2_2_1_odd`). -/
@@ -364,6 +373,7 @@ section S22aFock
 
 variable {F : Type*} [Field F] [CharZero F] {n : ℕ}
 
+omit [CharZero F] in
 /-- `m_w m_v = (v, w)_V - m_v m_w`. -/
 theorem s22a_m_swap (v w : V F n) (s : S F n) :
     m F n (ι (Q F n) w) (m F n (ι (Q F n) v) s) =
@@ -423,6 +433,7 @@ theorem s22a_dual_bases {W₁ W₂ : Submodule F (V F n)}
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [hψ]
 
+omit [CharZero F] in
 /-- The number operator `N = Σᵢ m_{xᵢ} m_{yᵢ}` satisfies `N m_v = m_v N + m_v` for `v ∈ W₁`. -/
 theorem s22a_numOp_W₁ {W₁ : Submodule F (V F n)} (i₁ : ∀ a ∈ W₁, ∀ b ∈ W₁, pairing F n a b = 0)
     {x y : Fin (2 * n) → V F n} (hx : ∀ i, x i ∈ W₁) (ex₁ : ∀ v ∈ W₁, v = ∑ i, pairing F n v (y i) • x i)
@@ -441,6 +452,7 @@ theorem s22a_numOp_W₁ {W₁ : Submodule F (V F n)} (i₁ : ∀ a ∈ W₁, ∀
   conv_rhs => rw [ex₁ v hv]
   simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply]
 
+omit [CharZero F] in
 /-- `N m_w = m_w N - m_w` for `w ∈ W₂`. -/
 theorem s22a_numOp_W₂ {W₂ : Submodule F (V F n)} (i₂ : ∀ a ∈ W₂, ∀ b ∈ W₂, pairing F n a b = 0)
     {x y : Fin (2 * n) → V F n} (hy : ∀ i, y i ∈ W₂) (ex₂ : ∀ w ∈ W₂, w = ∑ i, pairing F n (x i) w • y i)
@@ -550,6 +562,7 @@ theorem s22a_ann_combo_eq_bot (hn : 1 < n) {u₁ u₂ : S F n} (h₁ : IsEvenPur
     exact this
   rw [hx'0, hy'0, add_zero]
 
+omit [CharZero F] in
 /-- A nonzero multiple of an even pure spinor is an even pure spinor. -/
 theorem s22a_isEvenPureSpinor_smul {u : S F n} (hu : IsEvenPureSpinor F n u) {c : F}
     (hc : c ≠ 0) : IsEvenPureSpinor F n (c • u) := by

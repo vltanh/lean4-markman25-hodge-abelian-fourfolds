@@ -109,7 +109,7 @@ theorem s8_rank_phiOrlov_basis (K L : Finset (Fin (2 * n))) :
   simp only [map_smul, map_mul, rankExt, pullX, pullXHat, s8_algebraMapInv_map,
     s8_algebraMapInv_basisS, s8_algebraMapInv_basisSHat, smul_eq_mul, mul_ite, mul_one, mul_zero]
   rw [Finset.sum_eq_single (∅ : Finset (Fin (2 * n)))]
-  · simp only [Finset.sdiff_empty, if_true, s8_epsSign_empty_left, one_mul,
+  · simp only [Finset.sdiff_empty, ite_true, s8_epsSign_empty_left, one_mul,
       Finset.compl_eq_empty_iff]
     split_ifs with h
     · rw [h, Finset.card_univ, Fintype.card_fin, s8_neg_one_pow_top, Finset.compl_univ,
@@ -166,6 +166,7 @@ theorem s8_bcExt_basisExt (M : Finset (Fin (2 * n + 2 * n))) :
   funext i
   exact s8_bcV_basisV F F' n _
 
+omit [CharZero F] [CharZero F'] in
 theorem s8_epsSign_bc (K L : Finset (Fin (2 * n))) :
     epsSign F' n K L = algebraMap F F' (epsSign F n K L) := by
   rw [epsSign, epsSign, ← s8_bcS_basisS F F', ← s8_bcS_basisS F F', ← map_mul, s8_repr_bcS]
@@ -180,6 +181,7 @@ theorem s8_bcExt_phiOrlov_basis (K L : Finset (Fin (2 * n))) :
   congr 1
   simp only [map_mul, map_pow, map_neg, map_one, s8_epsSign_bc F F']
 
+omit [CharZero F] [CharZero F'] in
 theorem s8_bcS_eq_sum (x : S F n) :
     bcS F F' n x = ∑ K, algebraMap F F' ((basisS F n).repr x K) • basisS F' n K := by
   conv_lhs => rw [← (basisS F n).sum_repr x]
@@ -266,7 +268,7 @@ theorem s8_eq_zero_of_ev2 (F : Type*) [Field F] [CharZero F] {ξ : ExtV F n}
     rw [add_comm]
     congr 1
     conv_rhs => rw [s8_dual_eq_sum F n z.1]
-    simp only [map_sum, map_smul, smul_eq_mul, LinearMap.comp_apply, LinearMap.inr_apply]
+    simp only [map_sum, map_smul, smul_eq_mul]
     rw [show ((∑ i, z.1 (e F n i) • f F n i, (0 : H1 F n)) : V F n) =
         ∑ i, z.1 (e F n i) • ((f F n i, 0) : V F n) by
           ext1 <;> simp [Prod.fst_sum, Prod.snd_sum], map_sum]
@@ -322,6 +324,7 @@ section S8Weight
 
 variable (F : Type*) [Field F] [CharZero F] (n : ℕ)
 
+omit [CharZero F] in
 /-- Classes in `F_k = ⊕_{i ≥ k} ⋀^i V`, `k > 0`, have rank `0`. -/
 theorem s8_rank_eq_zero_of_mem_extFiltGE {k : ℕ} (hk : 0 < k) {x : ExtV F n}
     (hx : x ∈ extFiltGE F n k) : rankExt F n x = 0 :=
@@ -570,7 +573,7 @@ theorem lemma8_3_1_rank (hd : 0 < d) : rankExt ℚ 3 (phiOrlov ℚ 3 (chF1 d ⊗
   have hK := congrArg (rankExt (Kd d) 3) hbc
   simp only [rankExt] at hK h0 h1 h2 h3 h4
   rw [s8_algebraMapInv_bcExt, h0, map_zero] at hK
-  simp only [map_add, map_sub, LinearMap.map_smul_of_tower, map_smul, map_rat_smul] at hK h3 h4
+  simp only [map_add, map_sub, map_smul, map_rat_smul] at hK h3 h4
   rw [h1, h2, h3, add_zero, smul_zero, smul_zero, zero_add, zero_add, smul_eq_mul] at hK
   have hc : Kd.sqrtNeg d / (2 * (d : Kd d)) ≠ 0 := by
     have hd0 : (d : Kd d) ≠ 0 := by exact_mod_cast hd.ne'
@@ -679,7 +682,7 @@ theorem s8_kappa_K_invariant (c : ℚ)
       rw [h6, map_smul, map_pow, map_rat_smul, map_pow, hhK]
     · rw [show j + j = 2 * j by ring] at hmem ⊢
       exact lemma2_2_7_trivial _ hd hP j hj3 (by omega) _ hmem ⟨g, hg⟩
-  · haveI : Module.Finite ℚ (ExtV ℚ 3) := Module.Finite.of_basis (basisExt ℚ 3)
+  · have : Module.Finite ℚ (ExtV ℚ 3) := Module.Finite.of_basis (basisExt ℚ 3)
     have h0 := lemma2_2_7_odd _ hd hP k hodd
     rw [Submodule.finrank_eq_zero] at h0
     rw [h0] at hmem
