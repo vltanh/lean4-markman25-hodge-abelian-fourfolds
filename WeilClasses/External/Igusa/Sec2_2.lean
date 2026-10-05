@@ -956,7 +956,7 @@ theorem sc_stab_classify (hn : 3 ≤ n) (u₁ u₂ : S F n) (h₁ : IsEvenPureSp
       rw [hxdef, hydef, sc_mukai_m_spin, sc_mukai_m_spin]
     rw [hc₁, hc₂, hu₁, hu₂] at hM1
     simp only [map_smul, LinearMap.smul_apply, smul_eq_mul] at hM1
-    rw [mukai_swap_of_mem_Splus F n 1 (pt F n) sc_one_mem_Splus sc_pt_mem_Splus] at hM1
+    rw [mukai_swap_of_mem_Splus F n 1 (pt F n)] at hM1
     have hM0 := sc_mukai_one_pt_ne_zero (F := F) hn0
     have hprod : c₁ * c₂ = α * β := by
       have : (a * c₁) * (b * c₂) = (a * α) * (b * β) := by rw [hcoef.1, hcoef.2]; ring
@@ -1218,7 +1218,7 @@ theorem sc_exists_swap (hn : 0 < n) (heven : Even n) (u₁ u₂ : S F n) (h₁ :
     have h := sc_mukai_m_spin s u₁ u₂
     rw [← hκ, ← hκ'] at h
     simp only [map_smul, LinearMap.smul_apply, smul_eq_mul] at h
-    rw [mukai_swap_of_mem_Splus F n u₁ u₂ h₁.1 h₂.1, heven.neg_one_pow, one_mul] at h
+    rw [mukai_swap_of_mem_Splus F n u₁ u₂, heven.neg_one_pow, one_mul] at h
     exact mul_right_cancel₀ hM (by linear_combination h)
   have hκ0 : κ ≠ 0 := left_ne_zero_of_mul_eq_one hkk
   have hκ'eq : κ' = κ⁻¹ := eq_inv_of_mul_eq_one_right hkk
@@ -1313,7 +1313,7 @@ theorem igusa_lemma1_range (u₁ u₂ : S F n) (h₁ : IsEvenPureSpinor F n u₁
 restricted to `W₁ × W₂`, which identifies `W₂` with `W₁*`). -/
 theorem igusa_lemma1_dual (u₁ u₂ : S F n)
     (g : (lineStabilizer F n u₁ ⊓ lineStabilizer F n u₂ : Subgroup (Spin F n)))
-    (x y : V F n) (hx : x ∈ ann F n u₁) (hy : y ∈ ann F n u₂) :
+    (x y : V F n) :
     pairing F n (rho F n g x) (rho F n g y) = pairing F n x y :=
   sc_pairing_rho _ x y
 

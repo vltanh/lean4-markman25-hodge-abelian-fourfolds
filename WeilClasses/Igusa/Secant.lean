@@ -1975,7 +1975,7 @@ theorem s10_singular (u : S ℂ 3) (hu : IsEvenPureSpinor ℂ 3 u) :
           mul_div_cancel₀ t hc]
       have hmem : c • (1 + (t / c) • y) ∈ Splus ℂ 3 :=
         Submodule.smul_mem _ _ (add_mem (s10_one_mem_Splus ℂ 3) (Submodule.smul_mem _ _ hyS))
-      rw [h1, h2, igusa_prop3_invariant ℂ g _ hmem, J_smul, s10_J_one_add_smul]
+      rw [h1, h2, igusa_prop3_invariant ℂ g _, J_smul, s10_J_one_add_smul]
       field_simp
   refine ⟨?_, fun x => ?_⟩
   · obtain ⟨G, -, hG⟩ := key 0

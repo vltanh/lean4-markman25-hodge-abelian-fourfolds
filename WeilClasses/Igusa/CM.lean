@@ -714,8 +714,6 @@ theorem s10_not_fixed_lines {d : ℚ} (hdJ : J ℚ w = d) (hd : 0 < d)
   have hw' : w = m ℚ 3 (h : C ℚ 3) (α • 1 + (2 * β) • pt ℚ 3) := by
     rw [hwr, ← hα, ← hβ, map_add, map_smul, map_smul, smul_smul]
   have hJw := igusa_prop3_invariant ℚ h (α • 1 + (2 * β) • pt ℚ 3)
-    (add_mem (Submodule.smul_mem _ _ (s10_one_mem_Splus ℚ 3))
-      (Submodule.smul_mem _ _ (s10_pt_mem_Splus ℚ 3)))
   rw [← hw', s10_J_add_smul_pt, hdJ] at hJw
   have : d ≤ 0 := by rw [hJw]; nlinarith [sq_nonneg (α * (2 * β))]
   linarith
@@ -1083,7 +1081,7 @@ theorem s10_spinStab_eq (w : S ℚ 3) (_hw : w ∈ Splus ℚ 3) (hd : 0 < J ℚ 
         rcases hu with rfl | rfl
         · exact Submodule.subset_span (by simp)
         · exact Submodule.subset_span (by simp)
-      rw [P.isEvenPureSpinor_iff_of_mem_span hd (by norm_num) hW.inf_eq_bot _ hmemc]
+      rw [P.isEvenPureSpinor_iff_of_mem_span (by norm_num) hW.inf_eq_bot _ hmemc]
       refine ⟨fun h0 => hu0 (s10_bcS_injective (by rw [h0, map_zero])), ?_⟩
       rcases hu with rfl | rfl
       · exact Or.inl (Submodule.mem_span_singleton_self _)
@@ -1093,7 +1091,7 @@ theorem s10_spinStab_eq (w : S ℚ 3) (_hw : w ∈ Splus ℚ 3) (hd : 0 < J ℚ 
     rw [← s10_bcS_bcS (F' := Kd (J ℚ w)), ← ha, map_smul, ← algebraMap_smul ℂ a, J_smul, hJ0,
       mul_zero]
   -- Remark 2.2.3 (`n = 3` odd): the stabilizer of `w` is `Spin(V_K)_P`
-  have hfix := remark2_2_3_odd P hd (by norm_num) (by decide) hW.inf_eq_bot _ hwK
+  have hfix := remark2_2_3_odd P (by norm_num) (by decide) hW.inf_eq_bot _ hwK
     (hnot P.u₁ (by simp)) (hnot P.u₂ (by simp))
   ext h
   constructor

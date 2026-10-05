@@ -3116,7 +3116,7 @@ Equation (2.4.5). Then the discriminant of the Hermitian form `H` is `(-1)^n`.
 Here `P = P_Θ` for `Θ` ample for the complex structure `J` of `X` (so that Assumption 2.4.1 holds,
 `PTheta_assumption2_4_1`); `d > 0` rational (the paper: a positive integer). -/
 theorem lemma3_1_3 (hd : 0 < d) (hn : 0 < n) (J : Module.End ℝ (H1 ℝ n))
-    (hJ : IsComplexStructure J) (Θ : S ℚ n) (hΘ : IsAmple n J Θ) :
+    (Θ : S ℚ n) (hΘ : IsAmple n J Θ) :
     (PTheta n d hd Θ hΘ.mem_exteriorPower_two (hΘ.ne_zero_of_pos hn)).DiscIs
       (PTheta_isCompl n d hd Θ _ _ hΘ.bijective_thetaMap) ((-1) ^ n) := by
   have hΘ2 := hΘ.mem_exteriorPower_two

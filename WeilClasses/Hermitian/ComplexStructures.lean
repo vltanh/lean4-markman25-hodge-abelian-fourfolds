@@ -1352,8 +1352,7 @@ This part: `Ξ_P` is of type `(1,1)` for `I`, i.e. `Ξ_P(I x, I y) = Ξ_P(x, y)`
 in Corollary 3.2.2), `g_I` positive definite; Assumption 2.4.1. -/
 theorem corollary3_2_3_type11 (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
     (hP : Assumption2_4_1 P J) (I : Module.End ℝ (V ℝ n))
-    (hIP : ∃ g ∈ P.spinPR, (rho ℝ n g : V ℝ n →ₗ[ℝ] V ℝ n) = I) (hI : IsComplexStructure I)
-    (hν : P.nu hP.isCompl I = 2 * n) (hpos : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl I x x)
+    (hIP : ∃ g ∈ P.spinPR, (rho ℝ n g : V ℝ n →ₗ[ℝ] V ℝ n) = I)
     (x y : V ℝ n) : P.XiR hP.isCompl (I x) (I y) = P.XiR hP.isCompl x y := by
   obtain ⟨g, hg, hgI⟩ := hIP
   have hcomm := P.rho_spinPR_comm_fR J hP g hg
@@ -1368,8 +1367,7 @@ complex torus `(V_ℝ/V_ℤ, I)`: `Ξ_P(x, I x) > 0` for every nonzero tangent v
 (convention of [Huybrechts, Lemma 1.2.15]). -/
 theorem corollary3_2_3_kahler (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
     (hP : Assumption2_4_1 P J) (I : Module.End ℝ (V ℝ n))
-    (hIP : ∃ g ∈ P.spinPR, (rho ℝ n g : V ℝ n →ₗ[ℝ] V ℝ n) = I) (hI : IsComplexStructure I)
-    (hν : P.nu hP.isCompl I = 2 * n) (hpos : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl I x x)
+    (hpos : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl I x x)
     (x : V ℝ n) (hx : x ≠ 0) : 0 < P.XiR hP.isCompl x (I x) :=
   -- `Ξ_P(x, I x) = g_I(x, x)`
   hpos x hx
@@ -1389,7 +1387,7 @@ theorem corollary3_2_3_comm (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
 theorem corollary3_2_3_weil (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
     (hP : Assumption2_4_1 P J) (I : Module.End ℝ (V ℝ n))
     (hIP : ∃ g ∈ P.spinPR, (rho ℝ n g : V ℝ n →ₗ[ℝ] V ℝ n) = I) (hI : IsComplexStructure I)
-    (hν : P.nu hP.isCompl I = 2 * n) (hpos : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl I x x) :
+    (hν : P.nu hP.isCompl I = 2 * n) :
     Module.finrank ℂ ↥(P.W₁ℂ ⊓ V10 n I) = n ∧ Module.finrank ℂ ↥(P.W₂ℂ ⊓ V10 n I) = n := by
   obtain ⟨h1, h2, -, -⟩ := lemma3_2_1 P J hP I hIP hI hν
   rw [inf_comm] at h1 h2
@@ -1400,8 +1398,6 @@ theorem corollary3_2_3_weil (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
 `η(k)^*Ξ_P = Nm(k) Ξ_P` for all `k ∈ K`, `WeilClasses.vanGeemen_def4_9`). -/
 theorem corollary3_2_3_polarization (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n))
     (hP : Assumption2_4_1 P J) (I : Module.End ℝ (V ℝ n))
-    (hIP : ∃ g ∈ P.spinPR, (rho ℝ n g : V ℝ n →ₗ[ℝ] V ℝ n) = I) (hI : IsComplexStructure I)
-    (hν : P.nu hP.isCompl I = 2 * n) (hpos : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl I x x)
     (x y : V ℚ n) :
     P.XiQ hP.isCompl (P.fη hP.isCompl x) (P.fη hP.isCompl y) = d * P.XiQ hP.isCompl x y :=
   -- `Ξ_P(f x, f y) = (f²x, f y)_V = d (f x, y)_V = d Ξ_P(x, y)`

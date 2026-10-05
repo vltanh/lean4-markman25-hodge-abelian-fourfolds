@@ -477,7 +477,7 @@ theorem s22a_eq_zero_of_W₂ (hW : P.W₁ ⊓ P.W₂ = ⊥) {y : V (Kd d) n} (hy
 
 Proof: the statement of record `igusa_lemma1_ker`, for `F = K` (`restrictW₁` is
 `pairRestrict K n u₁ u₂`). -/
-theorem restrictW₁_eq_one_iff (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) :
+theorem restrictW₁_eq_one_iff (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) :
     P.restrictW₁ g = 1 ↔
       ((g : Spin (Kd d) n) : C (Kd d) n) = 1 ∨ ((g : Spin (Kd d) n) : C (Kd d) n) = -1 :=
   igusa_lemma1_ker (Kd d) n P.u₁ P.u₂ P.isPure P.isPure₂ hW g
@@ -516,7 +516,7 @@ for `K`-points: `diag(a, 1, …, 1)` with `a ∉ K^{×2}` is not in the image (i
 
 Proof: [Igusa, Lemma 1] in its form for `F`-points (`igusa_lemma1_range`), for `F = K`
 (`restrictW₁` is `pairRestrict K n u₁ u₂`). -/
-theorem range_restrictW₁ (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
+theorem range_restrictW₁ (hW : P.W₁ ⊓ P.W₂ = ⊥) :
     (P.restrictW₁.range : Set (Module.End (Kd d) P.W₁)ˣ) =
       {A : (Module.End (Kd d) P.W₁)ˣ |
         IsSquare (LinearMap.det (A : Module.End (Kd d) P.W₁))} :=
@@ -527,14 +527,14 @@ theorem range_restrictW₁ (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
 
 Proof: the kernel of `ρ : Spin(V_K) → SO(V_K)` is `{±1}` (library: Tau Ceti,
 `mem_ker_spinToOrthogonal_iff`). -/
-theorem rho_eq_one_iff (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) :
+theorem rho_eq_one_iff (g : P.spinL₁L₂) :
     rho (Kd d) n g = 1 ↔
       ((g : Spin (Kd d) n) : C (Kd d) n) = 1 ∨ ((g : Spin (Kd d) n) : C (Kd d) n) = -1 :=
   s22a_rho_eq_one_iff (s22a_n_pos P) _
 
 /-- "**`W₂` is identified with `W₁*` via the bilinear pairing of `V_K`**" (§2.2): when
 `W₁ ∩ W₂ = 0`, `y ↦ (·, y)_V|_{W₁}` is an isomorphism `W₂ ≅ W₁*`. -/
-theorem pairingW₂_bijective (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
+theorem pairingW₂_bijective (hW : P.W₁ ⊓ P.W₂ = ⊥) :
     Function.Bijective P.pairingW₂ := by
   have hinj : Function.Injective P.pairingW₂ := by
     rw [← LinearMap.ker_eq_bot, LinearMap.ker_eq_bot']
@@ -555,7 +555,7 @@ theorem pairingW₂_bijective (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
 
 Proof: [Igusa, Lemma 1] (`igusa_lemma1_dual`: `(ρ(h) x, ρ(h) y)_V = (x, y)_V` for `x ∈ W₁`,
 `y ∈ W₂`), applied to `h = g⁻¹`, `x`, `ρ(g) y`. -/
-theorem pairingW₂_rho (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) (y : V (Kd d) n)
+theorem pairingW₂_rho (g : P.spinL₁L₂) (y : V (Kd d) n)
     (hy : y ∈ P.W₂) :
     P.pairingW₂ ⟨rho (Kd d) n g y, P.rho_mem_W₂ g y hy⟩ =
       LinearMap.dualMap
@@ -565,8 +565,7 @@ theorem pairingW₂_rho (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL
   intro x
   rw [LinearMap.dualMap_apply, P.s22a_pairingW₂_apply, P.s22a_pairingW₂_apply,
     P.s22a_restrictW₁_inv_apply]
-  have h := igusa_lemma1_dual (Kd d) n P.u₁ P.u₂ g⁻¹ (x : V (Kd d) n) (rho (Kd d) n g y) x.2
-    (P.rho_mem_W₂ g y hy)
+  have h := igusa_lemma1_dual (Kd d) n P.u₁ P.u₂ g⁻¹ (x : V (Kd d) n) (rho (Kd d) n g y)
   calc pairing (Kd d) n (x : V (Kd d) n) (rho (Kd d) n g y)
       = pairing (Kd d) n (rho (Kd d) n ((g : Spin (Kd d) n)⁻¹) x)
           (rho (Kd d) n ((g : Spin (Kd d) n)⁻¹) (rho (Kd d) n g y)) := h.symm
@@ -575,7 +574,7 @@ theorem pairingW₂_rho (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL
 /-- "**`det₂(s) = det₁(s)⁻¹`**" (§2.2), for `s ∈ Spin(V_K)_{ℓ₁,ℓ₂}`. -/
 theorem det₂_eq_inv (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) :
     P.det₂ g = (P.det₁ g)⁻¹ := by
-  set e := LinearEquiv.ofBijective P.pairingW₂ (P.pairingW₂_bijective hd hW) with he
+  set e := LinearEquiv.ofBijective P.pairingW₂ (P.pairingW₂_bijective hW) with he
   set B : Module.End (Kd d) P.W₁ :=
     (((P.restrictW₁ g)⁻¹ : (Module.End (Kd d) P.W₁)ˣ) : Module.End (Kd d) P.W₁) with hB
   have hconj : (rho (Kd d) n g : V (Kd d) n →ₗ[Kd d] V (Kd d) n).restrict
@@ -588,7 +587,7 @@ theorem det₂_eq_inv (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL�
     simp only [LinearMap.coe_comp, Function.comp_apply, LinearEquiv.coe_coe,
       LinearEquiv.symm_symm, LinearEquiv.apply_symm_apply]
     rw [he, LinearEquiv.ofBijective_apply, LinearEquiv.ofBijective_apply, hB]
-    exact P.pairingW₂_rho hd hW g y y.2
+    exact P.pairingW₂_rho g y y.2
   have hdet : P.det₂ g = LinearMap.det B := by
     show LinearMap.det ((rho (Kd d) n g : V (Kd d) n →ₗ[Kd d] V (Kd d) n).restrict
       (fun v hv => P.rho_mem_W₂ g v hv)) = _
@@ -602,13 +601,13 @@ character `χ₁` of `Spin(V_K)_{ℓ₁,ℓ₂}` on `ℓ̃₁` satisfies `χ₁�
 ("`ℓ̃ᵢ²` is the character `⋀^{2n} Wᵢ ≅ detᵢ`").
 
 Proof: `igusa_lemma1_sq` (the statement of record of the cited proof of [Igusa, Lemma 1]). -/
-theorem χ₁_sq (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) :
+theorem χ₁_sq (g : P.spinL₁L₂) :
     P.χ₁ g ^ 2 = P.det₁ g :=
   igusa_lemma1_sq (Kd d) n P.u₁ P.isPure P.u₁_ne_zero g (Subgroup.mem_inf.mp g.2).1 (P.χ₁ g)
     (P.s22a_χ₁_spec g)
 
 /-- "**`ℓ̃₂ ⊗ ℓ̃₂ ≅ det₂`**" (§2.2): `χ₂² = det₂` (`igusa_lemma1_sq`). -/
-theorem χ₂_sq (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) :
+theorem χ₂_sq (g : P.spinL₁L₂) :
     P.χ₂ g ^ 2 = P.det₂ g :=
   igusa_lemma1_sq (Kd d) n P.u₂ P.isPure₂ P.s22a_u₂_ne_zero g (Subgroup.mem_inf.mp g.2).2 (P.χ₂ g)
     (P.s22a_χ₂_spec g)
@@ -669,7 +668,7 @@ theorem s22a_exists_spinPK (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (A : Modu
     ∃ g : P.spinPK, ((P.restrictW₁P g : (Module.End (Kd d) P.W₁)ˣ) : Module.End (Kd d) P.W₁) = A := by
   have hAu : IsUnit A := (LinearMap.isUnit_iff_isUnit_det A).mpr (by rw [hA]; exact isUnit_one)
   have hmem : hAu.unit ∈ (P.restrictW₁.range : Set (Module.End (Kd d) P.W₁)ˣ) := by
-    rw [P.range_restrictW₁ hd hW]
+    rw [P.range_restrictW₁ hW]
     show IsSquare (LinearMap.det ((hAu.unit : (Module.End (Kd d) P.W₁)ˣ) : Module.End (Kd d) P.W₁))
     rw [IsUnit.unit_spec, hA]
     exact ⟨1, (one_mul 1).symm⟩
@@ -680,7 +679,7 @@ theorem s22a_exists_spinPK (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (A : Modu
     simpa only [P.s22a_restrictW₁_apply, IsUnit.unit_spec] using this
   have hdet₁ : P.det₁ g₀ = 1 := by
     rw [← P.det_restrictW₁ g₀, hg₀, IsUnit.unit_spec, hA]
-  have hsq : P.χ₁ g₀ ^ 2 = 1 := by rw [P.χ₁_sq hd hW, hdet₁]
+  have hsq : P.χ₁ g₀ ^ 2 = 1 := by rw [P.χ₁_sq, hdet₁]
   have hχχ := P.s22a_χ₁_mul_χ₂ hW g₀
   have hres : ∀ g' : Spin (Kd d) n, (∀ v, rho (Kd d) n g' v = rho (Kd d) n g₀ v) →
       (m (Kd d) n (g' : C (Kd d) n) P.u₁ = P.u₁) → (m (Kd d) n (g' : C (Kd d) n) P.u₂ = P.u₂) →
@@ -720,7 +719,7 @@ theorem s22a_restrict_aux (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
   refine ⟨?_, ?_⟩
   · rw [injective_iff_map_eq_one]
     intro g hg
-    rcases (P.restrictW₁_eq_one_iff hd hW (Subgroup.inclusion P.spinPK_le_spinL₁L₂ g)).mp hg
+    rcases (P.restrictW₁_eq_one_iff hW (Subgroup.inclusion P.spinPK_le_spinL₁L₂ g)).mp hg
       with h | h
     · exact Subtype.ext (Subtype.ext h)
     · exfalso
@@ -740,7 +739,7 @@ theorem s22a_restrict_aux (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) :
       have hχ : P.χ₁ (Subgroup.inclusion P.spinPK_le_spinL₁L₂ g) = 1 :=
         smul_left_injective (Kd d) hu₁
           ((P.s22a_χ₁_spec _).symm.trans ((hfix₁ g).trans (one_smul _ _).symm))
-      have h := P.χ₁_sq hd hW (Subgroup.inclusion P.spinPK_le_spinL₁L₂ g)
+      have h := P.χ₁_sq (Subgroup.inclusion P.spinPK_le_spinL₁L₂ g)
       rw [hχ, one_pow] at h
       simp only [Units.coe_map, Units.val_one]
       exact h.symm
@@ -856,7 +855,7 @@ includes the nonzero rational points of `P`.
 
 Proof (the paper's): [Chevalley, III.1.12] (`chevalley_III_1_12`), as in the comment after
 Lemma 2.2.1 (`isEvenPureSpinor_iff_of_mem_span`), here for the `K`-points `u₁, u₂`. -/
-theorem _root_.WeilClasses.remark2_2_3_not_pure (hd : 0 < d) (hn : 3 ≤ n)
+theorem _root_.WeilClasses.remark2_2_3_not_pure (hn : 3 ≤ n)
     (hW : P.W₁ ⊓ P.W₂ = ⊥) (w : S (Kd d) n) (hwP : w ∈ P.PK)
     (hw₁ : w ∉ Submodule.span (Kd d) {P.u₁}) (hw₂ : w ∉ Submodule.span (Kd d) {P.u₂}) :
     ¬ IsEvenPureSpinor (Kd d) n w := by
@@ -876,7 +875,7 @@ theorem _root_.WeilClasses.remark2_2_3_not_pure (hd : 0 < d) (hn : 3 ≤ n)
 
 Proof (the paper's): `w = a u₁ + b u₂` with `a, b ≠ 0` (`s22a_coeffs`), and [Igusa, Lemma 2] and
 the remark following it (`igusa_lemma2_stab_odd`, for `F = K`). -/
-theorem _root_.WeilClasses.remark2_2_3_odd (hd : 0 < d) (hn : 3 ≤ n) (hodd : Odd n)
+theorem _root_.WeilClasses.remark2_2_3_odd (hn : 3 ≤ n) (hodd : Odd n)
     (hW : P.W₁ ⊓ P.W₂ = ⊥) (w : S (Kd d) n) (hwP : w ∈ P.PK)
     (hw₁ : w ∉ Submodule.span (Kd d) {P.u₁}) (hw₂ : w ∉ Submodule.span (Kd d) {P.u₂}) :
     fixingSpin (Kd d) n (Submodule.span (Kd d) {w}) = P.spinPK := by
@@ -891,7 +890,7 @@ elements exchanging `ℓ₁` and `ℓ₂`, has `K`-points).
 
 Proof (the paper's): `w = a u₁ + b u₂` with `a, b ≠ 0` (`s22a_coeffs`), and [Igusa, Lemma 2] and
 the remark following it (`igusa_lemma2_stab_even`, for `F = K`). -/
-theorem _root_.WeilClasses.remark2_2_3_even (hd : 0 < d) (hn : 3 ≤ n) (heven : Even n)
+theorem _root_.WeilClasses.remark2_2_3_even (hn : 3 ≤ n) (heven : Even n)
     (hW : P.W₁ ⊓ P.W₂ = ⊥) (w : S (Kd d) n) (hwP : w ∈ P.PK)
     (hw₁ : w ∉ Submodule.span (Kd d) {P.u₁}) (hw₂ : w ∉ Submodule.span (Kd d) {P.u₂}) :
     P.spinPK ≤ fixingSpin (Kd d) n (Submodule.span (Kd d) {w}) ∧
@@ -916,7 +915,7 @@ theorem _root_.WeilClasses.remark2_2_3_determines (hd : 0 < d) (hn : 3 ≤ n)
     P'.PK = P.PK := by
   -- `P_K` is the joint kernel of the infinitesimal stabilizer of `w` (`s22a_fix_iff`), which
   -- depends only on `w`.
-  have hnp := remark2_2_3_not_pure P hd hn hW w hwP hw₁ hw₂
+  have hnp := remark2_2_3_not_pure P hn hW w hwP hw₁ hw₂
   have hw0 : w ≠ 0 := fun h => hw₁ (h ▸ Submodule.zero_mem _)
   have hline : ∀ {u : S (Kd d) n}, IsEvenPureSpinor (Kd d) n u →
       w ∉ Submodule.span (Kd d) {u} := by
@@ -944,11 +943,11 @@ Departure from the paper (reason 2): as for `remark2_2_3_determines`, over `ℂ`
 (`s22a_ann_combo_eq_bot`, the computation of the proof of [Chevalley, III.1.12]) forces `x, y` to be
 transversal with nonzero coefficients, and both `P_ℂ` and `ℂx + ℂy` are the joint kernel of the
 infinitesimal stabilizer of `w` (`s22a_fix_iff`). -/
-theorem _root_.WeilClasses.remark2_2_3_unique_secant (hd : 0 < d) (hn : 3 ≤ n)
+theorem _root_.WeilClasses.remark2_2_3_unique_secant (hn : 3 ≤ n)
     (hW : P.W₁ ⊓ P.W₂ = ⊥) (w : S (Kd d) n) (hwP : w ∈ P.PK)
     (hw₁ : w ∉ Submodule.span (Kd d) {P.u₁}) (hw₂ : w ∉ Submodule.span (Kd d) {P.u₂})
     (x y : S ℂ n) (hx : IsEvenPureSpinor ℂ n x) (hy : IsEvenPureSpinor ℂ n y)
-    (hxy : LinearIndependent ℂ ![x, y]) (hw : bcS (Kd d) ℂ n w ∈ Submodule.span ℂ {x, y}) :
+    (hw : bcS (Kd d) ℂ n w ∈ Submodule.span ℂ {x, y}) :
     Submodule.span ℂ {x, y} =
       Submodule.span ℂ {bcS (Kd d) ℂ n P.u₁, bcS (Kd d) ℂ n P.u₂} := by
   -- Over `ℂ`, `w` lies on the secant `ℙ(P_ℂ)` only, since the joint kernel of its infinitesimal

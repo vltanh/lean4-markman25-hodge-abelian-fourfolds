@@ -2098,14 +2098,12 @@ algebraic Lefschetz property of the nondegenerate `2`-form `Ξ_P`: the operator 
 `(f x, y) = -(x, f y)`).
 Ampleness (`hample`) is not used. -/
 theorem lemma6_2_3_injective (hP : Assumption2_4_1 P J)
-    (hample : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl (productStructure n J) x x)
     (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) (k : ℕ)
     (hk : IsLeast {j : ℕ | projDeg ℚ n (2 * j) (secantSqClass ℚ n w₂ w₁) ≠ 0} k) (hkn : k < n)
     (x : ExtV ℚ n) (hx : x ∈ ⋀[ℚ]^2 (V ℚ n))
     (h0 : projDeg ℚ n (2 * k) (secantSqClass ℚ n w₂ w₁) * x = 0) : x = 0 := by
   -- `β_k = c Ξ_P^k` with `c ≠ 0`, and `Ξ_P^k ∪ (•)` is injective on `H²` for `k + 2 ≤ 2n` (the
   -- Lefschetz property of the nondegenerate `2`-form `Ξ_P`, from the `sl₂`-triple `(L, Λ, H)`)
-  clear hample
   obtain ⟨-, c, hc, hck⟩ := lemma6_2_3_lowest P J hP w₁ w₂ hw₁ hw₂ k hk hkn
   rw [hck, smul_mul_assoc] at h0
   have h1 := (smul_eq_zero.mp h0).resolve_left hc
@@ -2315,7 +2313,7 @@ theorem s62_c1N_of_gamma (hP : Assumption2_4_1 P J)
   have hmem : c - (rhoExt ℚ n g ℓ - ℓ) ∈ ⋀[ℚ]^2 (V ℚ n) :=
     Submodule.sub_mem _ hc2 (Submodule.sub_mem _ (s62_rhoExt_mem ℚ n g hℓ2) hℓ2)
   rw [(s62_commute_of_mem_two ℚ n hmem _).eq] at h0
-  exact sub_eq_zero.mp (lemma6_2_3_injective P J hP hample w₁ w₂ hw₁ hw₂ k hk hkn _ hmem h0)
+  exact sub_eq_zero.mp (lemma6_2_3_injective P J hP w₁ w₂ hw₁ hw₂ k hk hkn _ hmem h0)
 
 /-- `c₁(N_g) = ρ_g(ℓ) - ℓ` (proof of Lemma 6.2.3; `lemma6_2_3_c1N`). -/
 theorem s62_c1N (hP : Assumption2_4_1 P J)
@@ -2598,16 +2596,13 @@ theorem remark6_2_4 (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n)) (hP : Assu
 where `t` is the unique scalar such that `ℓ` belongs to `H²(X × X̂, ℚ)_P`": every `ℓ ∈ H²_P` making
 `exp(ℓ) β` invariant (the class of Lemma 6.2.3) is `(t Ξ_P - β₁)/r` for this `t`. -/
 theorem remark6_2_4_ell (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n)) (hP : Assumption2_4_1 P J)
-    (hample : ∀ x : V ℝ n, x ≠ 0 → 0 < P.gI hP.isCompl (productStructure n J) x x)
-    (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ)
-    (hr : rankExt ℚ n (secantSqClass ℚ n w₂ w₁) ≠ 0) (t : ℚ)
+    (w₁ w₂ : S ℚ n)     (hr : rankExt ℚ n (secantSqClass ℚ n w₂ w₁) ≠ 0) (t : ℚ)
     (ht : (rankExt ℚ n (secantSqClass ℚ n w₂ w₁))⁻¹ •
         (t • P.hClass hP.isCompl - projDeg ℚ n 2 (secantSqClass ℚ n w₂ w₁)) ∈ P.H2P)
     (ℓ : ExtV ℚ n) (hℓ : ℓ ∈ P.H2P)
     (hα : IsNilpotent.exp ℓ * secantSqClass ℚ n w₂ w₁ ∈ invariantsExt ℚ n P.spinPZ) :
     ℓ = (rankExt ℚ n (secantSqClass ℚ n w₂ w₁))⁻¹ •
       (t • P.hClass hP.isCompl - projDeg ℚ n 2 (secantSqClass ℚ n w₂ w₁)) := by
-  clear hample
   -- the degree-`2` part `β₁ + r ℓ` of `exp(ℓ) β` is invariant
   have hℓ2 : ℓ ∈ ⋀[ℚ]^2 (V ℚ n) := P.H2P_le hℓ
   have hdeg2 : projDeg ℚ n 2 (IsNilpotent.exp ℓ * secantSqClass ℚ n w₂ w₁) =
@@ -2695,11 +2690,10 @@ of `P` (a consequence of Proposition 6.1.2): with `-½ c₁(𝒫) = ℓ₀ + t �
 of Lemma 6.2.3 is `ℓ₀`. Stated: `ℓ₀ := -½ c₁(𝒫) - t h ∈ H²_P` makes `exp(ℓ₀) φ(w₂ ⊗ τ w₁)` invariant
 for all `w₁, w₂ ∈ P`. (Checked numerically for `n = 2, 3`.) -/
 theorem ell_eq_proj_c1P (P : KSecant n d) (J : Module.End ℝ (H1 ℝ n)) (hP : Assumption2_4_1 P J)
-    (t : ℚ) (ht : -((2 : ℚ)⁻¹ • c1P ℚ n) - t • P.hClass hP.isCompl ∈ P.H2P)
+    (t : ℚ)
     (w₁ w₂ : S ℚ n) (hw₁ : w₁ ∈ P.Pℚ) (hw₂ : w₂ ∈ P.Pℚ) :
     IsNilpotent.exp (-((2 : ℚ)⁻¹ • c1P ℚ n) - t • P.hClass hP.isCompl) *
       secantSqClass ℚ n w₂ w₁ ∈ invariantsExt ℚ n P.spinPZ := by
-  clear ht
   intro g hg
   have hc := s62_c1P_mem ℚ n
   have hh : P.hClass hP.isCompl ∈ ⋀[ℚ]^2 (V ℚ n) := formToExt2_mem ℚ n _

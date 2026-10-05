@@ -2478,11 +2478,11 @@ theorem s22b_mem_spinPℚ_of_mem_spinPZ {g : Spin ℚ n} (hg : g ∈ P.spinPZ) :
 
 theorem s22b_det₁_eq_one (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) (g : Spin ℚ n)
     (hg : g ∈ P.spinPℚ) : P.det₁ ⟨_, P.s22b_bcSpin_mem_spinL₁L₂ g hg⟩ = 1 := by
-  rw [← P.χ₁_sq hd hW.inf_eq_bot, s22b_χ₁_eq_one g hg, one_pow]
+  rw [← P.χ₁_sq, s22b_χ₁_eq_one g hg, one_pow]
 
 theorem s22b_det₂_eq_one (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) (g : Spin ℚ n)
     (hg : g ∈ P.spinPℚ) : P.det₂ ⟨_, P.s22b_bcSpin_mem_spinL₁L₂ g hg⟩ = 1 := by
-  rw [← P.χ₂_sq hd hW.inf_eq_bot, s22b_χ₂_eq_one g hg, one_pow]
+  rw [← P.χ₂_sq, s22b_χ₂_eq_one g hg, one_pow]
 
 /-- `⋀^{2n} W₁` is fixed by `Spin(V)_P`. -/
 theorem s22b_top₁_inv (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂)
@@ -2946,7 +2946,7 @@ theorem s22b_exists_det_ne_one (hd : 0 < d) (hW : IsCompl P.W₁ P.W₂) :
     rw [LinearMap.det_smul, map_one, mul_one,
       show Module.finrank (Kd d) P.W₁ = 2 * n from P.isPure.2.2]
   have hA : A ∈ (P.restrictW₁.range : Set (Module.End (Kd d) P.W₁)ˣ) := by
-    rw [P.range_restrictW₁ hd hW.inf_eq_bot]
+    rw [P.range_restrictW₁ hW.inf_eq_bot]
     show IsSquare (LinearMap.det (A : Module.End (Kd d) P.W₁))
     rw [hdetA]
     exact ⟨2 ^ n, by ring⟩

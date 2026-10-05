@@ -1975,7 +1975,7 @@ variety lies in the singular locus of `V(J)` (`WeilClasses.s10_singular`). (The 
 element per fiber of `J` in the proof of Lemma 10.1.1, l. 9702, and the normal form in the proof of
 Lemma 10.2.1, l. 9792, go through `IgusaProp3NormalForm` instead.) -/
 theorem igusa_prop3_invariant (F : Type*) [Field F] [CharZero F] (g : Spin F 3) (x : S F 3)
-    (hx : x ∈ Splus F 3) : J F (m F 3 (g : C F 3) x) = J F x := by
+    : J F (m F 3 (g : C F 3) x) = J F x := by
   -- the elements of `Spin(V_F)` preserving `J` form a subgroup, which contains the generators
   -- of `Spin(V_F)` (`sc_closure_genSet_eq_top`): `J` is invariant under each generator by an
   -- explicit polynomial identity in the coordinates (`sc_J_xp_all`, `sc_J_wp_all`, `sc_J_xl_all`,

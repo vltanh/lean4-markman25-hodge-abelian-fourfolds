@@ -476,7 +476,7 @@ theorem markmanM2_prop1_7 (w h : S ℚ 2) (hw : w ∈ Splus ℚ 2) (hh : h ∈ S
     have := mul_pos_of_neg_of_neg hww hhh
     rw [hd_def]; positivity
   have hhw : mukai ℚ 2 h w = 0 := by
-    rw [mukai_swap_of_mem_Splus ℚ 2 w h hw hh, hwh, mul_zero]
+    rw [mukai_swap_of_mem_Splus ℚ 2 w h, hwh, mul_zero]
   -- `w, h` are linearly independent over `ℚ`
   have hind : ∀ p q : ℚ, p • w + q • h = 0 → p = 0 ∧ q = 0 := by
     intro p q hpq

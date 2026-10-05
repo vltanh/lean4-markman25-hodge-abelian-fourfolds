@@ -1139,7 +1139,7 @@ with `k = a₁₂/a₂₂` if `a₂₂ ≠ 0`, and `a ∈ [[0, -1], [1, 0]] B` i
 `s8_rho_expSpin_eq_hdgMatrix`), the second to `span_K{Θⁿ}` (the case `a₂₂ = 0`). The lifts of the
 matrices to `Spin(V_K)` by Eichler transvections (`exists_rho_eq_hdgMatrix`) are taken for granted in
 the paper. -/
-theorem lemma8_1_1 (hd : 0 < d) (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
+theorem lemma8_1_1 (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
     (hθ : Function.Bijective (thetaExt n (Kd d) Θ)) :
     {L : Submodule (Kd d) (S (Kd d) n) | ∃ g : Spin (Kd d) n,
         (rho (Kd d) n g : V (Kd d) n →ₗ[Kd d] V (Kd d) n) ∈ SOplusHdg (thetaExt n (Kd d) Θ) hθ ∧
@@ -1194,7 +1194,7 @@ computes the action of `[[0, -f⁻¹], [f, 0]]` in `iota_tau_extends`): the matr
 for `g ∈ Spin(V_K)` with `ρ(g) = A`, `m_g(exp(kΘ)) ∈ K exp(k'Θ)`. (If `a₂₁ k + a₂₂ = 0`, `A` maps
 `ker m_{exp(kΘ)}` onto `H¹(X, K)`, the annihilator of the line of `Θⁿ`; that case is not part of
 this statement.) (Checked numerically for `n ≤ 3`.) -/
-theorem m_exp_mem_span_hdgMatrix (hd : 0 < d) (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
+theorem m_exp_mem_span_hdgMatrix (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
     (hθ : Function.Bijective (thetaExt n (Kd d) Θ)) (a : Matrix (Fin 2) (Fin 2) (Kd d))
     (g : Spin (Kd d) n)
     (hg : (rho (Kd d) n g : V (Kd d) n →ₗ[Kd d] V (Kd d) n) = hdgMatrix (thetaExt n (Kd d) Θ) hθ a)
@@ -1256,7 +1256,7 @@ claim is false: the matrix acts on the pure spinors by the Möbius map `k ↦ -1
 `[[0, c f⁻¹], [c f, 0]]` of `SO⁺_Hdg(V_K)` inducing `k ↦ 1/k` needs `-c² = 1`, so it exists only for
 `K = ℚ(√-1)`.) The paper uses the claim only to lift `ι` to `Aut(Dᵇ(X))` and obtain an object of
 non-zero rank, which `ι ∘ τ` also gives. -/
-theorem iota_tau_extends (hd : 0 < d) (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
+theorem iota_tau_extends (Θ : S ℚ n) (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
     (hθ : Function.Bijective (thetaExt n (Kd d) Θ)) (g : Spin (Kd d) n)
     (hg : (rho (Kd d) n g : V (Kd d) n →ₗ[Kd d] V (Kd d) n) =
       hdgMatrix (thetaExt n (Kd d) Θ) hθ !![0, -1; 1, 0]) :
@@ -1827,8 +1827,8 @@ theorem betaPP_mem_SZ (d : ℚ) (hdZ : ∃ z : ℤ, d = z) (Θ : S ℚ n) (hΘ :
 combination `aα + bβ` is integral only if `a, b ∈ ℤ`. Hypotheses: `Θ` integral and primitive in
 `H²(X, ℤ)` (true for the generator `Θ` of `NS(X)`, which is saturated in `H²(X, ℤ)`), `d ∈ ℤ`,
 `n ≥ 1`. -/
-theorem saturated_of_q_eq_one (d : ℚ) (hdZ : ∃ z : ℤ, d = z) (hn : 1 ≤ n) (Θ : S ℚ n)
-    (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n)) (hΘZ : Θ ∈ SZ n)
+theorem saturated_of_q_eq_one (d : ℚ) (hn : 1 ≤ n) (Θ : S ℚ n)
+    (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n))
     (hprim : ∀ c : ℚ, c • Θ ∈ SZ n → ∃ z : ℤ, c = z) (ρ τ : ℤ) (a b : ℚ)
     (hab : a • alphaPP Θ d ρ τ 1 + b • betaPP Θ d ρ τ 1 ∈ SZ n) :
     (∃ z : ℤ, a = z) ∧ ∃ z : ℤ, b = z := by
@@ -1922,7 +1922,7 @@ theorem s8_tau_odd_sum {Θ : S ℚ n} (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n)) (c : 
 
 theorem s8_commute_sums (Θ : S ℚ n) (c c' : ℕ → ℚ) (e e' : ℕ → ℕ) (N N' : ℕ) :
     Commute (∑ j ∈ Finset.range N, c j • Θ ^ e j) (∑ k ∈ Finset.range N', c' k • Θ ^ e' k) :=
-  Commute.sum_left _ _ _ fun j _ => Commute.sum_right _ _ _ fun k _ =>
+  Commute.sum_left _ _ _ fun _ _ => Commute.sum_right _ _ _ fun _ _ =>
     (((Commute.refl Θ).pow_pow _ _).smul_left _).smul_right _
 
 theorem s8_tau_exp_mul_exp {Θ : S ℚ n} (hΘ : Θ ∈ ⋀[ℚ]^2 (H1 ℚ n)) (c : ℚ) :

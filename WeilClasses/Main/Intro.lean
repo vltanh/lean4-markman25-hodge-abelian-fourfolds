@@ -757,7 +757,7 @@ Model: `ch(F₂) = w`, `ch(F₁^∨) = τ(w)`, `w = chF1 d`. Stated: the plane s
 the plane `P` of `P_Θ` (whose `K`-span is `P_K = span_K{exp(u), exp(ū)}`), and over `ℂ` it is a
 transversal secant meeting the even spinor variety exactly in the lines of `exp(±√-dΘ)`
 (`IsTransversalSecant`, Lemma 10.1.1). -/
-theorem theorem1_4_1_1 (hJ : IsComplexStructure J) (hΘ : IsAmple 3 J (ThetaStd ℚ 3))
+theorem theorem1_4_1_1 (hΘ : IsAmple 3 J (ThetaStd ℚ 3))
     (hd3 : 3 ≤ d) :
     Submodule.span ℚ {tau ℚ 3 (chF1 d), chF1 d} = (PJac d hΘ (pos_of_three_le hd3)).Pℚ ∧
       Submodule.span (Kd d) {bcS ℚ (Kd d) 3 (tau ℚ 3 (chF1 d)), bcS ℚ (Kd d) 3 (chF1 d)} =
@@ -916,7 +916,7 @@ simple reflexive) is sheaf-theoretic. (Checked numerically for `d = 1, 2, 3, 5, 
 Departure from the paper (reason 3): the paper reads the rank off the sheaf, `E ≅ 𝒢₁^*` for the
 reflexive sheaf `𝒢₁ = R¹π_{23,*}(π₁^*F₁ ⊗ 𝓕₂)` of rank `8d` (Proposition 9.2.2, TeX lines
 5455–5463); the model has no sheaves, and computes the rank as the degree-`0` part of `ch(E)`. -/
-theorem theorem1_4_1_2_rank (hd3 : 3 ≤ d) : rankExt ℚ 3 (chE d) = 8 * d := by
+theorem theorem1_4_1_2_rank : rankExt ℚ 3 (chE d) = 8 * d := by
   rw [main_rankExt_apply]
   exact rank_chE d
 

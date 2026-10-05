@@ -1993,8 +1993,8 @@ theorem weilDomain_eq_image_OmegaP (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 
     have hweil := s24b_weil_of_mem_OmegaP n d hd hn I hI
     obtain ⟨hIP, hcs, hν, hpos⟩ := s24b_cor3_2_3_hyps n d hd hn I hI
     have hc := corollary3_2_3_comm (PStd n d hd hn) (s8_J0 n) hP I hIP hcs hν hpos
-    have h11 := corollary3_2_3_type11 (PStd n d hd hn) (s8_J0 n) hP I hIP hcs hν hpos
-    have hpol := corollary3_2_3_polarization (PStd n d hd hn) (s8_J0 n) hP I hIP hcs hν hpos
+    have h11 := corollary3_2_3_type11 (PStd n d hd hn) (s8_J0 n) hP I hIP
+    have hpol := corollary3_2_3_polarization (PStd n d hd hn) (s8_J0 n) hP I
     have hIso : ∀ x y, pairing ℝ n (I x) (I y) = pairing ℝ n x y := by
       obtain ⟨g, -, hgI⟩ := hIP
       intro x y
@@ -2022,7 +2022,7 @@ theorem weilDomain_eq_image_OmegaP (η : Kd d →+* Module.End ℚ (H1 ℚ (2 * 
         rw [ha']
         simp
       rw [ha', s24b_eval2_hX n d hd hn I hcs hIso x]
-      exact corollary3_2_3_kahler (PStd n d hd hn) (s8_J0 n) hP I hIP hcs hν hpos x hx0
+      exact corollary3_2_3_kahler (PStd n d hd hn) (s8_J0 n) hP I hpos x hx0
     · -- `η(k)^* h = Nm(k) h`: the condition on the polarization (Corollary 3.2.3, `f^*Ξ_P = d Ξ_P`)
       -- with [van Geemen, Def. 4.9]
       intro k

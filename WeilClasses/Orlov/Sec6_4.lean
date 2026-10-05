@@ -969,7 +969,7 @@ theorem map_m_u₁_tmul_u₁ (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.
   -- `ℓ̃₁ ⊗ ℓ̃₁ ≅ χ₁² = det₁`
   have h1 : m (Kd d) n ((g : Spin (Kd d) n) : C (Kd d) n) P.u₁ = P.χ₁ g • P.u₁ :=
     Classical.choose_spec ((Subgroup.mem_inf.mp g.2).1)
-  rw [TensorProduct.map_tmul, h1, TensorProduct.smul_tmul_smul, ← P.χ₁_sq hd hW g, sq]
+  rw [TensorProduct.map_tmul, h1, TensorProduct.smul_tmul_smul, ← P.χ₁_sq g, sq]
 
 /-- (§6.4) `Spin(V_K)_{ℓ₁,ℓ₂}` acts on `ℓ̃₂^{⊗2}` by the character `det₂`. -/
 theorem map_m_u₂_tmul_u₂ (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.spinL₁L₂) :
@@ -978,7 +978,7 @@ theorem map_m_u₂_tmul_u₂ (hd : 0 < d) (hW : P.W₁ ⊓ P.W₂ = ⊥) (g : P.
       P.det₂ g • (P.u₂ ⊗ₜ[Kd d] P.u₂) := by
   have h2 : m (Kd d) n ((g : Spin (Kd d) n) : C (Kd d) n) P.u₂ = P.χ₂ g • P.u₂ :=
     Classical.choose_spec ((Subgroup.mem_inf.mp g.2).2)
-  rw [TensorProduct.map_tmul, h2, TensorProduct.smul_tmul_smul, ← P.χ₂_sq hd hW g, sq]
+  rw [TensorProduct.map_tmul, h2, TensorProduct.smul_tmul_smul, ← P.χ₂_sq g, sq]
 
 /-- (§6.4, TeX lines 2864–2865) `ℓ̃₁ ⊗ ℓ̃₂` and `ℓ̃₂ ⊗ ℓ̃₁` (hence `ℓ̃₁ ∧ ℓ̃₂ ⊆ ⋀² S⁺` and
 `ℓ̃₁ ℓ̃₂ ⊆ Sym² S⁺`) are trivial characters of `Spin(V_K)_{ℓ₁,ℓ₂}` (`χ₁ χ₂ = 1`, since the Mukai
@@ -1015,7 +1015,7 @@ theorem exists_det₁_ne (hd : 0 < d) (hP : ¬ P.IsIsotropic) :
     simp only [A, Units.coe_map, RingHom.toMonoidHom_eq_coe, MonoidHom.coe_ofClass, Units.val_mk0,
       Algebra.algebraMap_eq_smul_one, LinearMap.det_smul, hfr, map_one, mul_one]
   have hA : A ∈ (P.restrictW₁.range : Set (Module.End (Kd d) P.W₁)ˣ) := by
-    rw [P.range_restrictW₁ hd hW]
+    rw [P.range_restrictW₁ hW]
     show IsSquare (LinearMap.det (A : Module.End (Kd d) P.W₁))
     rw [hdetA]
     exact ⟨2 ^ n, by ring⟩

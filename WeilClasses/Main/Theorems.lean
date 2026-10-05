@@ -255,7 +255,7 @@ theorem discIs_XXhat (n : ℕ) (d : ℚ) (hd : 0 < d) (A : AbVar (2 * n)) (X : P
     refine ⟨Fin.elim0, linearIndependent_empty_type, 1, one_ne_zero, ?_⟩
     simp [Kd.Nm]
   · -- Lemma 3.1.3 for `P_Θ`, `Θ = ThetaStd` (ample for `J₀`)
-    obtain ⟨b, hb, q, ⟨z, hz, rfl⟩, hdet⟩ := lemma3_1_3 hd hn (s8_J0 n) (s8_J0_isComplex n)
+    obtain ⟨b, hb, q, ⟨z, hz, rfl⟩, hdet⟩ := lemma3_1_3 hd hn (s8_J0 n)
       (ThetaStd ℚ n) (s8_ample_J0 n)
     set P := PStd n d hd hn
     set hW := PStd_isCompl n d hd hn

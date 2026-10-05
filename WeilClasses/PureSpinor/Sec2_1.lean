@@ -553,12 +553,12 @@ theorem m_ι_mul_m_ι_of_pairing_eq_two (v : V F n) (hv : pairing F n v v = 2) :
   rw [← map_mul, ι_sq_scalar, hQ, map_one, map_one]
 
 /-- If `(v, v)_V = 2` then `m_v` maps `S⁺` to `S⁻` (§2.1). -/
-theorem m_ι_mem_Sminus_of_pairing_eq_two (v : V F n) (hv : pairing F n v v = 2) (s : S F n)
+theorem m_ι_mem_Sminus_of_pairing_eq_two (v : V F n) (s : S F n)
     (hs : s ∈ Splus F n) : m F n (ι (Q F n) v) s ∈ Sminus F n :=
   m_mem_Sminus_of_odd F n _ (ι_mem_evenOdd_one _ v) s hs
 
 /-- If `(v, v)_V = 2` then `m_v` maps `S⁻` to `S⁺` (§2.1). -/
-theorem m_ι_mem_Splus_of_pairing_eq_two (v : V F n) (hv : pairing F n v v = 2) (s : S F n)
+theorem m_ι_mem_Splus_of_pairing_eq_two (v : V F n) (s : S F n)
     (hs : s ∈ Sminus F n) : m F n (ι (Q F n) v) s ∈ Splus F n :=
   m_mem_Splus_of_odd F n _ (ι_mem_evenOdd_one _ v) s hs
 

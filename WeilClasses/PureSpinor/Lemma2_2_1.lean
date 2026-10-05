@@ -342,7 +342,7 @@ theorem IsEvenPureSpinor.ne_zero {F : Type*} [Field F] [CharZero F] {n : ℕ} (h
 /-- **The Mukai pairing on `S⁺` is `(-1)^n`-symmetric**: `(t, s)_S = (-1)^n (s, t)_S` for
 `s, t ∈ S⁺` (in fact for all `s, t ∈ S`). For odd `n` it is alternating on `S⁺`. This is the reason
 for the correction of the second sentence of Lemma 2.2.1 (see `lemma2_2_1_odd`). -/
-theorem mukai_swap_of_mem_Splus (s t : S F n) (hs : s ∈ Splus F n) (ht : t ∈ Splus F n) :
+theorem mukai_swap_of_mem_Splus (s t : S F n) :
     mukai F n t s = (-1) ^ n * mukai F n s t :=
   s22a_mukai_swap s t
 
@@ -1714,7 +1714,7 @@ theorem isCompl_of_not_isIsotropic (hd : 0 < d) (hP : ¬ P.IsIsotropic) : IsComp
 
 Proof (the paper's): [Chevalley, III.1.12] (`chevalley_III_1_12`), applied over `ℂ` to the base
 change of `u₁, u₂` (`s22a_bc_pure_pair`). -/
-theorem isEvenPureSpinor_iff_of_mem_span (hd : 0 < d) (hn : 1 < n) (hW : P.W₁ ⊓ P.W₂ = ⊥)
+theorem isEvenPureSpinor_iff_of_mem_span (hn : 1 < n) (hW : P.W₁ ⊓ P.W₂ = ⊥)
     (w : S ℂ n) (hw : w ∈ Submodule.span ℂ {bcS (Kd d) ℂ n P.u₁, bcS (Kd d) ℂ n P.u₂}) :
     IsEvenPureSpinor ℂ n w ↔
       w ≠ 0 ∧ (w ∈ Submodule.span ℂ {bcS (Kd d) ℂ n P.u₁} ∨
