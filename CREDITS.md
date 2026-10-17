@@ -13,7 +13,7 @@ How this formalization was made, from the session transcript and the run log.
 - **Tool:** Claude Opus 5.5 (Anthropic, model `claude-opus-5-5`), run as an agent in Claude Code 2.1.288 (VS Code
   extension), in one session with sub-agents. It wrote the Lean code and the documents under the direction of the
   maintainer.
-- **Procedure:** the skill [formalize-math-paper](https://github.com/vltanh/formalize-math-paper), version 2.1.0 (commit `397f71c`).
+- **Procedure:** the skill [formalize-math-paper](https://github.com/vltanh/formalize-math-paper), version 2.1.0 (commit `873c5b3`).
 - **Review:** no person has reviewed the proofs. Independent AI agents reviewed the statements against the TeX source
   before any proof was written, compared every formal proof with the paper's proof afterwards, and verified the
   audit's findings and its literature survey, as described below.

@@ -229,7 +229,7 @@ automation:
       framework: "Claude Code 2.1.288 (VS Code extension, Claude Agent SDK)"
       tool_setup: >-
         The formalize-math-paper skill, version 2.1.0 (https://github.com/vltanh/formalize-math-paper, commit
-        397f71c): one main session with 56 sub-agents (at most 10 at once) for the library survey,
+        873c5b3): one main session with 56 sub-agents (at most 10 at once) for the library survey,
         statements, statement review, proofs, cited results, refactors, proof review, fixes and the audit's
         verification; Lean v4.35.0-rc3, Mathlib, Tau Ceti.
       cost:
